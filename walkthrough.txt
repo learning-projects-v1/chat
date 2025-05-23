@@ -1,0 +1,16 @@
+﻿
+1. register/login
+#configure
+- postgres
+- redis
+#configure db models - user, refresh token
+#add jwt authenticaion
+#add angular
+ - routes - register, login
+ - add interceptors
+#add refresh token authentication - api and angular
+
+2. add/find friends
+3. send 1v1 msg to a friend
+4. message reply, reaction
+5. group

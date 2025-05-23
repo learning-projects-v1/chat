@@ -1,0 +1,76 @@
+Functional Requrements:
+1. User A can chat with User B.
+2. User A can add a user with Id/username B as friend
+3. Chat notification
+4. Create group for chat
+5. Can share image
+6. Online status
+
+Non Functional Requirements:
+1. High availabilty
+2. Encryption
+3. Web Sockets
+4. Low latency
+
+Features
+1. Load connected users
+2. Add someone as friend
+3. Confirm friend
+4. send message to a friend
+5. create group
+6. Notification
+7. Online status
+8. Message reply
+9. React to message
+10. online status
+11. notification
+
+Api endpoints:
+1. signup(password, email)
+2. login(email, password)
+
+3. friend_suggestions(userId)
+4. add_friend(userId, friend_id)
+
+5. get_friends_list(user_id)
+6. load_messages(sender_id, receiver_id)
+7. send_message(sender_id, receiver_id, message)
+
+Db:
+
+USER:
+user_id,
+hashed_pass,
+email,
+username,
+full_name,
+isOnline,
+
+FRIENDSHIP:
+user_id,
+friend_id,
+string status,
+
+MESSAGE:
+id,
+sender_id,
+receiver_id,
+created_at,
+is_read,
+content,
+// for reply
+replyToMessageId,
+replyMessage
+
+REFRESHTOKEN:
+id,
+userId,
+token,
+createdAt,
+expiresAt,
+
+REACTION:
+id,
+message_id,
+user_id,
+type,

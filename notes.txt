@@ -1,0 +1,142 @@
+🗓️ Week-by-Week Breakdown
+🔹 Week 1: Foundation & Setup
+Goal: Set up the base Angular + .NET backend + Redis project, and understand SignalR basics.
+
+✅ Tasks:
+ Create the Angular frontend project.
+
+ Create the .NET Core backend project.
+
+ Set up Redis in Docker (if not already done).
+
+ Add SignalR to the backend:
+
+Microsoft.AspNetCore.SignalR
+
+ Create a basic SignalR Hub (ChatHub.cs).
+
+ Connect Angular to SignalR using @microsoft/signalr.
+
+📚 Resources:
+SignalR official docs (ASP.NET Core)
+
+Redis Pub/Sub Overview
+
+🔹 Week 2: One-on-One Chat
+Goal: Implement private chat with real-time delivery.
+
+✅ Backend:
+ Create user authentication (JWT if not already present).
+
+ Track user connections (userId ↔ connectionId mapping).
+
+ Add SignalR methods:
+
+SendPrivateMessage(string receiverUserId, string message)
+
+ Store messages in a database (e.g., PostgreSQL).
+
+ Implement Redis Pub/Sub:
+
+On message send, publish to a Redis channel.
+
+All app instances subscribe to Redis channels and relay messages via SignalR.
+
+✅ Frontend:
+ Create UI for one-on-one chat (chat list + message pane).
+
+ Connect to SignalR and handle incoming messages in real time.
+
+ Show typing indicator (optional).
+
+🔹 Week 3: Group Chat & Online Status
+Goal: Add group chat support and user presence updates.
+
+✅ Backend:
+ Extend ChatHub with JoinGroup, SendToGroup.
+
+ Use Redis Pub/Sub to broadcast group messages to all app instances.
+
+ Manage group membership server-side.
+
+ Track online/offline status with connection tracking.
+
+Broadcast UserOnline / UserOffline events.
+
+✅ Frontend:
+ Add group chat UI: sidebar for rooms, message threads.
+
+ Real-time group message handling.
+
+ Show online/offline indicators in the user list.
+
+ Handle reconnects gracefully (SignalR auto-reconnect).
+
+🔹 Week 4: Scalability & Load Testing
+Goal: Make the system horizontally scalable with sticky sessions and validate real-time sync.
+
+✅ Backend:
+ Deploy multiple backend instances (use Docker).
+
+ Ensure Redis is the broker for cross-instance communication.
+
+ Configure sticky sessions (required for SignalR in WebSocket mode).
+
+e.g., with Nginx/Traefik or cloud LB.
+
+✅ Testing:
+ Simulate multiple users using tools like Artillery or custom test scripts.
+
+ Check:
+
+Message delivery consistency
+
+Failover (simulate server restart)
+
+Presence updates
+
+
+
+/YourApp
+│
+├── /Domain
+│   ├── Entities/
+│   │   ├── User.cs
+│   │   ├── Message.cs
+│   │   └── ...
+│   ├── Interfaces/
+│   │   ├── IUserRepository.cs
+│   │   ├── IMessageRepository.cs
+│   │   └── IUnitOfWork.cs
+│   └── Common/
+│       └── BaseEntity.cs (optional)
+│
+├── /Infrastructure
+│   ├── Data/
+│   │   ├── ChatAppDbContext.cs
+│   │   ├── Migrations/
+│   │   └── UnitOfWork.cs
+│   └── Repositories/
+│       ├── UserRepository.cs
+│       ├── MessageRepository.cs
+│       └── ...
+│
+├── /Application
+│   ├── DTOs/
+│   ├── Services/
+│   │   ├── ChatService.cs
+│   │   └── AuthService.cs
+│   └── Interfaces/
+│       ├── IChatService.cs
+│       └── IAuthService.cs
+│
+├── /API
+│   ├── Controllers/
+│   │   ├── AuthController.cs
+│   │   ├── ChatController.cs
+│   │   └── ...
+│   ├── Middleware/
+│   └── Program.cs
+│
+└── /Shared
+    └── Extensions/
