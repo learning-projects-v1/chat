@@ -15,4 +15,5 @@ public class ChatAppDbContext : DbContext
 
     }
     public DbSet<TestModel> TestModel { get; set; }
+    public DbSet<User> User { get; set; }
 }
