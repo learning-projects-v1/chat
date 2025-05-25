@@ -1,4 +1,4 @@
-﻿using ChatBackend.Models;
+﻿using ChatApp.Infrastructure.Models;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;

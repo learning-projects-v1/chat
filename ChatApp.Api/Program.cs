@@ -1,5 +1,6 @@
-using ChatBackend.Models;
+
 using ChatApp.API.Middleware;
+using ChatApp.Infrastructure.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 

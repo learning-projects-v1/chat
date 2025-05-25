@@ -9,7 +9,7 @@ namespace ChatApp.Application.Interfaces;
 public interface IRepository<T> where T : class
 {
     Task AddAsync(T entity, CancellationToken cancellationToken = default);
-    Task RemoveAsync(T entity, CancellationToken cancellationToken = default);
-    Task UpdateAsync(T entity, CancellationToken cancellationToken = default);
+    void RemoveAsync(T entity, CancellationToken cancellationToken = default);
+    void UpdateAsync(T entity, CancellationToken cancellationToken = default);
     Task<T?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default);
 }

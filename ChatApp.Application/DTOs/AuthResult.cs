@@ -24,6 +24,11 @@ public class AuthResult
         Message = message
     };
 
+    public static AuthResult Succeeded(string message)
+    {
+        return new AuthResult { Success = true, Message = message };
+    }
+
     public static AuthResult Succeeded(string accessToken, string refreshToken, string userId, string email, string username)
         => new AuthResult
         {

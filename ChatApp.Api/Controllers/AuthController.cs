@@ -2,9 +2,8 @@
 using ChatApp.Application.Services;
 using ChatApp.Domain.Constants;
 using ChatApp.Domain.Models;
+using ChatApp.Infrastructure.Models;
 using ChatApp.Infrastructure.Persistence;
-using ChatBackend.Models;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;

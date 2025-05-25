@@ -1,4 +1,6 @@
 ﻿using ChatApp.Application.Interfaces;
+using ChatApp.Domain.Models;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -7,7 +9,20 @@ using System.Threading.Tasks;
 
 namespace ChatApp.Infrastructure.Services;
 
-public class UserRepository : IUserRepository
+public class UserRepository : BaseRepository<User>, IUserRepository
 {
+    private readonly DbContext _context;
+    public UserRepository(DbContext dbContext) : base(dbContext)
+    {
+        _context = dbContext;
+    }
+    public async Task<User?> GetUserByEmail(string email)
+    {
+        return await _context.Set<User>().FirstOrDefaultAsync(x => x.Email == email);
+    }
 
+    public async Task<User?> GetUserByUsername(string username)
+    {
+        return await _context.Set<User>().FirstOrDefaultAsync(x => x.UserName == username);
+    }
 }
