@@ -24,6 +24,13 @@ public class JwtTokenGenerator : ITokenGenerator
 
     public TokenResult GenerateToken(User user)
     {
+        var accessToken = GenerateAccessToken(user);
+        var token = new TokenResult() { AccessToken = accessToken };
+        return token;
+    }
+
+    private string GenerateAccessToken(User user)
+    {
         var key = new SymmetricSecurityKey(Encoding.ASCII.GetBytes(_jwtSettings.Secret));
         var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256Signature);
         var tokenDescriptor = new SecurityTokenDescriptor
@@ -34,7 +41,6 @@ public class JwtTokenGenerator : ITokenGenerator
         };
         var tokenHandler = new JwtSecurityTokenHandler();
         var token = tokenHandler.CreateJwtSecurityToken(tokenDescriptor);
-        //return tokenHandler.WriteToken(token);
-        return default;
+        return tokenHandler.WriteToken(token);
     }
 }

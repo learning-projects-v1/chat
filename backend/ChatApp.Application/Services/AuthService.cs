@@ -36,17 +36,17 @@ public class AuthService : IAuthService
         return AuthResult.Succeeded("User Registered successfully");
     }
 
-    //public async Task<AuthResult> LoginAsync(LoginRequest request)
-    //{
-    //    var user = await _repository.GetUserByEmail(request.Email);
-    //    if(user == null || BCrypt.Net.BCrypt.Verify(request.Password, user.HashedPassword))
-    //    {
-    //        return AuthResult.Failed("Username or password is wrong.");
-    //    }
+    public async Task<AuthResult> LoginAsync(LoginRequest request)
+    {
+        var user = await _repository.GetUserByEmail(request.Email);
+        if (user == null || BCrypt.Net.BCrypt.Verify(request.Password, user.HashedPassword))
+        {
+            return AuthResult.Failed("Username or password is wrong.");
+        }
 
-    //    var token = _tokenGenerator.GenereateToken(user);
-        
-    //}
+        var token = _tokenGenerator.GenerateToken(user);
+        return AuthResult.Succeeded(token.AccessToken, "", user.Id.ToString(), user.Email, user.UserName);
+    }
 
     public Task<TokenResult> RefreshAsync(string token)
     {

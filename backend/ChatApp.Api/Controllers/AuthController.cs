@@ -54,7 +54,10 @@ public class AuthController : ControllerBase
         });
         return Ok(new
         {
-            AccessToken = response.AccessToken,
+            accessToken = response.AccessToken,
+            userId = response.UserId,
+            email = response.Email,
+            username = response.Username
         });
     }
 

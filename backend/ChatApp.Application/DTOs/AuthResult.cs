@@ -24,19 +24,21 @@ public class AuthResult
         Message = message
     };
 
+    public static AuthResult Succeeded(string accessToken, string refreshToken, string userId, string email, string username)
+    => new AuthResult
+    {
+        Success = true,
+        AccessToken = accessToken,
+        RefreshToken = refreshToken,
+        UserId = userId,
+        Email = email,
+        Username = username
+    };
+
     public static AuthResult Succeeded(string message)
     {
         return new AuthResult { Success = true, Message = message };
     }
 
-    public static AuthResult Succeeded(string accessToken, string refreshToken, string userId, string email, string username)
-        => new AuthResult
-        {
-            Success = true,
-            AccessToken = accessToken,
-            RefreshToken = refreshToken,
-            UserId = userId,
-            Email = email,
-            Username = username
-        };
+
 }
