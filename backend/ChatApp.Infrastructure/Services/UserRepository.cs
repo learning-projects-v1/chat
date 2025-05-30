@@ -1,5 +1,6 @@
 ﻿using ChatApp.Application.Interfaces;
 using ChatApp.Domain.Models;
+using ChatApp.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
@@ -11,8 +12,8 @@ namespace ChatApp.Infrastructure.Services;
 
 public class UserRepository : BaseRepository<User>, IUserRepository
 {
-    private readonly DbContext _context;
-    public UserRepository(DbContext dbContext) : base(dbContext)
+    private readonly ChatAppDbContext _context;
+    public UserRepository(ChatAppDbContext dbContext) : base(dbContext)
     {
         _context = dbContext;
     }

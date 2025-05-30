@@ -23,11 +23,11 @@ public class AuthService : IAuthService
         {
             return AuthResult.Failed("User with this email exists");    ///todo: magic string
         }
-        var hashedPassword = BCrypt.Net.BCrypt.HashPassword(request.Paswword);
+        var hashedPassword = BCrypt.Net.BCrypt.HashPassword(request.Password);
         var user = new User
         {
             Email = request.Email,
-            FullName = request.FullName,
+            //FullName = request.FullName,
             UserName = request.Username,
             HashedPassword = hashedPassword
         };
@@ -39,7 +39,7 @@ public class AuthService : IAuthService
     public async Task<AuthResult> LoginAsync(LoginRequest request)
     {
         var user = await _repository.GetUserByEmail(request.Email);
-        if (user == null || BCrypt.Net.BCrypt.Verify(request.Password, user.HashedPassword))
+        if (user == null || !BCrypt.Net.BCrypt.Verify(request.Password, user.HashedPassword))
         {
             return AuthResult.Failed("Username or password is wrong.");
         }
@@ -49,11 +49,6 @@ public class AuthService : IAuthService
     }
 
     public Task<TokenResult> RefreshAsync(string token)
-    {
-        throw new NotImplementedException();
-    }
-
-    public Task<AuthResult> LoginAsync(LoginRequest request)
     {
         throw new NotImplementedException();
     }

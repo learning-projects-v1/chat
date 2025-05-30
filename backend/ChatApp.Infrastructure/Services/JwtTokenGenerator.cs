@@ -37,7 +37,9 @@ public class JwtTokenGenerator : ITokenGenerator
         {
             Subject = new ClaimsIdentity(new[] { new Claim(ClaimTypes.Name, user.Id.ToString()) }),
             Expires = DateTime.UtcNow.AddSeconds(2),
-            SigningCredentials = creds
+            SigningCredentials = creds,
+            Issuer = _jwtSettings.Issuer,
+            Audience = _jwtSettings.Audience
         };
         var tokenHandler = new JwtSecurityTokenHandler();
         var token = tokenHandler.CreateJwtSecurityToken(tokenDescriptor);

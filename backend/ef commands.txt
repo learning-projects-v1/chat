@@ -1,8 +1,8 @@
 
-dotnet ef migrations add "Test Model Added" --project ChatApp.Infrastructure --startup-project ChatApp.API
+dotnet ef migrations add "User Model Added" --project ChatApp.Infrastructure --startup-project ChatApp.API
 
 dotnet ef database update --project ChatApp.Infrastructure --startup-project ChatApp.API
 
-dotnet ef migrations remove --project AuthService.Infrastructure --startup-project AuthService.Api
+dotnet ef migrations remove --project ChatApp.Infrastructure --startup-project ChatApp.API
 
-dotnet ef database drop --project AuthService.Infrastructure --startup-project AuthService.Api
+dotnet ef database drop --project ChatApp.Infrastructure --startup-project ChatApp.API

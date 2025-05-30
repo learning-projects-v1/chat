@@ -1,4 +1,5 @@
 ﻿using ChatApp.Application.Interfaces;
+using ChatApp.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
@@ -10,8 +11,8 @@ namespace ChatApp.Infrastructure.Services;
 
 public class UnitOfWork : IUnitOfWork
 {
-    private DbContext _context;
-    public UnitOfWork(DbContext context)
+    private ChatAppDbContext _context;
+    public UnitOfWork(ChatAppDbContext context)
     {
         _context = context;
     }

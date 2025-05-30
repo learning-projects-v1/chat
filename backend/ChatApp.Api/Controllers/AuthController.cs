@@ -4,6 +4,7 @@ using ChatApp.Domain.Constants;
 using ChatApp.Domain.Models;
 using ChatApp.Infrastructure.Models;
 using ChatApp.Infrastructure.Persistence;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
@@ -27,12 +28,12 @@ public class AuthController : ControllerBase
         _jwtSettings = jwtOptions.Value;
     }
     [HttpPost("register")]
-    public async Task<IActionResult> Register(RegisterRequest request)
+    public async Task<IActionResult> Register([FromBody] RegisterRequest request)
     {
         var response = await _authService.RegisterAsync(request);
         if(response != null && response.Success)
         {
-            return Ok(new { msg = "Registered successfully!" });
+            return Ok(new { message = "Registered successfully!" });
         }
         return BadRequest(new { message = response.Message});
     }
@@ -41,17 +42,18 @@ public class AuthController : ControllerBase
     public async Task<IActionResult> Login(LoginRequest request)
     {
         var response = await _authService.LoginAsync(request);
-        if (response == null || !response.Success) return BadRequest(new { msg = response?.Message ?? "Log in failed" });
+        if (response == null || !response.Success) return BadRequest(new { message = response?.Message ?? "Log in failed" });
         
-        Response.Cookies.Append(AuthConstants.RefreshTokenKey, response.RefreshToken, new CookieOptions()
-        {
-            Domain = "myDomain",
-            Path = "/",
-            Expires = DateTime.UtcNow.AddHours(_jwtSettings.RefreshTokenExpirationHours),
-            HttpOnly = true,
-            SameSite = SameSiteMode.Lax,
-            Secure = false
-        });
+        //Response.Cookies.Append(AuthConstants.RefreshTokenKey, response.RefreshToken, new CookieOptions()
+        //{
+        //    Domain = "myDomain",
+        //    Path = "/",
+        //    Expires = DateTime.UtcNow.AddHours(_jwtSettings.RefreshTokenExpirationHours),
+        //    HttpOnly = true,
+        //    SameSite = SameSiteMode.Lax,
+        //    Secure = false
+        //});
+
         return Ok(new
         {
             accessToken = response.AccessToken,
@@ -62,9 +64,11 @@ public class AuthController : ControllerBase
     }
 
     [HttpGet("Test")]
+    [Authorize]
     public async Task<IActionResult> Test(string message)
     {
         var newModel = new TestModel();
+        var req = Request;
         newModel.Message = message;
         newModel.Id = Guid.NewGuid().ToString();
         var res = await _context.TestModel.OrderByDescending(m => m.CreatedAt).FirstOrDefaultAsync();
