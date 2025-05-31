@@ -35,7 +35,7 @@ public class AuthController : ControllerBase
         {
             return Ok(new { message = "Registered successfully!" });
         }
-        return BadRequest(new { message = response.Message});
+        return BadRequest(new { message = response?.Message ?? "Error"});
     }
 
     [HttpPost("login")]

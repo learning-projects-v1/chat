@@ -26,15 +26,20 @@ Features
 11. notification
 
 Api endpoints:
-1. signup(password, email)
-2. login(email, password)
+auth:
+1. Post api/auth/register - {password, email}
+2. Post api/auth/login - {email, password}
 
-3. friend_suggestions(userId)
-4. add_friend(userId, friend_id)
+Friend requests:
+3. Get api/users/suggestions - {}
+4. Post api/friends/request - {friend_id}
+5. Post api/friends/accept - {friend_request_id}
+6. Get api/friends - {}
+7. Delete api/friends/:friendId
 
-5. get_friends_list(user_id)
-6. load_messages(sender_id, receiver_id)
-7. send_message(sender_id, receiver_id, message)
+
+8. load_messages(sender_id, receiver_id)
+9. send_message(sender_id, receiver_id, message)
 
 Db:
 
@@ -47,9 +52,11 @@ full_name,
 isOnline,
 
 FRIENDSHIP:
+id,
 user_id,
 friend_id,
 string status,
+createdAt
 
 MESSAGE:
 id,

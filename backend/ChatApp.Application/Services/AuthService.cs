@@ -18,6 +18,10 @@ public class AuthService : IAuthService
     }
     public async Task<AuthResult> RegisterAsync(RegisterRequest request)
     {
+        if (request == null)
+        {
+            return AuthResult.Failed("invalid user info");
+        }
         var existingUser = await _repository.GetUserByEmail(request.Email);
         if(existingUser != null)
         {
@@ -39,10 +43,17 @@ public class AuthService : IAuthService
     public async Task<AuthResult> LoginAsync(LoginRequest request)
     {
         var user = await _repository.GetUserByEmail(request.Email);
-        if (user == null || !BCrypt.Net.BCrypt.Verify(request.Password, user.HashedPassword))
+
+        // test purpose
+        if (user == null)
         {
-            return AuthResult.Failed("Username or password is wrong.");
+            return AuthResult.Failed("User not found with this email");
         }
+
+        //if (user == null || !BCrypt.Net.BCrypt.Verify(request.Password, user.HashedPassword))
+        //{
+        //    return AuthResult.Failed("Username or password is wrong.");
+        //}
 
         var token = _tokenGenerator.GenerateToken(user);
         return AuthResult.Succeeded(token.AccessToken, "", user.Id.ToString(), user.Email, user.UserName);

@@ -15,4 +15,11 @@ public class User
     public bool IsOnline { get; set; }
     public string? FullName { get; set; }
     public string? RefreshToken { get; set; }
+    public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+
+    public ICollection<Friendship> FriendRequestsSent { get; set; }
+    public ICollection<Friendship> FriendRequestsReceived { get; set; }
+
+    public ICollection<Message> SentMessages { get; set; }
+    public ICollection<Message> ReceivedMessages { get; set; }
 }

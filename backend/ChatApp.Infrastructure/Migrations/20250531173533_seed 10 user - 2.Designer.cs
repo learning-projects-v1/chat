@@ -3,6 +3,7 @@ using System;
 using ChatApp.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace ChatApp.Infrastructure.Migrations
 {
     [DbContext(typeof(ChatAppDbContext))]
-    partial class ChatAppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250531173533_seed 10 user - 2")]
+    partial class seed10user2
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -141,7 +144,7 @@ namespace ChatApp.Infrastructure.Migrations
                         new
                         {
                             Id = new Guid("00000000-0000-0000-0000-000000000001"),
-                            CreatedAt = new DateTime(2025, 5, 31, 17, 43, 12, 282, DateTimeKind.Utc).AddTicks(7017),
+                            CreatedAt = new DateTime(2025, 5, 31, 17, 35, 30, 899, DateTimeKind.Utc).AddTicks(3734),
                             Email = "User-1@gmail.com",
                             FullName = "User 1",
                             HashedPassword = "123456",
@@ -151,7 +154,7 @@ namespace ChatApp.Infrastructure.Migrations
                         new
                         {
                             Id = new Guid("00000000-0000-0000-0000-000000000002"),
-                            CreatedAt = new DateTime(2025, 5, 31, 17, 43, 12, 282, DateTimeKind.Utc).AddTicks(7030),
+                            CreatedAt = new DateTime(2025, 5, 31, 17, 35, 30, 899, DateTimeKind.Utc).AddTicks(3759),
                             Email = "User-2@gmail.com",
                             FullName = "User 2",
                             HashedPassword = "123456",
@@ -161,7 +164,7 @@ namespace ChatApp.Infrastructure.Migrations
                         new
                         {
                             Id = new Guid("00000000-0000-0000-0000-000000000003"),
-                            CreatedAt = new DateTime(2025, 5, 31, 17, 43, 12, 282, DateTimeKind.Utc).AddTicks(7036),
+                            CreatedAt = new DateTime(2025, 5, 31, 17, 35, 30, 899, DateTimeKind.Utc).AddTicks(3766),
                             Email = "User-3@gmail.com",
                             FullName = "User 3",
                             HashedPassword = "123456",
@@ -171,7 +174,7 @@ namespace ChatApp.Infrastructure.Migrations
                         new
                         {
                             Id = new Guid("00000000-0000-0000-0000-000000000004"),
-                            CreatedAt = new DateTime(2025, 5, 31, 17, 43, 12, 282, DateTimeKind.Utc).AddTicks(7042),
+                            CreatedAt = new DateTime(2025, 5, 31, 17, 35, 30, 899, DateTimeKind.Utc).AddTicks(3772),
                             Email = "User-4@gmail.com",
                             FullName = "User 4",
                             HashedPassword = "123456",
@@ -181,7 +184,7 @@ namespace ChatApp.Infrastructure.Migrations
                         new
                         {
                             Id = new Guid("00000000-0000-0000-0000-000000000005"),
-                            CreatedAt = new DateTime(2025, 5, 31, 17, 43, 12, 282, DateTimeKind.Utc).AddTicks(7048),
+                            CreatedAt = new DateTime(2025, 5, 31, 17, 35, 30, 899, DateTimeKind.Utc).AddTicks(3785),
                             Email = "User-5@gmail.com",
                             FullName = "User 5",
                             HashedPassword = "123456",
@@ -191,7 +194,7 @@ namespace ChatApp.Infrastructure.Migrations
                         new
                         {
                             Id = new Guid("00000000-0000-0000-0000-000000000006"),
-                            CreatedAt = new DateTime(2025, 5, 31, 17, 43, 12, 282, DateTimeKind.Utc).AddTicks(7056),
+                            CreatedAt = new DateTime(2025, 5, 31, 17, 35, 30, 899, DateTimeKind.Utc).AddTicks(3793),
                             Email = "User-6@gmail.com",
                             FullName = "User 6",
                             HashedPassword = "123456",
@@ -201,7 +204,7 @@ namespace ChatApp.Infrastructure.Migrations
                         new
                         {
                             Id = new Guid("00000000-0000-0000-0000-000000000007"),
-                            CreatedAt = new DateTime(2025, 5, 31, 17, 43, 12, 282, DateTimeKind.Utc).AddTicks(7062),
+                            CreatedAt = new DateTime(2025, 5, 31, 17, 35, 30, 899, DateTimeKind.Utc).AddTicks(3809),
                             Email = "User-7@gmail.com",
                             FullName = "User 7",
                             HashedPassword = "123456",
@@ -211,7 +214,7 @@ namespace ChatApp.Infrastructure.Migrations
                         new
                         {
                             Id = new Guid("00000000-0000-0000-0000-000000000008"),
-                            CreatedAt = new DateTime(2025, 5, 31, 17, 43, 12, 282, DateTimeKind.Utc).AddTicks(7067),
+                            CreatedAt = new DateTime(2025, 5, 31, 17, 35, 30, 899, DateTimeKind.Utc).AddTicks(3816),
                             Email = "User-8@gmail.com",
                             FullName = "User 8",
                             HashedPassword = "123456",
@@ -221,72 +224,12 @@ namespace ChatApp.Infrastructure.Migrations
                         new
                         {
                             Id = new Guid("00000000-0000-0000-0000-000000000009"),
-                            CreatedAt = new DateTime(2025, 5, 31, 17, 43, 12, 282, DateTimeKind.Utc).AddTicks(7073),
+                            CreatedAt = new DateTime(2025, 5, 31, 17, 35, 30, 899, DateTimeKind.Utc).AddTicks(3838),
                             Email = "User-9@gmail.com",
                             FullName = "User 9",
                             HashedPassword = "123456",
                             IsOnline = false,
                             UserName = "user9"
-                        },
-                        new
-                        {
-                            Id = new Guid("00000000-0000-0000-0000-000000000010"),
-                            CreatedAt = new DateTime(2025, 5, 31, 17, 43, 12, 282, DateTimeKind.Utc).AddTicks(7080),
-                            Email = "User-10@gmail.com",
-                            FullName = "User 10",
-                            HashedPassword = "123456",
-                            IsOnline = false,
-                            UserName = "user10"
-                        },
-                        new
-                        {
-                            Id = new Guid("00000000-0000-0000-0000-000000000011"),
-                            CreatedAt = new DateTime(2025, 5, 31, 17, 43, 12, 282, DateTimeKind.Utc).AddTicks(7087),
-                            Email = "User-11@gmail.com",
-                            FullName = "User 11",
-                            HashedPassword = "123456",
-                            IsOnline = false,
-                            UserName = "user11"
-                        },
-                        new
-                        {
-                            Id = new Guid("00000000-0000-0000-0000-000000000012"),
-                            CreatedAt = new DateTime(2025, 5, 31, 17, 43, 12, 282, DateTimeKind.Utc).AddTicks(7104),
-                            Email = "User-12@gmail.com",
-                            FullName = "User 12",
-                            HashedPassword = "123456",
-                            IsOnline = false,
-                            UserName = "user12"
-                        },
-                        new
-                        {
-                            Id = new Guid("00000000-0000-0000-0000-000000000013"),
-                            CreatedAt = new DateTime(2025, 5, 31, 17, 43, 12, 282, DateTimeKind.Utc).AddTicks(7110),
-                            Email = "User-13@gmail.com",
-                            FullName = "User 13",
-                            HashedPassword = "123456",
-                            IsOnline = false,
-                            UserName = "user13"
-                        },
-                        new
-                        {
-                            Id = new Guid("00000000-0000-0000-0000-000000000014"),
-                            CreatedAt = new DateTime(2025, 5, 31, 17, 43, 12, 282, DateTimeKind.Utc).AddTicks(7116),
-                            Email = "User-14@gmail.com",
-                            FullName = "User 14",
-                            HashedPassword = "123456",
-                            IsOnline = false,
-                            UserName = "user14"
-                        },
-                        new
-                        {
-                            Id = new Guid("00000000-0000-0000-0000-000000000015"),
-                            CreatedAt = new DateTime(2025, 5, 31, 17, 43, 12, 282, DateTimeKind.Utc).AddTicks(7121),
-                            Email = "User-15@gmail.com",
-                            FullName = "User 15",
-                            HashedPassword = "123456",
-                            IsOnline = false,
-                            UserName = "user15"
                         });
                 });
 
