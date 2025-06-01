@@ -17,6 +17,12 @@ public class UserRepository : BaseRepository<User>, IUserRepository
     {
         _context = dbContext;
     }
+
+    public async Task<List<User>> GetAllUsers()
+    {
+        return await _context.Set<User>().ToListAsync();
+    }
+
     public async Task<User?> GetUserByEmail(string email)
     {
         return await _context.Set<User>().FirstOrDefaultAsync(x => x.Email == email);
@@ -26,4 +32,6 @@ public class UserRepository : BaseRepository<User>, IUserRepository
     {
         return await _context.Set<User>().FirstOrDefaultAsync(x => x.UserName == username);
     }
+
+    
 }
