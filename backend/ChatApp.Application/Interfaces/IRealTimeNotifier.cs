@@ -1,0 +1,14 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace ChatApp.Application.Interfaces;
+
+public interface IRealTimeNotifier
+{
+    Task NotifyFriendRequest(Guid ReceiverId, object payload);
+    Task NotifyMessage(Guid ReceiverId, object payload);
+
+}

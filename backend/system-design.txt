@@ -32,7 +32,7 @@ auth:
 
 Friend requests:
 3. Get api/users/suggestions - {}
-4. Post api/friends/request - {friend_id}
+4. Post api/friends/request - {friend_request_id}
 5. Post api/friends/accept - {friend_request_id}
 6. Get api/friends - {}
 7. Delete api/friends/:friendId

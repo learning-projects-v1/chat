@@ -21,4 +21,6 @@ public class UsersController : ControllerBase
         var suggestedUsers = users.OrderBy(x => rng.Next()).Take(maxAmount);
         return Ok(suggestedUsers);
     }
+
+
 }

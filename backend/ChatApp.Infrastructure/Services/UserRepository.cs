@@ -20,12 +20,17 @@ public class UserRepository : BaseRepository<User>, IUserRepository
 
     public async Task<List<User>> GetAllUsers()
     {
-        return await _context.Set<User>().ToListAsync();
+        return await _context.Users.ToListAsync();
     }
 
     public async Task<User?> GetUserByEmail(string email)
     {
-        return await _context.Set<User>().FirstOrDefaultAsync(x => x.Email == email);
+        return await _context.Users
+            .Include(x => x.FriendRequestsSent)
+                .ThenInclude(y => y.Receiver)
+            .Include(x => x.FriendRequestsReceived)
+                .ThenInclude(y => y.Sender)
+            .FirstOrDefaultAsync(x => x.Email == email);
     }
 
     public async Task<User?> GetUserByUsername(string username)

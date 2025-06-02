@@ -1,4 +1,5 @@
-﻿using ChatApp.Application.Interfaces;
+﻿using ChatApp.API.Hubs;
+using ChatApp.Application.Interfaces;
 using ChatApp.Application.Services;
 using ChatApp.Infrastructure.Services;
 
@@ -12,6 +13,7 @@ public static class ServiceRegistrationMiddleware
         services.AddScoped<IUserRepository, UserRepository>();
         services.AddScoped<IUnitOfWork, UnitOfWork>();
         services.AddScoped<IAuthService, AuthService>();
+        services.AddScoped<IRealTimeNotifier, RealTimeNotifier>();
         return services;
     }
 }

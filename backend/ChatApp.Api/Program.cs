@@ -1,4 +1,5 @@
 
+using ChatApp.API.Hubs;
 using ChatApp.API.Middleware;
 using ChatApp.Infrastructure.Models;
 using ChatApp.Infrastructure.Persistence;
@@ -29,9 +30,11 @@ builder.Services
     .AddSwaggerGen()
     .AddDbContextMiddleware(builder.Configuration)
     .AddAuthenticationMiddleware(jwtSettings!)
-    .AddServices();
+    .AddServices()
+    .AddSignalR();
 
 var app = builder.Build();
+app.MapHub<NotificationHub>("/hubs/notifications");
 app.UseCors("AllowFrontend");
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())

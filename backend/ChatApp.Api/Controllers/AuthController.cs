@@ -10,7 +10,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using Microsoft.VisualBasic;
 
-namespace ChatBackend.Controllers;
+namespace ChatApp.API.Controllers;
 
 [Route("api/[controller]")]
 [ApiController]
@@ -20,7 +20,7 @@ public class AuthController : ControllerBase
     private readonly IAuthService _authService;
     private readonly IConfiguration _configuration;
     private readonly JwtSettings _jwtSettings;
-    public AuthController(ChatAppDbContext chatAppDbContext, IAuthService authService, IOptions<JwtSettings>jwtOptions, IConfiguration configuration)
+    public AuthController(ChatAppDbContext chatAppDbContext, IAuthService authService, IOptions<JwtSettings> jwtOptions, IConfiguration configuration)
     {
         _context = chatAppDbContext;
         _configuration = configuration;
@@ -31,11 +31,11 @@ public class AuthController : ControllerBase
     public async Task<IActionResult> Register([FromBody] RegisterRequest request)
     {
         var response = await _authService.RegisterAsync(request);
-        if(response != null && response.Success)
+        if (response != null && response.Success)
         {
             return Ok(new { message = "Registered successfully!" });
         }
-        return BadRequest(new { message = response?.Message ?? "Error"});
+        return BadRequest(new { message = response?.Message ?? "Error" });
     }
 
     [HttpPost("login")]
@@ -43,7 +43,7 @@ public class AuthController : ControllerBase
     {
         var response = await _authService.LoginAsync(request);
         if (response == null || !response.Success) return BadRequest(new { message = response?.Message ?? "Log in failed" });
-        
+
         //Response.Cookies.Append(AuthConstants.RefreshTokenKey, response.RefreshToken, new CookieOptions()
         //{
         //    Domain = "myDomain",
@@ -72,12 +72,12 @@ public class AuthController : ControllerBase
         newModel.Message = message;
         newModel.Id = Guid.NewGuid().ToString();
         var res = await _context.TestModel.OrderByDescending(m => m.CreatedAt).FirstOrDefaultAsync();
-        if(res == null)
+        if (res == null)
         {
             res = newModel;
         }
         _context.TestModel.Add(newModel);
         await _context.SaveChangesAsync();
-        return Ok(new {Message = res.Message});
+        return Ok(new { res.Message });
     }
 }

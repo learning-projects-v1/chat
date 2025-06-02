@@ -20,7 +20,6 @@ public class FriendshipRepository : BaseRepository<Friendship>, IFriendshipRepos
 
     public async Task AddFriendRequestAsync(Friendship friendship)
     {
-        friendship.Status = FriendshipStatus.Pending;
         await _context.Friendships.AddAsync(friendship);
     }
 
@@ -32,7 +31,7 @@ public class FriendshipRepository : BaseRepository<Friendship>, IFriendshipRepos
 
     public void DeleteFriendRequest(Friendship friendShip)
     {
-        friendShip.Status= FriendshipStatus.Rejected;
+        friendShip.Status = FriendshipStatus.Rejected;
         _context.Friendships.Update(friendShip);
     }
 
