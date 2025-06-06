@@ -8,7 +8,7 @@ namespace ChatApp.Application.Interfaces;
 
 public interface IRealTimeNotifier
 {
-    Task NotifyFriendRequest(Guid ReceiverId, object payload);
-    Task NotifyMessage(Guid ReceiverId, object payload);
+    Task NotifyFriendRequest(string ReceiverId, object payload);
+    Task NotifyMessage(string ReceiverId, object payload);
 
 }

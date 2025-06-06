@@ -1,4 +1,5 @@
 ﻿using ChatApp.Application.DTOs;
+using ChatApp.Application.Interfaces;
 using ChatApp.Application.Services;
 using ChatApp.Domain.Constants;
 using ChatApp.Domain.Models;
@@ -9,6 +10,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using Microsoft.VisualBasic;
+using System.Security.Claims;
 
 namespace ChatApp.API.Controllers;
 
@@ -20,12 +22,14 @@ public class AuthController : ControllerBase
     private readonly IAuthService _authService;
     private readonly IConfiguration _configuration;
     private readonly JwtSettings _jwtSettings;
-    public AuthController(ChatAppDbContext chatAppDbContext, IAuthService authService, IOptions<JwtSettings> jwtOptions, IConfiguration configuration)
+    private readonly IRealTimeNotifier _notifier;
+    public AuthController(ChatAppDbContext chatAppDbContext, IAuthService authService, IOptions<JwtSettings> jwtOptions, IConfiguration configuration, IRealTimeNotifier notifier)
     {
         _context = chatAppDbContext;
         _configuration = configuration;
         _authService = authService;
         _jwtSettings = jwtOptions.Value;
+        _notifier = notifier;
     }
     [HttpPost("register")]
     public async Task<IActionResult> Register([FromBody] RegisterRequest request)
@@ -78,6 +82,10 @@ public class AuthController : ControllerBase
         }
         _context.TestModel.Add(newModel);
         await _context.SaveChangesAsync();
+            
+        var senderId = User.FindFirst(ClaimTypes.Name)?.Value;
+   
+        await _notifier.NotifyMessage(senderId, "Hello world");
         return Ok(new { res.Message });
     }
 }

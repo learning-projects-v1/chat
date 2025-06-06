@@ -1,10 +1,13 @@
 ﻿using ChatApp.Application.Interfaces;
 using ChatApp.Domain.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
 
 namespace ChatApp.API.Controllers;
 
+[Route("api/[controller]")]
+[ApiController]
 public class FriendsController : ControllerBase
 {
     private readonly IFriendshipRepository _friendshipRepository;
@@ -18,10 +21,11 @@ public class FriendsController : ControllerBase
         _notifier = notifier;
     }
 
-    [HttpPost("Request")]
+    [Authorize]
+    [HttpPost("request")]
     public async Task<IActionResult> SendFriendRequest(string receiverId)
     {
-        var senderId = User.FindFirst(ClaimTypes.NameIdentifier).Value;
+        var senderId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
         var friendship = new Friendship
         {
             CreatedAt = DateTime.UtcNow,
@@ -32,7 +36,8 @@ public class FriendsController : ControllerBase
         
         await _friendshipRepository.AddFriendRequestAsync(friendship);
         await _unitOfWork.SaveChangesAsync();
-        await _notifier.NotifyFriendRequest(Guid.Parse(receiverId), new
+
+        await _notifier.NotifyFriendRequest(receiverId, new
         {
             SenderId = senderId,
             Message = "You have a new friend request"

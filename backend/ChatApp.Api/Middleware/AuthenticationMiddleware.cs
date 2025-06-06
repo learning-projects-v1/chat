@@ -25,6 +25,23 @@ public static class AuthenticationMiddleware
                 ValidIssuer = jwtSettings.Issuer,
                 ValidAudience = jwtSettings.Audience
             };
+
+            options.Events = new JwtBearerEvents
+            {
+                OnMessageReceived = context =>
+                {
+                    var accessToken = context.Request.Query["access_token"];
+
+                    // If the request is for the SignalR hub
+                    var path = context.HttpContext.Request.Path;
+                    if (!string.IsNullOrEmpty(accessToken) && path.StartsWithSegments("/hubs/notifications"))
+                    {
+                        context.Token = accessToken;
+                    }
+
+                    return Task.CompletedTask;
+                }
+            };
         });
         return services;
     }
