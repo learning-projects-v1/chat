@@ -38,5 +38,23 @@ public class UserRepository : BaseRepository<User>, IUserRepository
         return await _context.Set<User>().FirstOrDefaultAsync(x => x.UserName == username);
     }
 
-    
+    public Task<List<User>> GetSuggestedUsers(string userId)
+    {
+        var userIdGuid = Guid.Parse(userId);
+
+        var allUsers = _context.Users;
+
+        var friendIds = _context.Set<Friendship>()
+            .Where(f => f.SenderId == userIdGuid || f.ReceiverId == userIdGuid)
+            .Select(f => f.SenderId == userIdGuid? f.ReceiverId: f.SenderId)
+            .ToList();
+
+        var suggestedUsers = _context.Set<User>()
+            .Where(u => u.Id != userIdGuid && !friendIds.Contains(u.Id))
+            .ToList();
+
+        //return suggestedUsers;
+        return Task.FromResult(suggestedUsers);
+    }
+
 }

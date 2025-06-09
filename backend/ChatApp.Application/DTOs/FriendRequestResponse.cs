@@ -6,9 +6,8 @@ using System.Threading.Tasks;
 
 namespace ChatApp.Application.DTOs;
 
-public class UserResponse
+public class FriendRequestResponse
 {
-    public Guid Id { get; set; }
-    public string FullName { get; set; }
-    public string UserName { get; set; }
+    public UserResponse Sender { get; set; }
+    public string Message { get; set; }
 }

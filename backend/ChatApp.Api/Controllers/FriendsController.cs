@@ -1,5 +1,6 @@
 ﻿using ChatApp.Application.DTOs;
 using ChatApp.Application.Interfaces;
+using ChatApp.Application.Mappings;
 using ChatApp.Domain.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -12,14 +13,16 @@ namespace ChatApp.API.Controllers;
 public class FriendsController : ControllerBase
 {
     private readonly IFriendshipRepository _friendshipRepository;
+    private readonly IUserRepository _userRepository;
     private readonly IUnitOfWork _unitOfWork;
     private readonly IRealTimeNotifier _notifier;
 
-    public FriendsController(IFriendshipRepository friendsRepository, IUnitOfWork unitOfWork, IRealTimeNotifier notifier)
+    public FriendsController(IFriendshipRepository friendsRepository, IUnitOfWork unitOfWork, IRealTimeNotifier notifier, IUserRepository userRepository)
     {
         _friendshipRepository = friendsRepository;
         _unitOfWork = unitOfWork;
         _notifier = notifier;
+        _userRepository = userRepository;
     }
 
     [Authorize]
@@ -27,6 +30,16 @@ public class FriendsController : ControllerBase
     public async Task<IActionResult> SendFriendRequest(string receiverId)
     {
         var senderId = User.FindFirst(ClaimTypes.Name)?.Value;
+        if(senderId == receiverId)
+        {
+            return BadRequest(new { Message = "Can't send friend request to self" });
+        }
+        var existingFriendship = await _friendshipRepository.GetFriendshipAsync(Guid.Parse(senderId), Guid.Parse(receiverId));
+        if (existingFriendship != null)
+        {
+            string message = existingFriendship.Status == FriendshipStatus.Pending ? "Already have pending friend requests" : "Already friends";
+            return BadRequest(new { Message = message });
+        } 
         var friendship = new Friendship
         {
             CreatedAt = DateTime.UtcNow,
@@ -36,9 +49,14 @@ public class FriendsController : ControllerBase
         };
         await _friendshipRepository.AddFriendRequestAsync(friendship);
         await _unitOfWork.SaveChangesAsync();
+
+        var sender = await _userRepository.GetByIdAsync(Guid.Parse(senderId));
+        //need transaction here
+        if (sender == null) return BadRequest("Sender not found!");
+
         await _notifier.NotifyFriendRequest(receiverId, new
-        {
-            SenderId = senderId,
+        (){
+            Sender = sender.ToUserResponseDto(),
             Message = "You have a new friend request"
         });
 
@@ -46,7 +64,7 @@ public class FriendsController : ControllerBase
     }
 
     [Authorize]
-    [HttpPut("request/{senderId}/accept")]
+    [HttpPut("requests/{senderId}/accept")]
     public async Task<IActionResult> AcceptFriendRequest(string senderId)
     {
         var userId = GetUserId();
@@ -89,14 +107,7 @@ public class FriendsController : ControllerBase
         if (userId == null) return Unauthorized();
         var friends = await _friendshipRepository.GetPendingFriendsAsync(Guid.Parse(userId));
         var friendsDto = friends.
-            Select(
-                u => new UserResponse {
-                    Email = u.Email,
-                    Id = u.Id,
-                    FullName = u.FullName,
-                    UserName = u.UserName,
-                }
-            );
+            Select(u => u.ToUserResponseDto());
 
         return Ok(friendsDto);
     }

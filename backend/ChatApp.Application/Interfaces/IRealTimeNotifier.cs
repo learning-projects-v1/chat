@@ -1,4 +1,5 @@
-﻿using System;
+﻿using ChatApp.Application.DTOs;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -8,7 +9,7 @@ namespace ChatApp.Application.Interfaces;
 
 public interface IRealTimeNotifier
 {
-    Task NotifyFriendRequest(string ReceiverId, object payload);
+    Task NotifyFriendRequest(string ReceiverId, FriendRequestResponse payload);
     Task NotifyMessage(string ReceiverId, object payload);
 
 }

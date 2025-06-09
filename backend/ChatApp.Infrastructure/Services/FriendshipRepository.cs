@@ -39,10 +39,10 @@ public class FriendshipRepository : BaseRepository<Friendship>, IFriendshipRepos
         return friends.Select(f => f.SenderId == userId ? f.Receiver : f.Sender);
     }
 
-    public async Task<Friendship?> GetFriendshipAsync(Guid senderId, Guid receiverId)
+    public async Task<Friendship?> GetFriendshipAsync(Guid user1, Guid user2)
     {
         return await _context.Friendships.
-            FirstOrDefaultAsync(f => (f.SenderId == senderId && f.ReceiverId == receiverId) || (f.SenderId == receiverId && f.ReceiverId == senderId));
+            FirstOrDefaultAsync(f => (f.SenderId == user1 && f.ReceiverId == user2) || (f.SenderId == user2 && f.ReceiverId == user1));
     }
 
     public async Task<IEnumerable<User>> GetPendingFriendsAsync(Guid userId)

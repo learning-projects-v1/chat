@@ -14,5 +14,11 @@ public interface IFriendshipRepository : IRepository<Friendship>
     Task AddFriendRequestAsync(Friendship friendship);
     void ApproveFriendRequest(Friendship friendship);
     void RejectFriendRequest(Friendship friendShip);
+    /// <summary>
+    /// get friendship between 2 users
+    /// </summary>
+    /// <param name="user1"></param>
+    /// <param name="user2"></param>
+    /// <returns></returns>
     Task<Friendship?> GetFriendshipAsync(Guid senderId, Guid receiverId);
 }

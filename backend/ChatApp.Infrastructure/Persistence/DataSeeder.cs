@@ -30,7 +30,7 @@ public class DataSeeder
                 CreatedAt = DateTime.UtcNow,
                 Email = $"u{i}@gmail.com",
                 FullName = $"User {i}",
-                UserName = $"user{i}",
+                UserName = $"chat-app-user{i}",
                 HashedPassword = "123456",
             };
             users.Add(user);
