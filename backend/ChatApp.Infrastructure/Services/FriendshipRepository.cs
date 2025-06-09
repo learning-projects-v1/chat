@@ -2,11 +2,6 @@
 using ChatApp.Domain.Models;
 using ChatApp.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace ChatApp.Infrastructure.Services;
 
@@ -25,13 +20,11 @@ public class FriendshipRepository : BaseRepository<Friendship>, IFriendshipRepos
 
     public void ApproveFriendRequest(Friendship friendship)
     {
-        friendship.Status = FriendshipStatus.Accepted;
         _context.Friendships.Update(friendship);
     }
 
-    public void DeleteFriendRequest(Friendship friendShip)
+    public void RejectFriendRequest(Friendship friendShip)
     {
-        friendShip.Status = FriendshipStatus.Rejected;
         _context.Friendships.Update(friendShip);
     }
 

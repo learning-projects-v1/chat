@@ -13,6 +13,6 @@ public interface IFriendshipRepository : IRepository<Friendship>
     Task<IEnumerable<User>> GetPendingFriendsAsync(Guid userId);
     Task AddFriendRequestAsync(Friendship friendship);
     void ApproveFriendRequest(Friendship friendship);
-    void DeleteFriendRequest(Friendship friendShip);
+    void RejectFriendRequest(Friendship friendShip);
     Task<Friendship?> GetFriendshipAsync(Guid senderId, Guid receiverId);
 }

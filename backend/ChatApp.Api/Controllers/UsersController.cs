@@ -14,10 +14,8 @@ public class UsersController : ControllerBase
     public UsersController(IUserRepository repository)
     {
         _userRepository = repository;
-
     }
 
-    
     [HttpGet("suggestions")]
     public async Task<IActionResult> GetSuggestions()
     {
@@ -27,7 +25,5 @@ public class UsersController : ControllerBase
         var suggestedUsers = users.OrderBy(x => rng.Next()).Take(maxAmount);
         return Ok(suggestedUsers);
     }
-
-
 }
     

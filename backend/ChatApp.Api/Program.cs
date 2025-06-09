@@ -4,7 +4,6 @@ using ChatApp.API.Middleware;
 using ChatApp.Infrastructure.Models;
 using ChatApp.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
-using System;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -51,7 +50,6 @@ app.UseAuthorization();
 
 app.MapControllers();
 
-
 using (var scope = app.Services.CreateScope())
 {
     var dbContext = scope.ServiceProvider.GetRequiredService<ChatAppDbContext>();
@@ -68,6 +66,9 @@ using (var scope = app.Services.CreateScope())
         }
         dbContext.Database.Migrate();
         Console.WriteLine("Migration done");
+
+        var seeder = new DataSeeder(dbContext);
+        seeder.SeedInitialData();
     }
 }
 app.Run();

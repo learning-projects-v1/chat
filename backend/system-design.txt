@@ -30,12 +30,14 @@ auth:
 1. Post api/auth/register - {password, email}
 2. Post api/auth/login - {email, password}
 
-Friend requests:
-3. Get api/users/suggestions - {}
-4. Post api/friends/request - {receiver_id}
-5. Post api/friends/accept - {friend_request_id}
-6. Get api/friends - {}
-7. Delete api/friends/:friendId
+Friendship:
+
+1. Post api/friends/requests - {receiver_id}
+2. Post api/friends/{id}/accept- {id}
+3. Get api/friends - {}
+4. Get api/friends/requests - {}
+5. Post api/friends/{id}/reject - {id}
+5. Delete api/friends/:friendId
 
 
 8. load_messages(sender_id, receiver_id)
