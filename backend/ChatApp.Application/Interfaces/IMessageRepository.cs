@@ -1,12 +1,14 @@
-﻿using System;
+﻿using ChatApp.Domain.Models;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace ChatApp.Application.Interfaces
+namespace ChatApp.Application.Interfaces;
+
+public interface IMessageRepository : IRepository<Message>
 {
-    internal interface IMessageRepository
-    {
-    }
+    Task<List<Message>> GetAll(string userId);
+    Task<List<Message>> GetLatestMessages(Guid userId);
 }

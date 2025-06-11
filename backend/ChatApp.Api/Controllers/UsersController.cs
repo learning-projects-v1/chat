@@ -8,6 +8,7 @@ namespace ChatApp.API.Controllers;
 
 [Route("api/[controller]")]
 [ApiController]
+[Authorize]
 public class UsersController : ControllerBase
 {
     private readonly IUserRepository _userRepository;
@@ -17,7 +18,7 @@ public class UsersController : ControllerBase
         _userRepository = repository;
     }
 
-    [Authorize]
+
     [HttpGet("suggestions")]
     public async Task<IActionResult> GetSuggestions()
     {
