@@ -15,7 +15,7 @@ public class ChatOverviewController: ControllerBase
     private readonly IFriendshipRepository _friendshipRepository;
     private readonly IUnitOfWork _unitOfWork;
     private readonly IMessageRepository _messageRepository;
-    public ChatOverviewController(IUserRepository userRepository,IFriendshipRepository friendshipRepository, IUnitOfWork unitOfWork, IMessageRepository messageRepository)
+    public ChatOverviewController(IUserRepository userRepository, IFriendshipRepository friendshipRepository, IUnitOfWork unitOfWork, IMessageRepository messageRepository)
     {
         _userRepository = userRepository;
         _friendshipRepository = friendshipRepository;
@@ -39,11 +39,11 @@ public class ChatOverviewController: ControllerBase
             
             var latestMessageDto = new LatestMessageDto()
             {
-                UserId = friend.UserName,
-                Username = friend.UserName,
-                Message = message?.Content ?? "No messages yet",
+                FriendId = friend.Id,
+                FriendUserName = friend.UserName,
+                Content = message?.Content ?? "No messages yet",
                 MessageSenderId = message?.SenderId,
-                MessageTime = message?.SentAt ?? DateTime.MinValue
+                SentAt = message?.SentAt ?? DateTime.MinValue
             };
 
             results.Add(latestMessageDto);

@@ -17,6 +17,15 @@ public class MessagesRepository : BaseRepository<Message>, IMessageRepository
         return default;
     }
 
+    public async Task<List<Message>> GetChatHistory(Guid user1, Guid user2)
+    {
+        var chats = await _context.Messages
+            .Where(m => (m.SenderId == user1 && m.ReceiverId == user2) || (m.SenderId == user2 && m.ReceiverId == user1))
+            .OrderByDescending(m => m.SentAt)
+            .ToListAsync();
+        return chats;
+    }
+
     public async Task<List<Message>> GetLatestMessages(Guid userId)
     {
         var messages = await _context.Messages

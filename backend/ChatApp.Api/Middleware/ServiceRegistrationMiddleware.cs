@@ -12,6 +12,7 @@ public static class ServiceRegistrationMiddleware
         services.AddScoped<ITokenGenerator, JwtTokenGenerator>();
         services.AddScoped<IUserRepository, UserRepository>();
         services.AddScoped<IFriendshipRepository, FriendshipRepository>();
+        services.AddScoped<IMessageRepository, MessagesRepository>();
         services.AddScoped<IUnitOfWork, UnitOfWork>();
         services.AddScoped<IAuthService, AuthService>();
         services.AddScoped<IRealTimeNotifier, RealTimeNotifier>();

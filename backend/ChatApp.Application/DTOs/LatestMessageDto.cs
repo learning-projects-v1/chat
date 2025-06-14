@@ -2,9 +2,9 @@
 
 public class LatestMessageDto
 {
-    public string UserId { get; set; }
-    public string Username { get; set; }
-    public string Message { get; set; }
-    public DateTime MessageTime { get; set; }
+    public Guid FriendId { get; set; }
+    public string FriendUserName { get; set; }
+    public string Content { get; set; }
+    public DateTime SentAt { get; set; }
     public Guid? MessageSenderId { get; set; }
 }

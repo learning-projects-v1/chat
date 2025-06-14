@@ -20,6 +20,19 @@ public class DataSeeder
 
     public void SeedInitialData()
     {
+
+        var users = GetUsers();
+        var friendships = GetFriendships(users);
+        var messages = GetMessages(users);
+
+        _context.Users.AddRange(users);
+        _context.Friendships.AddRange(friendships);
+        _context.Messages.AddRange(messages);
+        _context.SaveChanges();
+    }
+    
+    private List<User> GetUsers()
+    {
         var users = new List<User>();
         int numberOfUser = 15;
         for (int i = 1; i <= numberOfUser; i++)
@@ -35,14 +48,18 @@ public class DataSeeder
             };
             users.Add(user);
         }
+        return users;
+    }
 
+    private List<Friendship> GetFriendships(List<User> users)
+    {
         var friendships = new List<Friendship>();
-        // send friend request to all from user-1
         var userOne = users.First();
-        for (int i = 1; i < users.Count; i++)
+        // Everyone is friend of 1
+        for (int i = 1; i < users.Count; i++)   
         {
-            var status = FriendshipStatus.Pending;
-            if (i > 5) status = FriendshipStatus.Accepted;
+            var status = FriendshipStatus.Accepted;
+            //if (i > 5) status = FriendshipStatus.Accepted;
             var friendship = new Friendship()
             {
                 Id = GetGuid(friendships.Count + 1, 'b'),
@@ -53,6 +70,8 @@ public class DataSeeder
             };
             friendships.Add(friendship);
         }
+
+        // [1,5] is friend of 2. Rest has pending requests
         var userTwo = users[1];
         for (int i = 2; i < users.Count; i++)
         {
@@ -68,44 +87,37 @@ public class DataSeeder
             };
             friendships.Add(friendship);
         }
-
-        _context.Users.AddRange(users);
-        _context.Friendships.AddRange(friendships);
-        _context.SaveChanges();
-        //modelBuilder.Entity<User>().HasData(users);
-        //modelBuilder.Entity<Friendship>().HasData(friendships);
-
-
-        //var message1 = new Message
-        //{
-        //    Id = Guid.NewGuid(),
-        //    SenderId = user1.Id,
-        //    ReceiverId = user2.Id,
-        //    Content = "Hey Bob!",
-        //    SentAt = DateTime.UtcNow.AddMinutes(-5)
-        //};
-
-        //var message2 = new Message
-        //{
-        //    Id = Guid.NewGuid(),
-        //    SenderId = user2.Id,
-        //    ReceiverId = user1.Id,
-        //    Content = "Hi Alice! How are you?",
-        //    SentAt = DateTime.UtcNow.AddMinutes(-4)
-        //};
-
-        //var message3 = new Message
-        //{
-        //    Id = Guid.NewGuid(),
-        //    SenderId = user1.Id,
-        //    ReceiverId = user3.Id,
-        //    Content = "Hi Charlie!",
-        //    SentAt = DateTime.UtcNow.AddMinutes(-3)
-        //};
-
-        //modelBuilder.Entity<Message>().HasData(message1, message2, message3);
+        return friendships;
     }
 
+    private List<Message> GetMessages(List<User> users) {
+
+        var messages = new List<Message>();
+        var customMessageContents = new List<string>()
+        {
+            "Hello world",
+            "How are you",
+            "Yo what's up",
+            "hello hello",
+            "ki ase jibone"
+        };
+        var random = new Random();
+        for (int i = 1; i < users.Count; i++)
+        {
+            var content = customMessageContents[random.Next(customMessageContents.Count)];
+            var message = new Message()
+            {
+                Content = content,
+                Id = Guid.NewGuid(),
+                IsSeen = false,
+                ReceiverId = users[0].Id,
+                SenderId = users[i].Id,
+                SentAt = new DateTime(2025, 6, 11, random.Next(24), random.Next(60), random.Next(60), DateTimeKind.Utc)
+            };
+            messages.Add(message);
+        }
+        return messages;
+    }
     private Guid GetGuid(int number, char ch)
     {
         var gd = $"00000000-0000-0000-0000-{ch}{new string('0', 11 - number.ToString().Length)}{number}";
