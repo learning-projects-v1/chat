@@ -40,7 +40,7 @@ public class ChatOverviewController: ControllerBase
             var latestMessageDto = new LatestMessageDto()
             {
                 FriendId = friend.Id,
-                FriendUserName = friend.UserName,
+                FriendUsername = friend.UserName,
                 Content = message?.Content ?? "No messages yet",
                 MessageSenderId = message?.SenderId,
                 SentAt = message?.SentAt ?? DateTime.MinValue
@@ -48,6 +48,7 @@ public class ChatOverviewController: ControllerBase
 
             results.Add(latestMessageDto);
         }
+        results = results.OrderByDescending(r => r.SentAt).ToList();
         return Ok(results);
     }
 }

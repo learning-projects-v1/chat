@@ -5,11 +5,7 @@ namespace ChatApp.API.Hubs;
 [Authorize]
 public class NotificationHub : Hub
 {
-    public async Task Register(string userId)
-    {
-        await Groups.AddToGroupAsync(Context.ConnectionId, userId);
-    }
-
+    #region Override
     public override async Task OnConnectedAsync()
     {
         Console.WriteLine("CONNECTED!!");
@@ -21,4 +17,10 @@ public class NotificationHub : Hub
         // Cleanup logic if needed
         await base.OnDisconnectedAsync(exception);
     }
+    #endregion
+    public async Task Register(string userId)
+    {
+        await Groups.AddToGroupAsync(Context.ConnectionId, userId);
+    }
+
 }

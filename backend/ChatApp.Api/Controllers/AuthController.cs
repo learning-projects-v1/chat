@@ -85,7 +85,8 @@ public class AuthController : ControllerBase
             
         var senderId = User.FindFirst(ClaimTypes.Name)?.Value;
    
-        await _notifier.NotifyMessage(senderId, "Hello world");
+        await _notifier.NotifyMessage(Guid.Parse(senderId), 
+            new() { Content = "ABCD HELLO WORLD"});
         return Ok(new { res.Message });
     }
 }

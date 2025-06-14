@@ -21,7 +21,7 @@ public class MessagesRepository : BaseRepository<Message>, IMessageRepository
     {
         var chats = await _context.Messages
             .Where(m => (m.SenderId == user1 && m.ReceiverId == user2) || (m.SenderId == user2 && m.ReceiverId == user1))
-            .OrderByDescending(m => m.SentAt)
+            .OrderBy(m => m.SentAt)
             .ToListAsync();
         return chats;
     }

@@ -1,6 +1,8 @@
 ﻿using ChatApp.Application.DTOs;
 using ChatApp.Application.Interfaces;
+using ChatApp.Domain.Constants;
 using Microsoft.AspNetCore.SignalR;
+using System.Reflection.Metadata;
 namespace ChatApp.API.Hubs;
 
 public class RealTimeNotifier : IRealTimeNotifier
@@ -13,11 +15,11 @@ public class RealTimeNotifier : IRealTimeNotifier
 
     public async Task NotifyFriendRequest(string ReceiverId, FriendRequestResponse payload)
     {
-        await _hubContext.Clients.Groups(ReceiverId).SendAsync("FriendRequestReceived", payload);
+        await _hubContext.Clients.Groups(ReceiverId).SendAsync(GlobalConstants.FriendRequestReceived, payload);
     }
 
-    public async Task NotifyMessage(string ReceiverId, object payload)
+    public async Task NotifyMessage(Guid ReceiverId, ChatDto payload)
     {
-        await _hubContext.Clients.Groups(ReceiverId).SendAsync("FriendRequestReceived", payload);
+        await _hubContext.Clients.Groups(ReceiverId.ToString()).SendAsync(GlobalConstants.MessageReceived, payload);
     }
 }
