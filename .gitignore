@@ -43,20 +43,6 @@ secrets.json
 *.bak
 *.old
 
-# === FRONTEND (Angular) ===
-frontend/node_modules/
-frontend/dist/
-frontend/.angular/
-frontend/.env
-frontend/.env.local
-frontend/.env.development
-
-# Angular specific logs
-frontend/npm-debug.log*
-frontend/yarn-debug.log*
-frontend/yarn-error.log*
-frontend/package-lock.json
-
 # === DOCKER ===
 *.pid
 Dockerfile.*
