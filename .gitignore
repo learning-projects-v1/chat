@@ -54,3 +54,11 @@ docker-compose.override.yaml
 Thumbs.db
 ehthumbs.db
 *.lnk
+
+
+# angular
+frontend/node_modules/
+frontend/dist/
+frontend/.angular/
+frontend/.env
+frontend/.env.*

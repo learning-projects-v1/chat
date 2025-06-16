@@ -1,0 +1,9 @@
+<div class="app-layout">
+    @if(showNavBar){
+      <app-nav-bar [navItems]="navItems"></app-nav-bar>
+    }
+
+  <main class="main-content" [class.fullscreen]="!showNavBar">
+    <router-outlet></router-outlet>
+  </main>
+</div>

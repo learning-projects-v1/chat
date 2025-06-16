@@ -1,0 +1,20 @@
+<div class="messages-container">
+  <h2>Chats</h2>
+
+
+  <div class="card-list-vertical">
+    @if(latestMessages && latestMessages.length > 0){
+      <div class="card" *ngFor="let message of latestMessages" (click)="goToChat(message.friendId)">
+        <div class="avatar">{{ message.friendUsername.charAt(0).toUpperCase()}}</div>
+
+        <div class="info">
+          <div class="name">{{ message.friendUsername }}</div>
+          <div class="mutual">{{ message.content }}</div>
+          <div class="time">{{ message.sentAt| date: 'MMM d, h:mm a'  }}</div>
+        </div>
+
+        <!-- <pre>{{message|json}}</pre> -->
+      </div>
+    }
+  </div>
+</div>

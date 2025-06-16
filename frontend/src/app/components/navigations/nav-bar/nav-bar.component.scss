@@ -1,0 +1,58 @@
+.sidebar-nav {
+  display: flex;
+  flex-direction: column;
+  width: 220px;
+  height: 100vh;
+  padding: 1.5rem;
+  background-color: #f4f4f4;
+  border-right: 1px solid #ddd;
+  box-shadow: 2px 0 5px rgba(0, 0, 0, 0.05);
+  box-sizing: border-box;
+
+  a {
+    display: flex;
+    align-items: center;
+    padding: 0.75rem 1rem;
+    margin-bottom: 0.5rem;
+    text-decoration: none;
+    color: #333;
+    border-radius: 6px;
+    transition: background-color 0.2s ease, color 0.2s ease;
+
+    .icon {
+      margin-right: 0.75rem;
+      font-size: 1.2rem;
+    }
+
+    &:hover {
+      background-color: #e0e0e0;
+    }
+
+    &.active {
+      background-color: #1976d2;
+      color: #fff;
+
+      .icon {
+        color: #fff;
+      }
+    }
+  }
+}
+
+// Optional: responsive collapse (for future mobile support)
+@media (max-width: 768px) {
+  .sidebar-nav {
+    width: 100%;
+    height: auto;
+    flex-direction: row;
+    flex-wrap: wrap;
+    padding: 1rem;
+    border-right: none;
+    border-bottom: 1px solid #ddd;
+
+    a {
+      flex: 1 1 45%;
+      justify-content: center;
+    }
+  }
+}

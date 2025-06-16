@@ -1,0 +1,21 @@
+<nav class="sidebar-nav">
+  <a
+    *ngFor="let item of navItems"
+    [routerLink]="item.route"
+    routerLinkActive="active"
+    [routerLinkActiveOptions]="{ exact: true }"
+  >
+    <span class="icon">{{ item.icon }}</span>
+    {{ item.label }}
+  </a>
+
+  <a *ngIf="!isLoggedIn" routerLink="/login" routerLinkActive="active">
+    <span class="icon">🔐</span>
+    Login
+  </a>
+
+  <a *ngIf="isLoggedIn" (click)="logout()">
+    <span class="icon">🚪</span>
+    Logout
+  </a>
+</nav>
