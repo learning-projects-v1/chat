@@ -1,5 +1,5 @@
-<div class="chat-container">
-  <div class="chat-header">
+<div class="chat-thread-container">
+  <div class="chat-thread-header">
     <h2>Chat</h2>
   </div>
 
@@ -7,18 +7,38 @@
     <div
       *ngFor="let msg of chats"
       [class.mine]="msg.senderId === currentUserId"
-      class="chat-bubble"
+      class="chat-container"
     >
-      <h4>{{userNameMap[msg.senderId]}}</h4>
-      <div class="text">{{ msg.content }}</div>
-      <div class="timestamp">{{ msg.sentAt | date: 'MMM d, h:mm a' }}</div>
+      <div>
+        <div *ngIf="msg.senderId !== currentUserId" class="sender-name">
+          {{ userNameMap[msg.senderId] }}
+        </div>
+        <div class="chat-bubble">
+          <!-- <h4 *ngIf="msg.senderId !== currentUserId">
+            {{ userNameMap[msg.senderId] }}
+          </h4> -->
+          <div class="text">{{ msg.content }}</div>
+          <div class="timestamp">{{ msg.sentAt | date : "MMM d, h:mm a" }}</div>
+        </div>
+
+        <!-- Action buttons (shown on hover) -->
+        <!-- <div class="chat-actions">
+          <button (click)="replyTo(msg)">Reply</button>
+          <button (click)="reactTo(msg)">React</button>
+          <button (click)="deleteMsg(msg)">Delete</button>
+        </div> -->
+      </div>
     </div>
+
     <div #scrollAnchor></div>
   </div>
 
   <div class="chat-input">
-    <input [(ngModel)]="newMessage" (keydown.enter)="sendMessage()" placeholder="Type your message..." />
-    <button (click)="sendMessage()">Send</button>
+    <input
+      [(ngModel)]="newMessage"
+      (keydown.enter)="onSendMessage()"
+      placeholder="Type your message..."
+    />
+    <button (click)="onSendMessage()">Send</button>
   </div>
-
 </div>

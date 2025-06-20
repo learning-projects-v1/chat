@@ -67,7 +67,29 @@ export class ChatThreadComponent implements OnInit, AfterViewInit,OnDestroy {
       });
   }
 
-  sendMessage(): void {
+  //html
+  onSendReplyMessage(){
+    this.sendMessage();
+  }
+
+  //html
+  onSendMessage(){
+    this.sendMessage();
+  }
+
+  replyTo(event: any){
+
+  }
+
+  reactTo(event: any){
+
+  }
+
+  deleteMsg(event: any){
+
+  }
+
+  sendMessage(replyToMessageId = ""): void {
     if (!this.newMessage.trim()) return;
     const messagePayload: Chat = {
       receiverId: this.friendId,
@@ -76,12 +98,14 @@ export class ChatThreadComponent implements OnInit, AfterViewInit,OnDestroy {
       senderId: this.currentUserId,
       sentAt: new Date(),
     };
-
+    if(replyToMessageId){
+      messagePayload.replyToMessageId = replyToMessageId;
+    }
+    
     this.httpservice.sendMessage(messagePayload).subscribe(() => {
       this.newMessage = '';
       this.chats.push(messagePayload);
       setTimeout(() => this.scrollToBottom(), 50);
-      
     });
   }
 
