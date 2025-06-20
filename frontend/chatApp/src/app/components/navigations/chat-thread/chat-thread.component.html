@@ -9,25 +9,22 @@
       [class.mine]="msg.senderId === currentUserId"
       class="chat-container"
     >
-      <div>
-        <div *ngIf="msg.senderId !== currentUserId" class="sender-name">
-          {{ userNameMap[msg.senderId] }}
-        </div>
-        <div class="chat-bubble">
-          <!-- <h4 *ngIf="msg.senderId !== currentUserId">
-            {{ userNameMap[msg.senderId] }}
-          </h4> -->
-          <div class="text">{{ msg.content }}</div>
-          <div class="timestamp">{{ msg.sentAt | date : "MMM d, h:mm a" }}</div>
-        </div>
-
-        <!-- Action buttons (shown on hover) -->
-        <!-- <div class="chat-actions">
-          <button (click)="replyTo(msg)">Reply</button>
-          <button (click)="reactTo(msg)">React</button>
-          <button (click)="deleteMsg(msg)">Delete</button>
-        </div> -->
+      <div *ngIf="msg.senderId !== currentUserId" class="sender-name">
+        {{ userNameMap[msg.senderId] }}
       </div>
+
+
+      <div class="chat-bubble">
+        <div class="text">{{ msg.content }}</div>
+        <div class="timestamp">{{ msg.sentAt | date : "MMM d, h:mm a" }}</div>
+      </div>
+
+      <!-- Action buttons (shown on hover) -->
+      <!-- <div class="chat-actions">
+        <button (click)="replyTo(msg)">Reply</button>
+        <button (click)="reactTo(msg)">React</button>
+        <button (click)="deleteMsg(msg)">Delete</button>
+      </div> -->
     </div>
 
     <div #scrollAnchor></div>

@@ -32,7 +32,8 @@
   .chat-container {
     display: flex;
     width: 100%;
-
+    flex-direction: row;
+    align-items: center;
     // Incoming message (not mine)
     &:not(.mine) {
       justify-content: flex-end;
@@ -40,11 +41,7 @@
       .chat-bubble {
         background-color: #f0f0f0;
         border-top-right-radius: 0;
-        margin-left: auto;
-      }
-
-      .chat-actions {
-        justify-content: flex-end;
+        margin-left: 0.5rem;
       }
     }
 
@@ -57,28 +54,39 @@
         border-top-left-radius: 0;
       }
 
-      .chat-actions {
-        justify-content: flex-start;
-      }
+      // .chat-actions {
+      //   order: 2; // show after bubble
+      //   margin-left: 0.5rem;
+      //   height: 1.5rem;
+      //   visibility: hidden;
+      //   opacity: 0;
+      //   display: flex;
+      //   gap: 0.4rem;
+      //   transition: opacity 0.2s ease, visibility 0.2s ease;
+      // }
+
+      // &:hover .chat-actions {
+      //   visibility: visible;
+      //   opacity: 1;
+      // }
     }
 
-    > div {
-      display: flex;
-      flex-direction: row;
-      align-items: center;
-      gap: 0.5rem;
-    }
+    // > div {
+    //   display: flex;
+    //   flex-direction: row;
+    //   align-items: center;
+    //   gap: 0.5rem;
+    // }
   }
 
   .chat-bubble {
     max-width: 70%;
-    width: fit-content;
     padding: 0.75rem 1rem;
     border-radius: 1rem;
     display: flex;
-    flex-direction: column;
+    flex-direction: row;
     position: relative;
-
+    gap: .75rem;
     h4 {
       font-size: 0.85rem;
       color: #333;
@@ -91,40 +99,11 @@
     }
 
     .timestamp {
-      font-size: 0.75rem;
+      font-size: 0.75rem; 
       color: #888;
       text-align: right;
-      margin-top: 0.25rem;
+      margin-top: 0.25rem;  
     }
-  }
-
-  .chat-actions {
-    display: none;
-    gap: 0.4rem;
-
-    button {
-      background: none;
-      border: none;
-      font-size: 0.75rem;
-      color: #666;
-      padding: 0.2rem 0.4rem;
-      border-radius: 0.5rem;
-      cursor: pointer;
-      transition: background-color 0.2s ease;
-
-      &:hover {
-        background-color: rgba(0, 0, 0, 0.05);
-        color: #000;
-      }
-
-      &:active {
-        background-color: rgba(0, 0, 0, 0.1);
-      }
-    }
-  }
-
-  .chat-container:hover .chat-actions {
-    display: flex;
   }
 
   .chat-input {
@@ -165,7 +144,6 @@
 }
 
 .sender-name {
-  margin: 0 0 0.25rem auto; // right-aligned like the message
   font-size: 0.8rem;
   color: #555;
   font-weight: 600;
@@ -173,4 +151,7 @@
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+
+  // Align with the bubble (right-aligned for incoming)
+  margin-left: auto;
 }
