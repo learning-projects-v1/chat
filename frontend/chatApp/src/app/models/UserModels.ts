@@ -14,13 +14,13 @@ export interface Message {
   replyToContent?: string;
 }
 
-export interface LatestMessage {
-  friendId: string,
-  friendUsername: string,
-  content: string,
-  sentAt: Date,
-  messageSenderId: string
-}
+// export interface LatestMessage {
+//   friendId: string,
+//   friendUsername: string,
+//   content: string,
+//   sentAt: Date,
+//   messageSenderId: string
+// }
 
 export interface Chat {
   id?: string,
@@ -41,4 +41,14 @@ export interface FriendInfo {
 export interface ChatThread{
   friendInfo: FriendInfo,
   chats: Chat[]
+}
+
+export interface ChatThreadPreview{
+  friendInfo: FriendInfo,
+  chat: Chat
+}
+
+export interface IncomingMessageNotification{
+  friendInfo: FriendInfo,
+  chat: Chat
 }

@@ -1,0 +1,23 @@
+<div class="messages-container">
+  <h2>Chats</h2>
+
+
+  <div class="card-list-vertical">
+    @if(messagePreviews && messagePreviews.length > 0){
+      @for(messagePreview of messagePreviews; track messagePreview.friendInfo.id){
+      <div class="card" (click)="goToChat(messagePreview.friendInfo.id)">
+        <div class="avatar">{{ messagePreview.friendInfo.username}}</div>
+
+        <div class="info">
+          <div class="name">{{ messagePreview.friendInfo.username }}</div>
+          <div class="mutual">{{ messagePreview.chat.content }}</div>
+          <div class="time">{{ messagePreview.chat.sentAt| date: 'MMM d, h:mm a'  }}</div>
+        </div>
+
+        <!-- <pre>{{message|json}}</pre> -->
+      </div>
+
+      }
+    }
+  </div>
+</div>

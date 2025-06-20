@@ -13,8 +13,9 @@ export const appConfig: ApplicationConfig = {
     provideZoneChangeDetection({ eventCoalescing: true }), provideRouter(routes),
     provideHttpClient(withInterceptorsFromDi()),
     provideToastr({
-      positionClass: 'toast-top-left',
+      positionClass: 'toast-top-right',
       timeOut: 5000,
+      toastClass: 'ngx-toastr'
     }),
     provideAnimationsAsync(),
     {provide: HTTP_INTERCEPTORS, useClass: AuthInterceptor, multi: true}

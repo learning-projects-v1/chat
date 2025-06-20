@@ -1,0 +1,50 @@
+// @import 'ngx-toastr/toastr.css';
+
+html, body {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  overflow: hidden; // 🔥 THIS stops full-page scroll
+}
+
+/* styles.scss */
+
+.custom-toast {
+  background-color: #1e1e2f !important;
+  color: #f0f0f0 !important;
+  font-family: 'Segoe UI', sans-serif;
+  border-left: 6px solid #4caf50; /* success green stripe */
+  padding: 16px !important;
+  border-radius: 12px !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+/* Title and message styling */
+.custom-toast .toast-title {
+  font-weight: bold;
+  font-size: 16px;
+  color: #ffffff;
+}
+
+.custom-toast .toast-message {
+  font-size: 14px;
+  margin-top: 4px;
+  color: #dddddd;
+}
+
+/* Type-specific accent colors */
+.toast-success.custom-toast {
+  border-left-color: #4caf50 !important;
+}
+
+.toast-error.custom-toast {
+  border-left-color: #f44336 !important;
+}
+
+.toast-warning.custom-toast {
+  border-left-color: #ff9800 !important;
+}
+
+.toast-info.custom-toast {
+  border-left-color: #2196f3 !important;
+}

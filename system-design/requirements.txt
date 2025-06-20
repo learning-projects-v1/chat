@@ -1,0 +1,26 @@
+Functional Requrements:
+1. User A can chat with User B.
+2. User A can add a user with Id/username B as friend
+3. Chat notification
+4. Create group for chat
+5. Can share image
+6. Online status
+
+Non Functional Requirements:
+1. High availabilty
+2. Encryption
+3. Web Sockets
+4. Low latency
+
+Features
+1. Load connected users
+2. Add someone as friend
+3. Confirm friend
+4. send message to a friend
+5. create group
+6. Notification
+7. Online status
+8. Message reply
+9. React to message
+10. online status
+11. notification

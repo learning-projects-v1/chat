@@ -1,5 +1,6 @@
 ﻿using ChatApp.Application.DTOs;
 using ChatApp.Application.Interfaces;
+using ChatApp.Domain.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
@@ -53,22 +54,33 @@ public class MessagesController: ControllerBase
 
 
     [HttpPost("send")]
-    public async Task SendMessage([FromBody] ChatDto payload)
+    public async Task SendMessage([FromBody] ChatDto chatDto)
     {
-        var userId = Guid.Parse(User.FindFirst(ClaimTypes.Name)?.Value);
-        var chatMessage = new Domain.Models.Message()
+        var message = new Message()
         {
-            Content = payload.Content,
-            IsSeen = false,
-            ReceiverId = payload.ReceiverId,
-            SenderId = userId,
-            ReplyToMessageId = payload.ReplyToMessageId,
-            SentAt = payload.SentAt,
-            
+            Content = chatDto.Content,
+            Id = chatDto.Id,
+            IsSeen = chatDto.IsSeen,
+            ReceiverId = chatDto.ReceiverId,
+            ReplyToMessageId = chatDto.ReplyToMessageId,
+            SentAt = chatDto.SentAt,
+            SenderId = chatDto.SenderId
+        };
+        var userId = Guid.Parse(User.FindFirst(ClaimTypes.Name)?.Value);
+        var friendinfo = await _userRepository.GetByIdAsync(chatDto.ReceiverId);
+        var friendInfoDto = new FriendInfoDto()
+        {
+            Id = friendinfo.Id,
+            Username = friendinfo.UserName
+        };
+        var payload = new ChatPreviewDto()
+        {
+            Chat = chatDto,
+            FriendInfo = friendInfoDto
         };
         ///Todo: begin transaction
-        await _messageRepository.AddAsync(chatMessage);
+        await _messageRepository.AddAsync(message);
         await _unitOfWork.SaveChangesAsync();
-        await _realTimeNotifier.NotifyMessage(payload.ReceiverId, payload);
+        await _realTimeNotifier.NotifyMessage(message.ReceiverId, payload);
     }
 }

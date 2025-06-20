@@ -14,6 +14,6 @@ export interface LoginRequest{
 export interface UserInfo{
     FullName?: string,
     Email: string,
-    UserName: string,
+    Username: string,
     UserId: string
 }

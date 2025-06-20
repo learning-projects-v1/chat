@@ -1,0 +1,22 @@
+Api endpoints:
+
+auth:
+1. Post api/auth/register - {password, email}
+2. Post api/auth/login - {email, password}
+
+Friendship:
+1. Post api/friends/requests - {receiver_id}
+2. Post api/friends/{id}/accept- {id}
+3. Get api/friends - {}
+4. Get api/friends/requests - {}
+5. Post api/friends/{id}/reject - {id}
+5. Delete api/friends/:friendId
+8. load_messages(sender_id, receiver_id)
+9. send_message(sender_id, receiver_id, message)
+
+Message:
+- Post api/Messages/send - {chatDto} -- send message
+- Get api/Messages/thread/:friendId -- get messages in a thread
+
+ChatOverview:
+- Get api/ChatOverview -- gets chat previews of each friend

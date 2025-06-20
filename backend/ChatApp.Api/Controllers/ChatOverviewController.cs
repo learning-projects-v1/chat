@@ -31,24 +31,46 @@ public class ChatOverviewController: ControllerBase
     
         var latestMessages = await _messageRepository.GetLatestMessages(userId);
         var latestMessagesDict = latestMessages.ToDictionary(m => m.SenderId == userId ? m.ReceiverId : m.SenderId, m => m);
-        var results = new List<LatestMessageDto>();
+        var results = new List<ChatPreviewDto>();
 
         foreach(var friend in friends)
         {
             latestMessagesDict.TryGetValue(friend.Id, out var message);
-            
-            var latestMessageDto = new LatestMessageDto()
+            if(message == null)
             {
-                FriendId = friend.Id,
-                FriendUsername = friend.UserName,
-                Content = message?.Content ?? "No messages yet",
-                MessageSenderId = message?.SenderId,
-                SentAt = message?.SentAt ?? DateTime.MinValue
+                message = new()
+                {
+                    Content = "No messages yet",
+                    Id = Guid.NewGuid(),
+                    SenderId = Guid.Empty,
+                    ReceiverId = userId,
+                    IsSeen = false,
+                    SentAt = DateTime.MinValue,
+                };
+            }
+            var chatDto = new ChatDto()
+            {
+                Id = message.Id,
+                Content = message.Content ?? "No messages yet",
+                SentAt = message.SentAt,
+                IsSeen = false,
+                ReceiverId = message.ReceiverId,
+                SenderId = message.SenderId
             };
 
-            results.Add(latestMessageDto);
+            var friendInfoDto = new FriendInfoDto()
+            {
+                Id = friend.Id,
+                Username = friend.UserName,
+            };
+
+            results.Add(new ChatPreviewDto()
+            {
+                Chat = chatDto,
+                FriendInfo = friendInfoDto,
+            });
         }
-        results = results.OrderByDescending(r => r.SentAt).ToList();
+        results = results.OrderByDescending(r => r.Chat.SentAt).ToList();
         return Ok(results);
     }
 }

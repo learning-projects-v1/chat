@@ -4,7 +4,7 @@ import { environment } from "../../environments/environment";
 import { LoginRequest, RegisterRequest } from "../../models/AuthModels";
 import { apiEndpoints } from "../api-endpoints";
 import { Observable } from "rxjs";
-import { Chat, ChatThread, LatestMessage, User } from "../../models/UserModels";
+import { Chat, ChatThread, ChatThreadPreview, User } from "../../models/UserModels";
 
 @Injectable({providedIn: "root"})
 export class HttpClientService{   
@@ -53,7 +53,7 @@ export class HttpClientService{
     }
 
     getLatestMessages(){
-        return this.http.get<LatestMessage[]>(apiEndpoints.LatestMessages);
+        return this.http.get<ChatThreadPreview[]>(apiEndpoints.LatestMessages);
     }
  
     getChatHistory(friendId: string) {

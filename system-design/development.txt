@@ -1,0 +1,30 @@
+
+
+#todo:
+
+#features:
+reply feature
+react feature
+notification on chat preview on new message
+notification on connections on update
+seen/unseen
+send image/txt file etc
+update profile pic
+group chat
+optimize when showing a long chat history
+pagination on connections tab
+
+#techs/tools
+testing
+graphql
+message broker
+containarize
+multiple api server
+multiple db, db technologies
+deploy
+
+#maybe
+search on message
+audio call
+send anonymous message
+setting for whether to take anonymous message

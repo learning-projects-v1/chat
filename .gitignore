@@ -62,3 +62,9 @@ frontend/dist/
 frontend/.angular/
 frontend/.env
 frontend/.env.*
+
+frontend/chatApp/node_modules/
+frontend/chatApp/dist/
+frontend/chatApp/.angular/
+frontend/chatApp/.env
+frontend/chatApp/.env.*

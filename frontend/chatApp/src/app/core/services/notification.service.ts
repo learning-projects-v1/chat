@@ -2,7 +2,7 @@
 import { Injectable } from '@angular/core';
 import { apiEndpoints } from '../api-endpoints';
 import { BehaviorSubject, Subject } from 'rxjs';
-import { Chat, ChatThread, User } from '../../models/UserModels';
+import { Chat, ChatThread, IncomingMessageNotification, User } from '../../models/UserModels';
 import { FriendRequestReceivedResponse } from '../../models/ResponseModels';
 import { GlobalConstants } from '../constants';
 
@@ -13,7 +13,7 @@ export class NotificationService {
   private friendRequestReceivedSource = new Subject<FriendRequestReceivedResponse>();
   friendRequestReceived$ = this.friendRequestReceivedSource.asObservable();
 
-  private messageReceivedSource = new Subject<Chat>();
+  private messageReceivedSource = new Subject<IncomingMessageNotification>();
   messageReceived$ = this.messageReceivedSource.asObservable();
 
   connect(token: string, userId: string) {
@@ -35,7 +35,7 @@ export class NotificationService {
       return this.friendRequestReceivedSource.next(payload);
     });
 
-    this.hubConnection.on(GlobalConstants.MessageReceived, (payload: Chat) => {
+    this.hubConnection.on(GlobalConstants.MessageReceived, (payload: IncomingMessageNotification) => {
       return this.messageReceivedSource.next(payload);
     });
   }

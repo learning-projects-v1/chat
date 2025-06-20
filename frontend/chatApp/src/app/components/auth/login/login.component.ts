@@ -62,11 +62,11 @@ export class LoginComponent {
             this.httpService.setAccessToken(res?.accessToken ?? '');
             this.userService.setUserInfo({
               Email: res?.email,
-              UserName: res?.username,
+              Username: res?.username,
               UserId: res?.userId,
             });
             this.notificationService.connect(res?.accessToken, res?.userId);
-            this.router.navigate(['/home']);
+            this.router.navigate(['/connections']);
           },
           error: (err) => {
             console.error('Login error:', err.message);

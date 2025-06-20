@@ -50,7 +50,7 @@ export class ConnectionsComponent implements OnInit, OnDestroy {
     if(this.sentRequests.has(receiverId)) return;
     this.httpService.sendFriendRequest(receiverId).subscribe({
       next: (res) => {
-        this.toastr.show('Friend request sent!');
+        this.toastr.success('Friend request sent!');
         this.sentRequests.add(receiverId);  
       },
       error: (err) => {
@@ -92,6 +92,10 @@ export class ConnectionsComponent implements OnInit, OnDestroy {
     return this.sentRequests.has(id);
   }
 
+  test(){
+    this.toastr.show("HSDFDSF");
+    this.toastr.success("successssssss!");
+  }
   ngOnDestroy(): void {
     this.ngUnsubscribe.next();
     this.ngUnsubscribe.complete();

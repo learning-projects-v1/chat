@@ -5,7 +5,7 @@
       <div class="avatar">{{ user.userName.charAt(0) }}</div>
       <div class="info">
         <div class="name">{{ user.userName }}</div>
-        <!-- <div class="mutual">{{ user.mutualFriends }} mutual friends</div> -->
+
         <div class="actions">
           <button class="accept" (click)="acceptRequest(user.id)">
             Accept
@@ -29,7 +29,7 @@
         <div class="actions">
           <button
             class="send"
-            [disabled]="sentRequests.has(user.id)"
+            [disabled]="isRequestSent(user.id)"
             (click)="sendRequest(user.id)"
             [ngClass]="{
               'send-btn': !isRequestSent(user.id),
@@ -44,3 +44,5 @@
   </div>
   <ng-template #noSuggestions><p>No suggestions at the moment.</p></ng-template>
 </div>
+
+<button (click)="test()"> CLICK </button>

@@ -5,7 +5,7 @@
 
   <div class="chat-messages">
     <div
-      *ngFor="let msg of messages"
+      *ngFor="let msg of chats"
       [class.mine]="msg.senderId === currentUserId"
       class="chat-bubble"
     >
@@ -13,10 +13,12 @@
       <div class="text">{{ msg.content }}</div>
       <div class="timestamp">{{ msg.sentAt | date: 'MMM d, h:mm a' }}</div>
     </div>
+    <div #scrollAnchor></div>
   </div>
 
   <div class="chat-input">
     <input [(ngModel)]="newMessage" (keydown.enter)="sendMessage()" placeholder="Type your message..." />
     <button (click)="sendMessage()">Send</button>
   </div>
+
 </div>

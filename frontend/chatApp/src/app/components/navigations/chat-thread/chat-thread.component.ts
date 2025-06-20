@@ -1,10 +1,10 @@
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import { AfterViewInit, Component, ElementRef, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { HttpClientService } from '../../../core/services/http-client.service';
 import { UserService } from '../../../core/services/auth.service';
 import { UserInfo } from '../../../models/AuthModels';
 import { CommonModule } from '@angular/common';
-import { Chat, FriendInfo, User } from '../../../models/UserModels';
+import { Chat, ChatThread, ChatThreadPreview, FriendInfo, IncomingMessageNotification, User } from '../../../models/UserModels';
 import { FormsModule } from '@angular/forms';
 import { NotificationService } from '../../../core/services/notification.service';
 import { Subject, takeUntil } from 'rxjs';
@@ -16,12 +16,13 @@ import { ToastrService } from 'ngx-toastr';
   styleUrls: ['./chat-thread.component.scss'],
   imports: [CommonModule, FormsModule],
 })
-export class ChatThreadComponent implements OnInit, OnDestroy {
+export class ChatThreadComponent implements OnInit, AfterViewInit,OnDestroy {
+  @ViewChild('scrollAnchor') private scrollAnchor!: ElementRef;
   friendId!: string;
   currentUserId!: string;
   currentUserInfo!: UserInfo;
   friendInfo!: FriendInfo;
-  messages: Chat[] = [];
+  chats: Chat[] = [];
   newMessage = '';
   ngUnsubscribe = new Subject<void>();
   userNameMap: {[key: string]: string} = {}
@@ -34,19 +35,25 @@ export class ChatThreadComponent implements OnInit, OnDestroy {
     private toastr: ToastrService
   ) {}
 
+
   ngOnInit(): void {
     this.friendId = this.route.snapshot.paramMap.get('friendId')!;
     this.loadMessages();
     this.notificationService.messageReceived$
       .pipe(takeUntil(this.ngUnsubscribe))
-      .subscribe((chat: Chat) => {
-        this.messages.push(chat);
+      .subscribe((incomingMessage: IncomingMessageNotification) => {
+        this.chats.push(incomingMessage.chat);
+        setTimeout(() => this.scrollToBottom(), 50);
         //test purpose
         this.toastr.show("Message received");
       });
 
     this.currentUserInfo = this.userService.getUserInfo();
     this.currentUserId = this.currentUserInfo.UserId;
+  } 
+
+  ngAfterViewInit(): void {
+    setTimeout(() => this.scrollToBottom(), 50);
   }
 
   loadMessages(): void {
@@ -54,8 +61,9 @@ export class ChatThreadComponent implements OnInit, OnDestroy {
       .getChatHistory(this.friendId)
       .pipe(takeUntil(this.ngUnsubscribe))
       .subscribe((data) => {
-        this.messages = data?.chats;
+        this.chats = data?.chats;
         this.friendInfo = data?.friendInfo;
+        this.mapUserNames();
       });
   }
 
@@ -71,17 +79,25 @@ export class ChatThreadComponent implements OnInit, OnDestroy {
 
     this.httpservice.sendMessage(messagePayload).subscribe(() => {
       this.newMessage = '';
-      this.messages.push(messagePayload);
-      // this.loadMessages(); // or push the message directly
+      this.chats.push(messagePayload);
+      setTimeout(() => this.scrollToBottom(), 50);
+      
     });
   }
 
   mapUserNames(){
     this.userNameMap = {
-      [this.currentUserId] : this.currentUserInfo.UserName,
+      [this.currentUserId] : this.currentUserInfo.Username,
       [this.friendId]: this.friendInfo.username
     }
   }
+
+  private scrollToBottom(): void {
+    if (this.scrollAnchor) {
+      this.scrollAnchor.nativeElement.scrollIntoView({ behavior: 'smooth' });
+    }
+  }
+
   ngOnDestroy(): void {
     this.ngUnsubscribe.next();
     this.ngUnsubscribe.complete();

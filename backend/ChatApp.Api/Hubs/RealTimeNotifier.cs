@@ -18,7 +18,7 @@ public class RealTimeNotifier : IRealTimeNotifier
         await _hubContext.Clients.Groups(ReceiverId).SendAsync(GlobalConstants.FriendRequestReceived, payload);
     }
 
-    public async Task NotifyMessage(Guid ReceiverId, ChatDto payload)
+    public async Task NotifyMessage(Guid ReceiverId, ChatPreviewDto payload)
     {
         await _hubContext.Clients.Groups(ReceiverId.ToString()).SendAsync(GlobalConstants.MessageReceived, payload);
     }
