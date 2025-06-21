@@ -54,12 +54,11 @@ public class MessagesController: ControllerBase
 
 
     [HttpPost("send")]
-    public async Task SendMessage([FromBody] ChatDto chatDto)
+    public async Task<IActionResult> SendMessage([FromBody] ChatDto chatDto)
     {
         var message = new Message()
         {
             Content = chatDto.Content,
-            Id = chatDto.Id,
             IsSeen = chatDto.IsSeen,
             ReceiverId = chatDto.ReceiverId,
             ReplyToMessageId = chatDto.ReplyToMessageId,
@@ -82,5 +81,7 @@ public class MessagesController: ControllerBase
         await _messageRepository.AddAsync(message);
         await _unitOfWork.SaveChangesAsync();
         await _realTimeNotifier.NotifyMessage(message.ReceiverId, payload);
+        chatDto.Id = message.Id;
+        return Ok(chatDto);
     }
 }

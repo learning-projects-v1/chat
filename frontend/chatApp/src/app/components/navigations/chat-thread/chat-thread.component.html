@@ -9,21 +9,20 @@
       [class.mine]="isSenderMe(msg.senderId)"
       class="chat-container"
     >
-      <!-- @if(!isSenderMe(msg.senderId)){
-      <div class="chat-actions">
-        <button (click)="replyTo(msg)">
-          <i class="fas fa-reply"></i>
-        </button>
-        <button (click)="reactTo(msg)">
-          <i class="fas fa-comment-dots"></i>
-        </button>
-      </div>
-      } -->
 
+    
       <div class="bubble-and-username">
-        <div *ngIf="!isSenderMe(msg.senderId)" class="sender-name">
-          {{ userNameMap[msg.senderId] }}
-        </div>
+        @if(msg.replyToMessageId){
+          <div class="reply-preview">
+            <p class="reply-user"><strong>{{ userNameMap[msg.senderId] }}</strong> replied to <strong>{{getMessageSenderName(msg.replyToMessageId)}}</strong></p>
+            <p class="reply-content">{{ getMessageContent(msg.replyToMessageId) }}</p>
+          </div>
+        }
+        @else if (!isSenderMe(msg.senderId)) {
+          <div class="sender-name">
+            {{ userNameMap[msg.senderId] }}
+          </div>
+        }
         <div class="chat-bubble">
           <div class="text">{{ msg.content }}</div>
           <div class="timestamp">{{ msg.sentAt | date : "MMM d, h:mm a" }}</div>
@@ -42,7 +41,19 @@
     <div #scrollAnchor></div>
   </div>
 
-  <div class="chat-input">
+  @if(replyToMessage){
+  <div class="reply-preview">
+    <div class="reply-header">
+      <p>
+        <strong>Replying to {{ userNameMap[replyToMessage.senderId] }}</strong>
+      </p>
+      <button (click)="cancelReply()"><i class="fas fa-times"></i></button>
+    </div>
+    <p class="reply-text">{{ replyToMessage.content }}</p>
+  </div>
+  }
+
+  <div class="chat-input" #messageInput>
     <input
       [(ngModel)]="newMessage"
       (keydown.enter)="onSendMessage()"

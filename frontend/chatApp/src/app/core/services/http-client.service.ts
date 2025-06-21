@@ -61,7 +61,7 @@ export class HttpClientService{
     }
 
     sendMessage(messagePayload: Chat) {
-        return this.http.post(apiEndpoints.SendMessage, messagePayload);
+        return this.http.post<Chat>(apiEndpoints.SendMessage, messagePayload);
     } 
     
     test(testMessage: string) {
