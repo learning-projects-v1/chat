@@ -3,30 +3,42 @@
     <h2>Chat</h2>
   </div>
 
-  <div class="chat-messages">
+  <div class="all-chat-messages">
     <div
       *ngFor="let msg of chats"
-      [class.mine]="msg.senderId === currentUserId"
+      [class.mine]="isSenderMe(msg.senderId)"
       class="chat-container"
     >
-      <div *ngIf="msg.senderId !== currentUserId" class="sender-name">
-        {{ userNameMap[msg.senderId] }}
+      <!-- @if(!isSenderMe(msg.senderId)){
+      <div class="chat-actions">
+        <button (click)="replyTo(msg)">
+          <i class="fas fa-reply"></i>
+        </button>
+        <button (click)="reactTo(msg)">
+          <i class="fas fa-comment-dots"></i>
+        </button>
+      </div>
+      } -->
+
+      <div class="bubble-and-username">
+        <div *ngIf="!isSenderMe(msg.senderId)" class="sender-name">
+          {{ userNameMap[msg.senderId] }}
+        </div>
+        <div class="chat-bubble">
+          <div class="text">{{ msg.content }}</div>
+          <div class="timestamp">{{ msg.sentAt | date : "MMM d, h:mm a" }}</div>
+        </div>
       </div>
 
-
-      <div class="chat-bubble">
-        <div class="text">{{ msg.content }}</div>
-        <div class="timestamp">{{ msg.sentAt | date : "MMM d, h:mm a" }}</div>
+      <div class="chat-actions" [class.mine]="isSenderMe(msg.senderId)">
+        <button (click)="replyTo(msg)" title="Reply">
+          <i class="fas fa-reply"></i>
+        </button>
+        <button (click)="reactTo(msg)" title="React">
+          <i class="fas fa-comment-dots"></i>
+        </button>
       </div>
-
-      <!-- Action buttons (shown on hover) -->
-      <!-- <div class="chat-actions">
-        <button (click)="replyTo(msg)">Reply</button>
-        <button (click)="reactTo(msg)">React</button>
-        <button (click)="deleteMsg(msg)">Delete</button>
-      </div> -->
     </div>
-
     <div #scrollAnchor></div>
   </div>
 

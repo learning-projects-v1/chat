@@ -122,6 +122,10 @@ export class ChatThreadComponent implements OnInit, AfterViewInit,OnDestroy {
     }
   }
 
+  isSenderMe(id: string){
+    return this.currentUserId == id;
+  }
+  
   ngOnDestroy(): void {
     this.ngUnsubscribe.next();
     this.ngUnsubscribe.complete();
