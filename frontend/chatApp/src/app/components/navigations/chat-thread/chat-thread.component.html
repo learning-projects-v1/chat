@@ -9,19 +9,21 @@
       [class.mine]="isSenderMe(msg.senderId)"
       class="chat-container"
     >
-
-    
       <div class="bubble-and-username">
         @if(msg.replyToMessageId){
-          <div class="reply-preview">
-            <p class="reply-user"><strong>{{ userNameMap[msg.senderId] }}</strong> replied to <strong>{{getMessageSenderName(msg.replyToMessageId)}}</strong></p>
-            <p class="reply-content">{{ getMessageContent(msg.replyToMessageId) }}</p>
-          </div>
-        }
-        @else if (!isSenderMe(msg.senderId)) {
-          <div class="sender-name">
-            {{ userNameMap[msg.senderId] }}
-          </div>
+        <div class="reply-preview">
+          <p class="reply-user">
+            <strong>{{ userNameMap[msg.senderId] }}</strong> replied to
+            <strong>{{ getMessageSenderName(msg.replyToMessageId) }}</strong>
+          </p>
+          <p class="reply-content">
+            {{ getMessageContent(msg.replyToMessageId) }}
+          </p>
+        </div>
+        } @else if (!isSenderMe(msg.senderId)) {
+        <div class="sender-name">
+          {{ userNameMap[msg.senderId] }}
+        </div>
         }
         <div class="chat-bubble">
           <div class="text">{{ msg.content }}</div>
@@ -53,11 +55,13 @@
   </div>
   }
 
-  <div class="chat-input" #messageInput>
+  <div class="chat-input">
     <input
       [(ngModel)]="newMessage"
       (keydown.enter)="onSendMessage()"
       placeholder="Type your message..."
+      #messageInput
+      maxlength="500"
     />
     <button (click)="onSendMessage()">Send</button>
   </div>

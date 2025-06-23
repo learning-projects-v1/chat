@@ -2,6 +2,7 @@ import {
   AfterViewInit,
   Component,
   ElementRef,
+  HostListener,
   OnDestroy,
   OnInit,
   ViewChild,
@@ -71,6 +72,7 @@ export class ChatThreadComponent implements OnInit, AfterViewInit, OnDestroy {
 
   ngAfterViewInit(): void {
     setTimeout(() => this.scrollToBottom(), 50);
+    this.focusInput();
   }
 
   loadMessages(): void {
@@ -99,7 +101,28 @@ export class ChatThreadComponent implements OnInit, AfterViewInit, OnDestroy {
 
     setTimeout(() => {
       this.messageInputRef?.nativeElement.focus();
-    }, .5);
+    }, 0.5);
+  }
+
+  focusInput() {
+    // Timeout ensures focus after view updates
+    setTimeout(() => {
+      this.messageInputRef?.nativeElement?.focus();
+    });
+  }
+
+  @HostListener("document:keydown", ["$event"])
+  onGlobalKeydown(event: KeyboardEvent) {
+    const input = this.messageInputRef?.nativeElement;
+    const charCode = event.key.charCodeAt(0);
+    const isTextChar =
+      event.key.length === 1 &&
+      (charCode >= 65 && charCode <= 90) ||
+      (charCode >= 97 && charCode <= 122);
+
+    if (isTextChar && document.activeElement !== input) {
+      input?.focus();
+    }
   }
 
   cancelReply() {
@@ -129,7 +152,7 @@ export class ChatThreadComponent implements OnInit, AfterViewInit, OnDestroy {
       .sendMessage(messagePayload)
       .subscribe((sentMessage: Chat) => {
         this.newMessage = "";
-        this.chats.push(messagePayload);
+        this.chats.push(sentMessage);
         setTimeout(() => this.scrollToBottom(), 50);
       });
   }

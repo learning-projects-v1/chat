@@ -82,6 +82,6 @@ public class MessagesController: ControllerBase
         await _unitOfWork.SaveChangesAsync();
         await _realTimeNotifier.NotifyMessage(message.ReceiverId, payload);
         chatDto.Id = message.Id;
-        return Ok(chatDto);
+        return Ok(chatDto); 
     }
 }
