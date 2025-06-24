@@ -35,7 +35,7 @@
         <button (click)="replyTo(msg)" title="Reply">
           <i class="fas fa-reply"></i>
         </button>
-        <button (click)="reactTo(msg)" title="React">
+        <button (click)="showReactionButtons(msg, $event)" title="React">
           <i class="fas fa-comment-dots"></i>
         </button>
       </div>
@@ -65,4 +65,20 @@
     />
     <button (click)="onSendMessage()">Send</button>
   </div>
+
+  @if(reactToMessageId){
+  <div
+    class="reaction-popup"
+    [ngStyle]="{
+      top: reactionPopupPosition.top + 'px',
+      left: reactionPopupPosition.left + 'px'
+    }"
+  >
+    @for(react of reactionModals;track react.class){
+    <button class="reaction-button" [title]="react.title" (click)="reactTo(react)">
+      <i [class]="react.class" [style]="react.style"></i>
+    </button>
+    }
+  </div>
+  }
 </div>

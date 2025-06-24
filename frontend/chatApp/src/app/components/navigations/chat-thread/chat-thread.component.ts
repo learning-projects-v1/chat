@@ -1,5 +1,6 @@
 import {
   AfterViewInit,
+  ChangeDetectorRef,
   Component,
   ElementRef,
   HostListener,
@@ -25,6 +26,12 @@ import { NotificationService } from "../../../core/services/notification.service
 import { Subject, takeUntil } from "rxjs";
 import { ToastrService } from "ngx-toastr";
 
+interface reactionModal {
+  class: string;
+  title: string;
+  style: string;
+}
+
 @Component({
   selector: "app-chat",
   templateUrl: "./chat-thread.component.html",
@@ -45,14 +52,29 @@ export class ChatThreadComponent implements OnInit, AfterViewInit, OnDestroy {
   userNameMap: { [key: string]: string } = {};
   isReplying: boolean = false;
   replyToMessage: Chat | null = null;
-
+  reactToMessageId: string| null = "";
+  reactionPopupPosition = { top: 0, left: 0 };
+  reactionModals: reactionModal[] = [];
   constructor(
     private route: ActivatedRoute,
     private httpservice: HttpClientService,
     private userService: UserService,
     private notificationService: NotificationService,
-    private toastr: ToastrService
-  ) {}
+    private toastr: ToastrService,
+    private cdRef: ChangeDetectorRef
+  ) {
+    this.reactionModals = [
+      { class: "fas fa-thumbs-up", title: "Like", style: "color:#3b82f6;" },
+      { class: "fas fa-heart", title: "Love", style: "color:#ef4444;" },
+      { class: "fas fa-face-laugh", title: "Laugh", style: "color:#facc15;" },
+      {
+        class: "fas fa-face-surprise",
+        title: "Surprised",
+        style: "color:#8b5cf6;",
+      },
+      { class: "fas fa-face-sad-tear", title: "Sad", style: "color:#64748b;" },
+    ];
+  }
 
   ngOnInit(): void {
     this.friendId = this.route.snapshot.paramMap.get("friendId")!;
@@ -73,6 +95,7 @@ export class ChatThreadComponent implements OnInit, AfterViewInit, OnDestroy {
   ngAfterViewInit(): void {
     setTimeout(() => this.scrollToBottom(), 50);
     this.focusInput();
+    document.addEventListener("click", this.handleDocumentClick);
   }
 
   loadMessages(): void {
@@ -116,8 +139,7 @@ export class ChatThreadComponent implements OnInit, AfterViewInit, OnDestroy {
     const input = this.messageInputRef?.nativeElement;
     const charCode = event.key.charCodeAt(0);
     const isTextChar =
-      event.key.length === 1 &&
-      (charCode >= 65 && charCode <= 90) ||
+      (event.key.length === 1 && charCode >= 65 && charCode <= 90) ||
       (charCode >= 97 && charCode <= 122);
 
     if (isTextChar && document.activeElement !== input) {
@@ -129,7 +151,9 @@ export class ChatThreadComponent implements OnInit, AfterViewInit, OnDestroy {
     this.replyToMessage = null;
   }
 
-  reactTo(event: any) {}
+  reactTo(event: any) {
+    // this.reactToMessageId = "";
+  }
 
   deleteMsg(event: any) {}
 
@@ -186,7 +210,32 @@ export class ChatThreadComponent implements OnInit, AfterViewInit, OnDestroy {
     return this.currentUserId == id;
   }
 
+  showReactionButtons(msg: Chat, event: MouseEvent) {
+    setTimeout(() => {
+      const modalHeight = 34;
+      const modalWidth = 140;
+      const target = (event.target as HTMLElement).closest("button");
+      const rect = target?.getBoundingClientRect();
+      this.reactionPopupPosition = {
+        top: rect!.top - modalHeight - 5,
+        left: rect!.left - modalWidth / 2,
+      };
+      this.reactToMessageId = msg.id ?? "";
+    });
+    // this.reactToMessageId = msg.id;
+  }
+
+  handleDocumentClick = (event: MouseEvent) => {
+    const target = event.target as HTMLElement;
+    const clickedInside = target.closest('.reaction-popup');
+    if(!clickedInside){
+        this.reactToMessageId = null;
+        this.cdRef.detectChanges();
+    }
+  }
+
   ngOnDestroy(): void {
+    document.removeEventListener("click", this.handleDocumentClick);
     this.ngUnsubscribe.next();
     this.ngUnsubscribe.complete();
   }

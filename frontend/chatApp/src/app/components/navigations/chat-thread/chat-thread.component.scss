@@ -206,4 +206,36 @@
     // // Align with the bubble (right-aligned for incoming)
     // margin-left: auto;
   }
+
+  .reaction-popup {
+    position: fixed;
+    z-index: 9999;
+    padding: 4px 8px; /* Minimal spacing */
+    background: white;
+    border: 1px solid #ccc;
+    border-radius: 0.5rem;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+    display: flex;
+    gap: 0.4rem;
+    // border: 2px solid red !important;
+  }
+
+  .reaction-popup button {
+    background: none;
+    border: none;
+    padding: 4px;
+    line-height: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+  }
+
+  .reaction-popup button:hover {
+    transform: scale(1.3);
+  }
+
+  .reaction-popup button i {
+    font-size: 1rem; /* or 20px */
+  }
 }
