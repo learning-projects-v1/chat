@@ -22,4 +22,9 @@ public class RealTimeNotifier : IRealTimeNotifier
     {
         await _hubContext.Clients.Groups(ReceiverId.ToString()).SendAsync(GlobalConstants.MessageReceived, payload);
     }
+
+    public Task NotifyMessageToAll(Guid threadId, ChatPreviewDto payload)
+    {
+        throw new NotImplementedException();
+    }
 }

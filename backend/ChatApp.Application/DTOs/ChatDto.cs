@@ -11,7 +11,7 @@ public class ChatDto
     public Guid Id { get; set; }
     public string Content { get; set; }
     public Guid SenderId { get; set; }
-    public Guid ReceiverId { get; set; }
+    public Guid ChatThreadId { get; set; }
     public bool IsSeen { get; set; } = false;
     public Guid? ReplyToMessageId { get; set; }
     public DateTime SentAt { get; set; }

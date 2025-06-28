@@ -21,7 +21,7 @@ public class BaseRepository<T> : IRepository<T> where T : class
         _context.Add<T>(entity);
     }
 
-    public async Task<T?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
+    public async Task<T?> GetItemByIdAsync(Guid id, CancellationToken cancellationToken = default)
     {
         return await _context.FindAsync<T>(id);
     }

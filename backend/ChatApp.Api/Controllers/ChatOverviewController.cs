@@ -29,7 +29,7 @@ public class ChatOverviewController: ControllerBase
         var userId = Guid.Parse(User.FindFirst(ClaimTypes.Name)?.Value);
         var friends = await _friendshipRepository.GetAllFriendsAsync(userId);
     
-        var latestMessages = await _messageRepository.GetLatestMessages(userId);
+        var latestMessages = await _messageRepository.GetChatOverviews(userId);
         var latestMessagesDict = latestMessages.ToDictionary(m => m.SenderId == userId ? m.ReceiverId : m.SenderId, m => m);
         var results = new List<ChatPreviewDto>();
 
@@ -58,7 +58,7 @@ public class ChatOverviewController: ControllerBase
                 SenderId = message.SenderId
             };
 
-            var friendInfoDto = new FriendInfoDto()
+            var friendInfoDto = new SenderInfo()
             {
                 Id = friend.Id,
                 Username = friend.UserName,
@@ -67,7 +67,7 @@ public class ChatOverviewController: ControllerBase
             results.Add(new ChatPreviewDto()
             {
                 Chat = chatDto,
-                FriendInfo = friendInfoDto,
+                SenderInfo = friendInfoDto,
             });
         }
         results = results.OrderByDescending(r => r.Chat.SentAt).ToList();

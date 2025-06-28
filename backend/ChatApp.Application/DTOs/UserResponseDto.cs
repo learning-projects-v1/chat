@@ -6,9 +6,10 @@ using System.Threading.Tasks;
 
 namespace ChatApp.Application.DTOs;
 
-public class FriendInfoDto
+public class UserResponseDto
+
 {
     public Guid Id { get; set; }
-    public string Username { get; set; }
-    public string? AvatarUrl { get; set; }
+    public string FullName { get; set; }
+    public string UserName { get; set; }
 }

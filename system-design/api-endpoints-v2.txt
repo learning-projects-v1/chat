@@ -1,0 +1,26 @@
+auth:
+- Post api/auth/register - {password, email}
+- Post api/auth/login - {email, password}
+
+Friendship:
+- post api/friends/friend-requests/create : {dto} -  send friend request
+- patch api/friends/friend-requests/:id : {dto} - update friend request (accept/reject)
+- get api/friends/friend-requests : {} - get all pending friend-requests
+- delete api/friends/:id :{} - delete a friend
+
+Thread:
+- get api/threads/:id : {} - get thread details
+- post api/threads/create :{threadDto} - create thread
+- delete api/threads/:id
+- patch api/threads/update : {threadDto} - update thread details
+- get api/threads/:id/members : {} - get all thread members
+
+Message:
+- get api/threads/:id/messages {} - get all messages in a thread
+- post api/threads/:id/messages/ : {chatDto} - send a message
+- delete api/threads/:id/messages/:id : {} - delete a message
+- patch api/threads/:id/messages/:id : {chatDto} - update a message
+- patch api/threads/:id/messages/:id/seen-status/
+- post api/threads/:id/messages/:id/reacts/create : {reactDto} - react to a message
+- patch api/threads/:id/messages/:id/reacts/:id : {reactDto} - react to a message
+- delete api/threads/:id/messages/:id/reacts/:id {} - delete a react

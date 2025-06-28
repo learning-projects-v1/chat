@@ -1,4 +1,5 @@
-﻿using System;
+﻿using ChatApp.Domain.Models;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -8,6 +9,7 @@ namespace ChatApp.Application.DTOs;
 
 public class ChatPreviewDto
 {
-    public FriendInfoDto FriendInfo { get; set; }
+    public SenderInfo SenderInfo { get; set; }
     public ChatDto Chat { get; set; }
+    public ChatThread Thread { get; set; }
 }

@@ -10,13 +10,14 @@ public class Message
 {
     public Guid Id { get; set; }
     public Guid SenderId { get; set; }
-    public Guid ReceiverId { get; set; }
+    public Guid ChatThreadId { get; set; }
     public bool IsSeen { get; set; }
     public string Content { get; set; }
     public DateTime SentAt { get; set; } = DateTime.UtcNow;
     public Guid? ReplyToMessageId { get; set; }
     // references
     public User Sender { get; set; }
-    public User Receiver { get; set; }
+    //public ChatThread ChatThread { get; set; }
     public Message ReplyToMessage { get; set; }
+    //public ICollection<Reaction> Reactions { get; set; }
 }

@@ -18,7 +18,10 @@ public class ChatAppDbContext : DbContext
     public DbSet<User> Users { get; set; }
     public DbSet<Message> Messages { get; set; }
     public DbSet<Friendship> Friendships { get; set; }
-
+    public DbSet<Reaction> Reactions { get; set; }
+    public DbSet<ChatThread> ChatThreads { get; set; }
+    public DbSet<ChatThreadMember> ChatThreadParticipents { get; set; }
+    public DbSet<MessageSeenStatus> MessageSeenStatuses { get; set; }
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
@@ -36,50 +39,106 @@ public class ChatAppDbContext : DbContext
             entity.Property(u => u.HashedPassword)
                 .IsRequired();
 
+            /// user - friendship
             entity.HasMany(u => u.FriendRequestsSent)
                 .WithOne(f => f.Sender)
                 .HasForeignKey(f => f.SenderId)
                 .OnDelete(DeleteBehavior.Restrict);
 
+            /// user - friendship
             entity.HasMany(u => u.FriendRequestsReceived)
                 .WithOne(f => f.Receiver)
                 .HasForeignKey(f => f.ReceiverId)
                 .OnDelete(DeleteBehavior.Restrict);
 
-            //entity.HasMany(x => x.SentMessages)
-            //    .WithOne(m => m.Sender)
-            //    .HasForeignKey(x => x.SenderId)
-            //    .OnDelete(DeleteBehavior.Restrict);
-
-            //entity.HasMany(u => u.ReceivedMessages)
-            //    .WithOne(m => m.Receiver)
-            //    .HasForeignKey(m => m.ReceiverId)
-            //    .OnDelete(DeleteBehavior.Restrict);
-
         });
+        //    /// user - seen_status
+        //    entity
+        //        .HasOne<MessageSeenStatus>()
+        //        .WithMany()
+        //        .HasForeignKey(x => x.);
+        //});
 
         modelBuilder.Entity<Friendship>()
             .HasIndex(f => new { f.SenderId, f.ReceiverId})
             .IsUnique();
 
-        modelBuilder.Entity<Message>()
-            .HasOne(m => m.ReplyToMessage)
+        modelBuilder.Entity<Message>((entity) =>
+        {
+            /// message - message
+            entity
+                .HasOne(m => m.ReplyToMessage)
+                .WithMany()
+                .HasForeignKey(m => m.ReplyToMessageId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            /// message - user
+            entity
+                .HasOne(m => m.Sender)
+                .WithMany(u => u.SentMessages)
+                .HasForeignKey(m => m.SenderId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            ///message - thread
+            entity
+                .HasOne<ChatThread>()
+                .WithMany()
+                .HasForeignKey(m => m.ChatThreadId)
+                .OnDelete(DeleteBehavior.Restrict);
+        });
+      
+        modelBuilder.Entity<Reaction>((entity) =>
+        {
+            /// message - reaction
+            entity
+            .HasOne<Message>()
             .WithMany()
-            .HasForeignKey(m => m.ReplyToMessageId)
-            .OnDelete(DeleteBehavior.Restrict);
+            .HasForeignKey(m => m.MessageId);
 
-        modelBuilder.Entity<Message>()
-            .HasOne(m => m.Sender)
-            .WithMany(u => u.SentMessages)
-            .HasForeignKey(m => m.SenderId)
-            .OnDelete(DeleteBehavior.Restrict);
+            entity
+                .HasIndex(r => r.MessageId);
 
-        modelBuilder.Entity<Message>()
-            .HasOne(m => m.Receiver)
-            .WithMany(u => u.ReceivedMessages)
-            .HasForeignKey(m => m.ReceiverId)
-            .OnDelete(DeleteBehavior.Restrict);
+            entity
+                .HasIndex(r => new { r.MessageId, r.UserId})
+                .IsUnique();
 
-        //SeedInitialData(modelBuilder);
+
+            entity.Property(r => r.Type)
+                  .IsRequired()
+                  .HasMaxLength(20);
+        });
+
+        //modelBuilder.Entity<ChatThread>(entity =>
+        //{
+
+        //});
+
+        modelBuilder.Entity<ChatThreadMember>(entity =>
+        {
+            entity
+                .HasOne<ChatThread>()
+                .WithMany()
+                .HasForeignKey(c => c.ChatThreadId);
+
+            entity
+                .HasOne<User>()
+                .WithMany()
+                .HasForeignKey(c => c.UserId);
+
+            entity.HasIndex(e => e.UserId);
+            entity.HasIndex(e => e.ChatThreadId);
+
+        });
+
+        modelBuilder.Entity<MessageSeenStatus>(entity =>
+        {
+            entity.HasOne<Message>()
+            .WithMany()
+            .HasForeignKey(m => m.MessageId);
+
+            entity.HasIndex(e => e.MessageId);
+        });
+
+
     }
 }

@@ -8,6 +8,6 @@ namespace ChatApp.Application.DTOs;
 
 public class ChatThreadDto
 {
-    public FriendInfoDto FriendInfo { get; set; }
+    public Dictionary<Guid, UserResponseDto> SenderInfo { get; set; }
     public List<ChatDto> Chats { get; set; }
 }

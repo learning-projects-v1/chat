@@ -10,6 +10,6 @@ namespace ChatApp.Application.Interfaces;
 public interface IMessageRepository : IRepository<Message>
 {
     Task<List<Message>> GetAll(string userId);
-    Task<List<Message>> GetLatestMessages(Guid userId);
-    Task<List<Message>> GetChatHistory(Guid userId, Guid friendId);
+    Task<List<Message>> GetChatOverviews(Guid userId);
+    Task<List<Message>> GetChats(Guid threadId);
 }

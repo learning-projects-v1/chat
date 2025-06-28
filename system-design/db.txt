@@ -8,24 +8,6 @@ username,
 full_name,
 isOnline,
 
-FRIENDSHIP:
-id,
-user_id,
-friend_id,
-string status,
-createdAt
-
-MESSAGE:
-id,
-sender_id,
-receiver_id,
-created_at,
-is_read,
-content,
-// for reply
-replyToMessageId,
-replyMessage
-
 REFRESHTOKEN:
 id,
 userId,
@@ -33,8 +15,46 @@ token,
 createdAt,
 expiresAt,
 
+
+FRIENDSHIP:
+id,
+user_id,
+friend_id,
+status,
+createdAt
+
+MESSAGE:
+id,
+sender_id,
+thread_id,
+created_at,
+content,
+// for reply
+replyToMessageId,
+replyMessage
+
+MeesageSeenStatus:
+id,
+message_id,
+user_id,
+seen_at,
+
+ChatThread:
+id,
+thread_name,
+created_at,
+created_by,
+avatar_url,
+is_group
+
+ChatThreadParticipent:
+id,
+thread_id,
+user_id,
+joined_at,
+
 REACTION:
 id,
 message_id,
 user_id,
-type,
+type, ///title

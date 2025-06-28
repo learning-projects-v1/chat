@@ -50,7 +50,7 @@ public class FriendsController : ControllerBase
         await _friendshipRepository.AddFriendRequestAsync(friendship);
         await _unitOfWork.SaveChangesAsync();
 
-        var sender = await _userRepository.GetByIdAsync(Guid.Parse(senderId));
+        var sender = await _userRepository.GetItemByIdAsync(Guid.Parse(senderId));
         //need transaction here
         if (sender == null) return BadRequest("Sender not found!");
 
