@@ -14,17 +14,20 @@ import { UserService } from "../../../core/services/auth.service";
 import { UserInfo } from "../../../models/AuthModels";
 import { CommonModule } from "@angular/common";
 import {
-  Chat,
+  ChatOverview,
   ChatThread,
   ChatThreadPreview,
-  FriendInfo,
+  UserInfoDto,
   IncomingMessageNotification,
   User,
-} from "../../../models/UserModels";
+  Chat,
+} from "../../../models/Dtos";
 import { FormsModule } from "@angular/forms";
 import { NotificationService } from "../../../core/services/notification.service";
 import { Subject, takeUntil } from "rxjs";
 import { ToastrService } from "ngx-toastr";
+import { RouteConstants } from "../../../core/constants";
+import { FriendInfoService } from "../../../core/global/friend-info.service";
 
 interface reactionModal {
   class: string;
@@ -42,26 +45,30 @@ export class ChatThreadComponent implements OnInit, AfterViewInit, OnDestroy {
   @ViewChild("scrollAnchor") private scrollAnchor!: ElementRef;
   @ViewChild("messageInput") messageInputRef!: ElementRef<HTMLInputElement>;
 
+  threadId: string = "";
   friendId!: string;
   currentUserId!: string;
   currentUserInfo!: UserInfo;
-  friendInfo!: FriendInfo;
+  friendInfoList!: UserInfoDto[];
   chats: Chat[] = [];
   newMessage = "";
   ngUnsubscribe = new Subject<void>();
   userNameMap: { [key: string]: string } = {};
   isReplying: boolean = false;
   replyToMessage: Chat | null = null;
-  reactToMessageId: string| null = "";
+  reactToMessageId: string | null = "";
   reactionPopupPosition = { top: 0, left: 0 };
   reactionModals: reactionModal[] = [];
+  friendInfosMap: UserInfoDto[] = [];
+
   constructor(
     private route: ActivatedRoute,
     private httpservice: HttpClientService,
     private userService: UserService,
     private notificationService: NotificationService,
     private toastr: ToastrService,
-    private cdRef: ChangeDetectorRef
+    private cdRef: ChangeDetectorRef,
+    private friendInfoService: FriendInfoService
   ) {
     this.reactionModals = [
       { class: "fas fa-thumbs-up", title: "Like", style: "color:#3b82f6;" },
@@ -77,8 +84,9 @@ export class ChatThreadComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   ngOnInit(): void {
-    this.friendId = this.route.snapshot.paramMap.get("friendId")!;
-    this.loadMessages();
+    this.threadId = this.route.snapshot.paramMap.get(RouteConstants.chatThreadParam)!;
+    this.loadMessages(this.threadId);
+
     this.notificationService.messageReceived$
       .pipe(takeUntil(this.ngUnsubscribe))
       .subscribe((incomingMessage: IncomingMessageNotification) => {
@@ -98,13 +106,13 @@ export class ChatThreadComponent implements OnInit, AfterViewInit, OnDestroy {
     document.addEventListener("click", this.handleDocumentClick);
   }
 
-  loadMessages(): void {
+  loadMessages(threadId: string): void {
     this.httpservice
-      .getChatHistory(this.friendId)
+      .getThreadContents(threadId)
       .pipe(takeUntil(this.ngUnsubscribe))
-      .subscribe((data) => {
+      .subscribe((data : ChatThread) => {
         this.chats = data?.chats;
-        this.friendInfo = data?.friendInfo;
+        this.friendInfoList = data?.memberInfoList;
         this.mapUserNames();
       });
   }
@@ -158,34 +166,34 @@ export class ChatThreadComponent implements OnInit, AfterViewInit, OnDestroy {
   deleteMsg(event: any) {}
 
   sendMessage(): void {
-    if (!this.newMessage.trim()) return;
-    const messagePayload: Chat = {
-      receiverId: this.friendId,
-      content: this.newMessage,
-      isSeen: false,
-      senderId: this.currentUserId,
-      sentAt: new Date(),
-    };
+    // if (!this.newMessage.trim()) return;
+    // const messagePayload: ChatOverview = {
+    //   // receiverId: this.friendId,
+    //   content: this.newMessage,
+    //   // isSeen: false,
+    //   senderId: this.currentUserId,
+    //   sentAt: new Date(),
+    // };
 
-    if (this.replyToMessage) {
-      messagePayload.replyToMessageId = this.replyToMessage.id;
-      this.replyToMessage = null;
-    }
+    // if (this.replyToMessage) {
+    //   messagePayload.replyToMessageId = this.replyToMessage.id;
+    //   this.replyToMessage = null;
+    // }
 
-    this.httpservice
-      .sendMessage(messagePayload)
-      .subscribe((sentMessage: Chat) => {
-        this.newMessage = "";
-        this.chats.push(sentMessage);
-        setTimeout(() => this.scrollToBottom(), 50);
-      });
+    // this.httpservice
+    //   .sendMessage(messagePayload)
+    //   .subscribe((sentMessage: ChatOverview) => {
+    //     this.newMessage = "";
+    //     this.chats.push(sentMessage);
+    //     setTimeout(() => this.scrollToBottom(), 50);
+    //   });
   }
 
   mapUserNames() {
-    this.userNameMap = {
-      [this.currentUserId]: this.currentUserInfo.Username,
-      [this.friendId]: this.friendInfo.username,
-    };
+    for(let friendInfo of this.friendInfoList){
+      this.userNameMap[friendInfo.id] = friendInfo.username;
+    }
+    
     this.userNameMap[this.currentUserId] = "You";
   }
 
@@ -227,12 +235,12 @@ export class ChatThreadComponent implements OnInit, AfterViewInit, OnDestroy {
 
   handleDocumentClick = (event: MouseEvent) => {
     const target = event.target as HTMLElement;
-    const clickedInside = target.closest('.reaction-popup');
-    if(!clickedInside){
-        this.reactToMessageId = null;
-        this.cdRef.detectChanges();
+    const clickedInside = target.closest(".reaction-popup");
+    if (!clickedInside) {
+      this.reactToMessageId = null;
+      this.cdRef.detectChanges();
     }
-  }
+  };
 
   ngOnDestroy(): void {
     document.removeEventListener("click", this.handleDocumentClick);

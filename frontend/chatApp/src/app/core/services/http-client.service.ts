@@ -4,7 +4,7 @@ import { environment } from "../../environments/environment";
 import { LoginRequest, RegisterRequest } from "../../models/AuthModels";
 import { apiEndpoints } from "../api-endpoints";
 import { Observable } from "rxjs";
-import { Chat, ChatThread, ChatThreadPreview, User } from "../../models/UserModels";
+import { Chat, ChatOverview, ChatThread, ChatThreadPreview, UserInfoDto, User } from "../../models/Dtos";
 
 @Injectable({providedIn: "root"})
 export class HttpClientService{   
@@ -30,13 +30,13 @@ export class HttpClientService{
     }
 
 
-    getFriendSuggestions(): Observable<User[]> {
-        return this.http.get<User[]>(apiEndpoints.FriendSuggestions, {});
+    getFriendSuggestions(): Observable<UserInfoDto[]> {
+        return this.http.get<UserInfoDto[]>(apiEndpoints.FriendSuggestions, {});
     }
 
     
     getFriendRequests(){
-        return this.http.get<User[]>(apiEndpoints.FriendRequests);
+        return this.http.get<UserInfoDto[]>(apiEndpoints.FriendRequests);
     }
 
     sendFriendRequest(receiverId: string){
@@ -48,20 +48,20 @@ export class HttpClientService{
     }
 
     
-    getFriends(){
-        return this.http.get<User[]>(apiEndpoints.Friends);
+    getFriendInfos(){
+        return this.http.get<UserInfoDto[]>(apiEndpoints.Friends);
     }
 
     getLatestMessages(){
-        return this.http.get<ChatThreadPreview[]>(apiEndpoints.LatestMessages);
+        return this.http.get<Chat[]>(apiEndpoints.LatestMessages);
     }
  
-    getChatHistory(friendId: string) {
-      return this.http.get<ChatThread>(apiEndpoints.ChatHistory(friendId));
+    getThreadContents(threadId: string) {
+      return this.http.get<ChatThread>(apiEndpoints.Thread(threadId));
     }
 
-    sendMessage(messagePayload: Chat) {
-        return this.http.post<Chat>(apiEndpoints.SendMessage, messagePayload);
+    sendMessage(messagePayload: ChatOverview) {
+        return this.http.post<ChatOverview>(apiEndpoints.SendMessage, messagePayload);
     } 
     
     test(testMessage: string) {

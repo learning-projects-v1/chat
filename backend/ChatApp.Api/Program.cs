@@ -28,8 +28,9 @@ builder.Services.AddControllers();
 builder.Services
     .AddEndpointsApiExplorer()
     .AddSwaggerGen()
-    .AddDbContextMiddleware(builder.Configuration)
-    .AddAuthenticationMiddleware(jwtSettings!)
+    .AddDbContextServices(builder.Configuration)
+    .AddAuthenticationServices(jwtSettings!)
+    .AddCustomAuthorization()
     .AddServices()
     .AddSignalR();
 

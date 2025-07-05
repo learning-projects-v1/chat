@@ -2,7 +2,7 @@
 import { Injectable } from '@angular/core';
 import { apiEndpoints } from '../api-endpoints';
 import { BehaviorSubject, Subject } from 'rxjs';
-import { Chat, ChatThread, IncomingMessageNotification, User } from '../../models/UserModels';
+import { ChatOverview, ChatThread, IncomingMessageNotification, User } from '../../models/Dtos';
 import { FriendRequestReceivedResponse } from '../../models/ResponseModels';
 import { GlobalConstants } from '../constants';
 

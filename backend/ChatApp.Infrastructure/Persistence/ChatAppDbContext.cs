@@ -20,8 +20,9 @@ public class ChatAppDbContext : DbContext
     public DbSet<Friendship> Friendships { get; set; }
     public DbSet<Reaction> Reactions { get; set; }
     public DbSet<ChatThread> ChatThreads { get; set; }
-    public DbSet<ChatThreadMember> ChatThreadParticipents { get; set; }
+    public DbSet<ChatThreadMember> ChatThreadMembers { get; set; }
     public DbSet<MessageSeenStatus> MessageSeenStatuses { get; set; }
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);

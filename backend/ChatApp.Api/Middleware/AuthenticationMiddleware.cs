@@ -7,7 +7,7 @@ namespace ChatApp.API.Middleware;
 
 public static class AuthenticationMiddleware
 {
-    public static IServiceCollection AddAuthenticationMiddleware(this IServiceCollection services, JwtSettings jwtSettings)
+    public static IServiceCollection AddAuthenticationServices(this IServiceCollection services, JwtSettings jwtSettings)
     {
         services.AddAuthentication(options =>
         {

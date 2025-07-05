@@ -15,6 +15,8 @@ export const apiEndpoints = {
     FriendRequests: `${environment.baseUrl}/api/friends/requests`,
 
     LatestMessages: `${environment.baseUrl}/api/chatoverview`,
-    ChatHistory: (friendId: string) => `${environment.baseUrl}/api/messages/thread/${friendId}`,
+    Thread: (threadId: string) => `${environment.baseUrl}/api/threads/${threadId}/messages`,
     SendMessage: `${environment.baseUrl}/api/messages/send`
+    // SendMessage: `${environment.baseUrl}/api/threads/${threadId}/messages`
+    
 }

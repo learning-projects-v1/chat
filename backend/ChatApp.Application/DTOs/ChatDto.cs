@@ -1,4 +1,5 @@
-﻿using System;
+﻿using ChatApp.Domain.Models;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -15,5 +16,18 @@ public class ChatDto
     public bool IsSeen { get; set; } = false;
     public Guid? ReplyToMessageId { get; set; }
     public DateTime SentAt { get; set; }
+    public ChatDto()
+    {
+           
+    }
+    public ChatDto(Message message)
+    {
+        Id = message.Id;
+        Content = message.Content;
+        SenderId = message.SenderId;
+        ChatThreadId = message.ChatThreadId;
+        ReplyToMessageId = message.ReplyToMessageId;
+        SentAt = message.SentAt;
+    }
 }
 

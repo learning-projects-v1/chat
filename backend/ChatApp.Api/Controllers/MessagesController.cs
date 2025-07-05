@@ -1,5 +1,6 @@
 ﻿using ChatApp.Application.DTOs;
 using ChatApp.Application.Interfaces;
+using ChatApp.Application.Mappings;
 using ChatApp.Domain.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -15,20 +16,22 @@ public class MessagesController: ControllerBase
     IMessageRepository _messageRepository;
     IUserRepository _userRepository;
     IChatThreadRepository _chatThreadRepository;
+    IChatThreadMemberRepository _chatThreadMemberRepository;
     IUnitOfWork _unitOfWork;
     IRealTimeNotifier _realTimeNotifier;
-    public MessagesController(IMessageRepository messageRepository, IUnitOfWork unitOfWork, IUserRepository userRepository, IRealTimeNotifier notifier, IChatThreadRepository chatThreadRepository)
+    public MessagesController(IMessageRepository messageRepository, IUnitOfWork unitOfWork, IUserRepository userRepository, IRealTimeNotifier notifier, IChatThreadRepository chatThreadRepository, IChatThreadMemberRepository chatThreadMemberRepository)
     {
         _messageRepository = messageRepository;
         _unitOfWork = unitOfWork;
         _userRepository = userRepository;
         _realTimeNotifier = notifier;
         _chatThreadRepository = chatThreadRepository;
+        _chatThreadMemberRepository = chatThreadMemberRepository;
     }
 
     // get all messages in a thread
     [HttpGet("")]
-    public async Task<IActionResult> GetThreadMessages(Guid threadId)
+    public async Task<IActionResult> GetThreadContents(Guid threadId)
     {
         var userId = Guid.Parse(User.FindFirst(ClaimTypes.Name)?.Value);
         var messages = await _messageRepository.GetChats(threadId);
@@ -41,18 +44,18 @@ public class MessagesController: ControllerBase
             ReplyToMessageId = m.ReplyToMessageId,
             SentAt = m.SentAt,
         }).ToList();
-        var senders = await _chatThreadRepository.GetThreadMembers(threadId);
-        var sendersDict = senders.ToDictionary(s => s.Id, t => new UserResponseDto()
+        var senders = await _chatThreadMemberRepository.GetThreadMembers(threadId);
+        var sendersDict = senders.ToDictionary(s => s.Id, t => new UserInfoDto()
         {
             FullName = t.FullName,
             Id = t.Id,
-            UserName = t.UserName
+            Username = t.UserName
         });
 
         return Ok(new ChatThreadDto()
         {
             Chats = chatDtos,
-            SenderInfo = sendersDict
+            MemberInfoList = senders.Select(x => x.ToUserResponseDto()).ToList()
         });
     }
 
@@ -88,7 +91,6 @@ public class MessagesController: ControllerBase
         var payload = new ChatPreviewDto()
         {
             Chat = chatDto,
-            SenderInfo = SenderInfoDto,
             Thread = thread
         };
 
@@ -96,7 +98,7 @@ public class MessagesController: ControllerBase
         await _messageRepository.AddAsync(message);
         await _unitOfWork.SaveChangesAsync();
         //await _realTimeNotifier.NotifyMessage(message.ReceiverId, payload);
-        var threadMembers = await _chatThreadRepository.GetThreadMembers(chatDto.ChatThreadId);
+        var threadMembers = await _chatThreadMemberRepository.GetThreadMembers(chatDto.ChatThreadId);
         var tasks = threadMembers.Where(t => t.Id != chatDto.SenderId)
             .Select(async t =>
             {

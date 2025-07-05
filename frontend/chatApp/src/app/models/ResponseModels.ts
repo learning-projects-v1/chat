@@ -1,4 +1,4 @@
-import { User } from "./UserModels";
+import { User } from "./Dtos";
 
 export interface FriendRequestReceivedResponse{
     sender: User,

@@ -16,17 +16,4 @@ public class ChatThreadRepository : BaseRepository<ChatThread>, IChatThreadRepos
     {
         _context = context;
     }
-
-
-    public async Task<List<Thread>> GetJoinedThreads(Guid userId)
-    {
-        return default;
-        //var x = await _context.ChatThreadParticipents.Where(c => c.UserId == userId).ToListAsync();
-        //var y = _context.ChatThreads.Join(x, a => a.Id, b => b.ChatThreadId);
-    }
-
-    public Task<List<User>> GetThreadMembers(Guid threadId)
-    {
-        throw new NotImplementedException();
-    }
 }

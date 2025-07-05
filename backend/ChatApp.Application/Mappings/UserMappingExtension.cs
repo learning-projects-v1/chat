@@ -10,13 +10,13 @@ namespace ChatApp.Application.Mappings;
 
 public static class UserMappingExtension
 {
-    public static UserResponseDto ToUserResponseDto(this User user)
+    public static UserInfoDto ToUserResponseDto(this User user)
     {
-        return new UserResponseDto
+        return new UserInfoDto
         {
             Id = user.Id,
             FullName = user.FullName,
-            UserName = user.UserName,
+            Username = user.UserName,
         };
     }
 }

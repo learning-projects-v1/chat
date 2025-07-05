@@ -1,4 +1,5 @@
 ﻿using ChatApp.Application.Interfaces;
+using ChatApp.Application.Mappings;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
@@ -22,13 +23,13 @@ public class UsersController : ControllerBase
     [HttpGet("suggestions")]
     public async Task<IActionResult> GetSuggestions()
     {
-        var userId =User.FindFirst(ClaimTypes.Name)?.Value;
+        var userId = User.FindFirst(ClaimTypes.Name)?.Value;
 
         var users = await _userRepository.GetSuggestedUsers(userId);
         var rng = new Random();
         int maxAmount = 10;
         var suggestedUsers = users.OrderBy(x => rng.Next()).Take(maxAmount);
-        return Ok(suggestedUsers);
+        return Ok(suggestedUsers.Select(x => x.ToUserResponseDto()).ToList());
     }
 }
     

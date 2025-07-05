@@ -6,6 +6,8 @@ import { HomeComponent } from './components/home/home.component';
 import { ConnectionsComponent } from './components/navigations/connections/connections.component';
 import { MessagesComponent } from './components/navigations/messages/messages.component';
 import { ChatThreadComponent } from './components/navigations/chat-thread/chat-thread.component';
+import { FriendInfoResolver } from './core/resolvers/friend-info.resolver';
+import { GlobalConstants, RouteConstants } from './core/constants';
 
 export const routes: Routes = [
   { path: '', redirectTo: '/login', pathMatch: 'full' },
@@ -13,7 +15,7 @@ export const routes: Routes = [
   { path: 'login', component: LoginComponent },
   { path: 'home', component: HomeComponent },
   { path: 'connections', component: ConnectionsComponent },
-  { path: 'messages', component: MessagesComponent },
-  { path: 'chat/:friendId', component: ChatThreadComponent },
+  { path: 'messages', component: MessagesComponent, resolve: {friends: FriendInfoResolver} },
+  { path: RouteConstants.chatThreadRoute, component: ChatThreadComponent },
   { path: '**', component: NotFoundComponent },
 ];

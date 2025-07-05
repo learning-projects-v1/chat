@@ -2,7 +2,7 @@ import { Component, OnDestroy, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { HttpClientService } from '../../../core/services/http-client.service';
 import { Subject, take, takeUntil } from 'rxjs';
-import { User } from '../../../models/UserModels';
+import { UserInfoDto, User } from '../../../models/Dtos';
 import { ToastrService } from 'ngx-toastr';
 import { NotificationService } from '../../../core/services/notification.service';
 import { FriendRequestReceivedResponse } from '../../../models/ResponseModels';
@@ -16,8 +16,8 @@ import { HttpErrorResponse } from '@angular/common/http';
   styleUrls: ['./connections.component.scss'],
 })
 export class ConnectionsComponent implements OnInit, OnDestroy {
-  pendingRequests: User[] = [];
-  suggestions: User[] = [];
+  pendingRequests: UserInfoDto[] = [];
+  suggestions: UserInfoDto[] = [];
   ngUnsubscribe: Subject<void> = new Subject<void>();
   sentRequests: Set<string> = new Set<string>();
 
@@ -31,7 +31,7 @@ export class ConnectionsComponent implements OnInit, OnDestroy {
     this.httpService
       .getFriendSuggestions()
       .pipe(take(1))
-      .subscribe((res: User[]) => {
+      .subscribe((res: UserInfoDto[]) => {
         this.suggestions = res;
       });
 
@@ -83,7 +83,7 @@ export class ConnectionsComponent implements OnInit, OnDestroy {
     this.httpService
       .getFriendRequests()
       .pipe(take(1))
-      .subscribe((res: User[]) => {
+      .subscribe((res: UserInfoDto[]) => {
         this.pendingRequests = res;
       });
   }

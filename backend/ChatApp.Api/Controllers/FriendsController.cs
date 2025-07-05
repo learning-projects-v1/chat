@@ -96,7 +96,8 @@ public class FriendsController : ControllerBase
 
 
         var friends = await _friendshipRepository.GetAllFriendsAsync(Guid.Parse(userId));
-        return Ok(friends);
+        var friendsDtos = friends.Select(f => f.ToUserResponseDto()).ToList();
+        return Ok(friendsDtos);
     }
 
     [Authorize]

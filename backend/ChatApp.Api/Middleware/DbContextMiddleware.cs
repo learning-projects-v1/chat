@@ -5,7 +5,7 @@ namespace ChatApp.API.Middleware;
 
 public static class DbContextMiddleware
 {
-    public static IServiceCollection AddDbContextMiddleware(this IServiceCollection services, IConfiguration configuration)
+    public static IServiceCollection AddDbContextServices(this IServiceCollection services, IConfiguration configuration)
     {
         services.AddDbContext<ChatAppDbContext>(options =>
         {

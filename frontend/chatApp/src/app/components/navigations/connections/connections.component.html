@@ -2,9 +2,9 @@
   <h2>Friend Requests</h2>
   <div class="card-list" *ngIf="pendingRequests.length > 0; else noRequests">
     <div class="card" *ngFor="let user of pendingRequests">
-      <div class="avatar">{{ user.userName.charAt(0) }}</div>
+      <div class="avatar">{{ user.username.charAt(0) }}</div>
       <div class="info">
-        <div class="name">{{ user.userName }}</div>
+        <div class="name">{{ user.username }}</div>
 
         <div class="actions">
           <button class="accept" (click)="acceptRequest(user.id)">
@@ -22,9 +22,9 @@
   <h2>People You May Know</h2>
   <div class="card-list" *ngIf="suggestions.length > 0; else noSuggestions">
     <div class="card" *ngFor="let user of suggestions">
-      <div class="avatar">{{ user.userName.charAt(0) }}</div>
+      <div class="avatar">{{ user.username.charAt(0) }}</div>
       <div class="info">
-        <div class="name">{{ user.userName }}</div>
+        <div class="name">{{ user.username }}</div>
         <!-- <div class="mutual">{{  }} mutual friends</div> -->
         <div class="actions">
           <button

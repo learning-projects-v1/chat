@@ -8,6 +8,6 @@ namespace ChatApp.Application.DTOs;
 
 public class FriendRequestResponse
 {
-    public UserResponseDto Sender { get; set; }
+    public UserInfoDto Sender { get; set; }
     public string Message { get; set; }
 }

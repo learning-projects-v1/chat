@@ -1,5 +1,5 @@
 
-dotnet ef migrations add "added reactions model" --project ChatApp.Infrastructure --startup-project ChatApp.API
+dotnet ef migrations add "added few models - chat-thread, thread-member etc" --project ChatApp.Infrastructure --startup-project ChatApp.API
 
 dotnet ef database update --project ChatApp.Infrastructure --startup-project ChatApp.API
 

@@ -10,4 +10,9 @@ public static class GlobalConstants
 {
     public static string MessageReceived = "MessageReceived";
     public static string FriendRequestReceived = "FriendRequestReceived";
+
+    public static class AuthorizationPolicy
+    {
+        public static string ThreadMember = "ThreadMember";
+    }
 }

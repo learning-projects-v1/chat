@@ -4,7 +4,8 @@ import { Router } from "@angular/router";
 import { HttpClientService } from "../../../core/services/http-client.service";
 import { Subject, takeUntil } from "rxjs";
 import { NotificationService } from "../../../core/services/notification.service";
-import { ChatThreadPreview } from "../../../models/UserModels";
+import { Chat, ChatThreadPreview, UserInfoDto } from "../../../models/Dtos";
+import { FriendInfoService } from "../../../core/global/friend-info.service";
 
 export interface ConnectedUser {
   userId: string;
@@ -20,13 +21,16 @@ export interface ConnectedUser {
   imports: [CommonModule],
 })
 export class MessagesComponent implements OnInit, OnDestroy {
-  messagePreviews: ChatThreadPreview[] = [];
+  // messagePreviews: ChatThreadPreview[] = [];
+  chats: Chat[] = [];
   ngUnsubscribe: Subject<void> = new Subject<void>();
+  friendInfosMap: Map<string, UserInfoDto> = new Map();
 
   constructor(
     private router: Router,
     private httpService: HttpClientService,
-    private notificationService: NotificationService
+    private notificationService: NotificationService,
+    private friendInfoService: FriendInfoService
   ) {}
 
   ngOnInit(): void {
@@ -34,20 +38,27 @@ export class MessagesComponent implements OnInit, OnDestroy {
       .getLatestMessages()
       .pipe(takeUntil(this.ngUnsubscribe))
       .subscribe((res) => {
-        this.messagePreviews = res;
+        this.chats = res;
       });
 
     this.notificationService.messageReceived$
       .pipe(takeUntil(this.ngUnsubscribe))
       .subscribe((res) => {
-        this.messagePreviews.push(res);
+        // this.messagePreviews.push(res);
       });
+      this.friendInfosMap = this.friendInfoService.getFriendInfosMap();
   }
 
-  goToChat(userId: string) {
-    this.router.navigate(["/chat", userId]);
+  getUserName(id: string){
+    let val =  this.friendInfosMap.get(id);
+    return val?.username;
   }
 
+  goToChat(threadId: string) {
+    this.router.navigate(["/chat", threadId]);
+  }
+
+  
   ngOnDestroy(): void {
     this.ngUnsubscribe.next();
     this.ngUnsubscribe.complete();

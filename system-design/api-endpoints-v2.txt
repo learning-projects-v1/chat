@@ -7,6 +7,7 @@ Friendship:
 - patch api/friends/friend-requests/:id : {dto} - update friend request (accept/reject)
 - get api/friends/friend-requests : {} - get all pending friend-requests
 - delete api/friends/:id :{} - delete a friend
+- get api/friends : {} get all accepted friends
 
 Thread:
 - get api/threads/:id : {} - get thread details
@@ -24,3 +25,6 @@ Message:
 - post api/threads/:id/messages/:id/reacts/create : {reactDto} - react to a message
 - patch api/threads/:id/messages/:id/reacts/:id : {reactDto} - react to a message
 - delete api/threads/:id/messages/:id/reacts/:id {} - delete a react
+
+ChatPreview
+- get api/chatPreview

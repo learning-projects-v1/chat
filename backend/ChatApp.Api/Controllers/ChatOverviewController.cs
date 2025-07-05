@@ -27,50 +27,54 @@ public class ChatOverviewController: ControllerBase
     public async Task<IActionResult> GetLatestMessages()
     {
         var userId = Guid.Parse(User.FindFirst(ClaimTypes.Name)?.Value);
-        var friends = await _friendshipRepository.GetAllFriendsAsync(userId);
-    
-        var latestMessages = await _messageRepository.GetChatOverviews(userId);
-        var latestMessagesDict = latestMessages.ToDictionary(m => m.SenderId == userId ? m.ReceiverId : m.SenderId, m => m);
-        var results = new List<ChatPreviewDto>();
+        var latestMessages = await _messageRepository.GetLatestMessages(userId);
+        var orderedMessages = latestMessages.OrderByDescending(c => c.SentAt).ToList();
+        var chatDtos = orderedMessages.Select(m => new ChatDto(m)).ToList();
+        return Ok(chatDtos);
 
-        foreach(var friend in friends)
-        {
-            latestMessagesDict.TryGetValue(friend.Id, out var message);
-            if(message == null)
-            {
-                message = new()
-                {
-                    Content = "No messages yet",
-                    Id = Guid.NewGuid(),
-                    SenderId = Guid.Empty,
-                    ReceiverId = userId,
-                    IsSeen = false,
-                    SentAt = DateTime.MinValue,
-                };
-            }
-            var chatDto = new ChatDto()
-            {
-                Id = message.Id,
-                Content = message.Content ?? "No messages yet",
-                SentAt = message.SentAt,
-                IsSeen = false,
-                ReceiverId = message.ReceiverId,
-                SenderId = message.SenderId
-            };
+        //var friends = await _friendshipRepository.GetAllFriendsAsync(userId);
+        //var latestMessages = await _messageRepository.GetLatestMessages(userId);
+        //var latestMessagesDict = latestMessages.ToDictionary(m => m.ChatThreadId, m => m);
+        //var results = new List<ChatPreviewDto>();
 
-            var friendInfoDto = new SenderInfo()
-            {
-                Id = friend.Id,
-                Username = friend.UserName,
-            };
+        //foreach(var friend in friends)
+        //{
+        //    latestMessagesDict.TryGetValue(friend.Id, out var message);
+        //    if(message == null)
+        //    {
+        //        message = new()
+        //        {
+        //            Content = "No messages yet",
+        //            Id = Guid.NewGuid(),
+        //            SenderId = Guid.Empty,
+        //            ReceiverId = userId,
+        //            IsSeen = false,
+        //            SentAt = DateTime.MinValue,
+        //        };
+        //    }
+        //    var chatDto = new ChatDto()
+        //    {
+        //        Id = message.Id,
+        //        Content = message.Content ?? "No messages yet",
+        //        SentAt = message.SentAt,
+        //        IsSeen = false,
+        //        ReceiverId = message.ReceiverId,
+        //        SenderId = message.SenderId
+        //    };
 
-            results.Add(new ChatPreviewDto()
-            {
-                Chat = chatDto,
-                SenderInfo = friendInfoDto,
-            });
-        }
-        results = results.OrderByDescending(r => r.Chat.SentAt).ToList();
-        return Ok(results);
+        //    var friendInfoDto = new SenderInfo()
+        //    {
+        //        Id = friend.Id,
+        //        Username = friend.UserName,
+        //    };
+
+        //    results.Add(new ChatPreviewDto()
+        //    {
+        //        Chat = chatDto,
+        //        SenderInfo = friendInfoDto,
+        //    });
+        //}
+        //results = results.OrderByDescending(r => r.Chat.SentAt).ToList();
+        //return Ok(latestMessages.OrderByDescending(c => c.SentAt).ToList());
     }
 }
