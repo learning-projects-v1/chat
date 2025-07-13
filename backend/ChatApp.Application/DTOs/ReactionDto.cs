@@ -6,9 +6,9 @@ using System.Threading.Tasks;
 
 namespace ChatApp.Application.DTOs;
 
-//public class SenderInfo
-//{
-//    public Guid Id { get; set; }
-//    public string Username { get; set; }
-//    public string? AvatarUrl { get; set; }
-//}
+public class ReactionDto
+{
+    public Guid Id { get; set; }
+    public string Type { get; set; }
+    public Guid SenderId { get; set;}
+}

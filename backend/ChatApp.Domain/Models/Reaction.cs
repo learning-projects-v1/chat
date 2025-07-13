@@ -9,12 +9,11 @@ namespace ChatApp.Domain.Models;
 public class Reaction
 {
     public Guid Id { get; set; }
-    public Guid MessageId { get; set; }
+    public Guid ReactionToMessageId { get; set; }
     public Guid UserId { get; set; }
     public string Type { get; set; }
-
+    public DateTime UpdatedAt { get; set; }
     //// navigation
-    //public Message ReactionToMessage { get; set; }
-    //public User User { get; set; }
-
+    public Message ReactionToMessage { get; set; }
+    public User User { get; set; }
 }

@@ -92,17 +92,21 @@ public class ChatAppDbContext : DbContext
         {
             /// message - reaction
             entity
-            .HasOne<Message>()
+            .HasOne<Message>(r => r.ReactionToMessage)
             .WithMany()
-            .HasForeignKey(m => m.MessageId);
+            .HasForeignKey(m => m.ReactionToMessageId);
 
             entity
-                .HasIndex(r => r.MessageId);
+                .HasIndex(r => r.ReactionToMessageId);
 
             entity
-                .HasIndex(r => new { r.MessageId, r.UserId})
+            .HasOne<User>(r => r.User)
+            .WithMany()
+            .HasForeignKey(m => m.UserId);
+
+            entity
+                .HasIndex(r => new { r.ReactionToMessageId, r.UserId})
                 .IsUnique();
-
 
             entity.Property(r => r.Type)
                   .IsRequired()
@@ -139,7 +143,5 @@ public class ChatAppDbContext : DbContext
 
             entity.HasIndex(e => e.MessageId);
         });
-
-
     }
 }

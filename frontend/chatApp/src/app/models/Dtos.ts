@@ -6,14 +6,20 @@ export interface User{
 }
 
 export interface Chat {
-  id: string;
+  id?: string;
   content: string;
   senderId: string;
   chatThreadId: string;
-  isSeen: boolean;
-  username: string;
+  isSeen?: boolean;
   replyToMessageId?: string;
-  sentAt: string; // ISO string, will be parsed to Date
+  sentAt: Date; // ISO string, will be parsed to Date
+  reactions?: Reaction[]
+}
+
+export interface Reaction{
+  id?: string,
+  type: string,
+  senderId: string
 }
 
 export interface ChatOverview {
@@ -46,3 +52,5 @@ export interface IncomingMessageNotification{
   friendInfo: UserInfoDto,
   chat: Chat
 }
+
+export type locationDict = {[title: string]: number}

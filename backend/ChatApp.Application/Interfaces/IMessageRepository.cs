@@ -12,4 +12,6 @@ public interface IMessageRepository : IRepository<Message>
     Task<List<Message>> GetAll(string userId);
     Task<List<Message>> GetLatestMessages(Guid userId);
     Task<List<Message>> GetChats(Guid threadId);
+    Task<List<Message>> GetChatsWithReactions(Guid threadId);
+
 }

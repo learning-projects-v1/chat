@@ -34,15 +34,18 @@ public class MessagesController: ControllerBase
     public async Task<IActionResult> GetThreadContents(Guid threadId)
     {
         var userId = Guid.Parse(User.FindFirst(ClaimTypes.Name)?.Value);
-        var messages = await _messageRepository.GetChats(threadId);
+        var messages = await _messageRepository.GetChatsWithReactions(threadId);
         var chatDtos = messages.Select(m => new ChatDto()
         {
             Content = m.Content,
             SenderId = m.SenderId,
-            ChatThreadId = threadId,
+            ChatThreadId = m.ChatThreadId,
             Id = m.Id,
             ReplyToMessageId = m.ReplyToMessageId,
             SentAt = m.SentAt,
+            Reactions = m.Reactions
+            .Select( r => new ReactionDto { Id = r.Id, Type = r.Type, SenderId = r.UserId})
+            .ToList()
         }).ToList();
         var senders = await _chatThreadMemberRepository.GetThreadMembers(threadId);
         var sendersDict = senders.ToDictionary(s => s.Id, t => new UserInfoDto()
@@ -83,7 +86,7 @@ public class MessagesController: ControllerBase
         if (thread == null) {
             return BadRequest(new { message = "Thread not found" });
         }
-        var SenderInfoDto = new SenderInfo()
+        var userInfoDto = new UserInfoDto()
         {
             Id = friendInfo.Id,
             Username = friendInfo.UserName,
@@ -91,28 +94,31 @@ public class MessagesController: ControllerBase
         var payload = new ChatPreviewDto()
         {
             Chat = chatDto,
-            Thread = thread
+            SenderInfo = userInfoDto
         };
 
         ///Todo: begin transaction
         await _messageRepository.AddAsync(message);
         await _unitOfWork.SaveChangesAsync();
         //await _realTimeNotifier.NotifyMessage(message.ReceiverId, payload);
-        var threadMembers = await _chatThreadMemberRepository.GetThreadMembers(chatDto.ChatThreadId);
-        var tasks = threadMembers.Where(t => t.Id != chatDto.SenderId)
-            .Select(async t =>
-            {
-                try
-                {
-                   await _realTimeNotifier.NotifyMessage(t.Id, payload);
-                }
-                catch (Exception ex)
-                {
-                    Console.WriteLine($"Failed to notify sent message to user {t.UserName}");
-                }
-            });
-        await Task.WhenAll(tasks);
         chatDto.Id = message.Id;
+        _ = Task.Run(async () =>
+        {
+            var threadMembers = await _chatThreadMemberRepository.GetThreadMembers(chatDto.ChatThreadId);
+            var tasks = threadMembers.Where(t => t.Id != chatDto.SenderId)
+                .Select(async t =>
+                {
+                    try
+                    {
+                        await _realTimeNotifier.NotifyMessage(t.Id, payload);
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine($"Failed to notify sent message to user {t.UserName}");
+                    }
+                });
+            await Task.WhenAll(tasks);
+        });
         return Ok(chatDto); 
     }
 }

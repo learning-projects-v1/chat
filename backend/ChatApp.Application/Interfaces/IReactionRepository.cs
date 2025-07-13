@@ -9,5 +9,6 @@ namespace ChatApp.Application.Interfaces;
 
 public interface IReactionRepository : IRepository<Reaction>
 {
-    Task<List<Reaction>> GetAllReactions(Guid messageId);
+    Task<List<Reaction>> GetReactions(Guid messageId);
+    Task<List<Reaction>> GetAllReactions(Guid ThreadId);
 }

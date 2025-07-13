@@ -19,5 +19,5 @@ public class Message
     public User Sender { get; set; }
     //public ChatThread ChatThread { get; set; }
     public Message ReplyToMessage { get; set; }
-    //public ICollection<Reaction> Reactions { get; set; }
+    public ICollection<Reaction> Reactions { get; set; }
 }

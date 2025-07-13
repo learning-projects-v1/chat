@@ -29,6 +29,19 @@
           <div class="text">{{ msg.content }}</div>
           <div class="timestamp">{{ msg.sentAt | date : "MMM d, h:mm a" }}</div>
         </div>
+        @if (msg.groupedReactions?.length) {
+        <div class="reaction-line">
+          @for (item of msg.groupedReactions; track $index) {
+          <span class="reaction-bubble" [title]="getTitles(item.reactions)">
+            <i
+              [class]="reactionModalsDict.get(item.title)?.class"
+              [style]="reactionModalsDict.get(item.title)?.style"
+            ></i>
+            <span class="reaction-count">{{ item.reactions.length }}</span>
+          </span>
+          }
+        </div>
+        }
       </div>
 
       <div class="chat-actions" [class.mine]="isSenderMe(msg.senderId)">
@@ -75,7 +88,11 @@
     }"
   >
     @for(react of reactionModals;track react.class){
-    <button class="reaction-button" [title]="react.title" (click)="reactTo(react)">
+    <button
+      class="reaction-button"
+      [title]="react.title"
+      (click)="reactTo(react)"
+    >
       <i [class]="react.class" [style]="react.style"></i>
     </button>
     }

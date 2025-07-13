@@ -3,6 +3,7 @@ using System;
 using ChatApp.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace ChatApp.Infrastructure.Migrations
 {
     [DbContext(typeof(ChatAppDbContext))]
-    partial class ChatAppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250711150915_build error fix 2")]
+    partial class builderrorfix2
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -167,10 +170,10 @@ namespace ChatApp.Infrastructure.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
-                    b.Property<Guid?>("MessageId")
+                    b.Property<Guid>("ReactionToMessageId")
                         .HasColumnType("uuid");
 
-                    b.Property<Guid>("ReactionToMessageId")
+                    b.Property<Guid>("ReactionToMessageId1")
                         .HasColumnType("uuid");
 
                     b.Property<string>("Type")
@@ -184,13 +187,18 @@ namespace ChatApp.Infrastructure.Migrations
                     b.Property<Guid>("UserId")
                         .HasColumnType("uuid");
 
-                    b.HasKey("Id");
+                    b.Property<Guid>("UserId1")
+                        .HasColumnType("uuid");
 
-                    b.HasIndex("MessageId");
+                    b.HasKey("Id");
 
                     b.HasIndex("ReactionToMessageId");
 
+                    b.HasIndex("ReactionToMessageId1");
+
                     b.HasIndex("UserId");
+
+                    b.HasIndex("UserId1");
 
                     b.HasIndex("ReactionToMessageId", "UserId")
                         .IsUnique();
@@ -327,18 +335,26 @@ namespace ChatApp.Infrastructure.Migrations
             modelBuilder.Entity("ChatApp.Domain.Models.Reaction", b =>
                 {
                     b.HasOne("ChatApp.Domain.Models.Message", null)
-                        .WithMany("Reactions")
-                        .HasForeignKey("MessageId");
-
-                    b.HasOne("ChatApp.Domain.Models.Message", "ReactionToMessage")
                         .WithMany()
                         .HasForeignKey("ReactionToMessageId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("ChatApp.Domain.Models.User", "User")
+                    b.HasOne("ChatApp.Domain.Models.Message", "ReactionToMessage")
+                        .WithMany("Reactions")
+                        .HasForeignKey("ReactionToMessageId1")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("ChatApp.Domain.Models.User", null)
                         .WithMany()
                         .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("ChatApp.Domain.Models.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId1")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 

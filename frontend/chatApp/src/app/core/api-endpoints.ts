@@ -16,7 +16,8 @@ export const apiEndpoints = {
 
     LatestMessages: `${environment.baseUrl}/api/chatoverview`,
     Thread: (threadId: string) => `${environment.baseUrl}/api/threads/${threadId}/messages`,
-    SendMessage: `${environment.baseUrl}/api/messages/send`
-    // SendMessage: `${environment.baseUrl}/api/threads/${threadId}/messages`
+    SendMessage: (threadId: string) => `${environment.baseUrl}/api/threads/${threadId}/messages`,
     
+    AddReaction: (threadId: string, messageId: string) => `${environment.baseUrl}/api/threads/${threadId}/messages/${messageId}/reactions`,
+    DeleteReaction: (reactId: string, threadId: string, messageId: string) => `${environment.baseUrl}/api/threads/${threadId}/messages/${messageId}/reactions/${reactId}`
 }

@@ -21,13 +21,15 @@ import {
   IncomingMessageNotification,
   User,
   Chat,
+  Reaction,
 } from "../../../models/Dtos";
 import { FormsModule } from "@angular/forms";
 import { NotificationService } from "../../../core/services/notification.service";
-import { Subject, takeUntil } from "rxjs";
+import { Subject, take, takeUntil } from "rxjs";
 import { ToastrService } from "ngx-toastr";
 import { RouteConstants } from "../../../core/constants";
 import { FriendInfoService } from "../../../core/global/friend-info.service";
+import { ChatUi } from "../../../models/uiModels";
 
 interface reactionModal {
   class: string;
@@ -50,7 +52,7 @@ export class ChatThreadComponent implements OnInit, AfterViewInit, OnDestroy {
   currentUserId!: string;
   currentUserInfo!: UserInfo;
   friendInfoList!: UserInfoDto[];
-  chats: Chat[] = [];
+  chats: ChatUi[] = [];
   newMessage = "";
   ngUnsubscribe = new Subject<void>();
   userNameMap: { [key: string]: string } = {};
@@ -60,6 +62,7 @@ export class ChatThreadComponent implements OnInit, AfterViewInit, OnDestroy {
   reactionPopupPosition = { top: 0, left: 0 };
   reactionModals: reactionModal[] = [];
   friendInfosMap: UserInfoDto[] = [];
+  reactionModalsDict: Map<string, reactionModal> = new Map();
 
   constructor(
     private route: ActivatedRoute,
@@ -81,16 +84,19 @@ export class ChatThreadComponent implements OnInit, AfterViewInit, OnDestroy {
       },
       { class: "fas fa-face-sad-tear", title: "Sad", style: "color:#64748b;" },
     ];
+    this.reactionModals.forEach((x) => this.reactionModalsDict.set(x.title, x));
   }
 
   ngOnInit(): void {
-    this.threadId = this.route.snapshot.paramMap.get(RouteConstants.chatThreadParam)!;
+    this.threadId = this.route.snapshot.paramMap.get(
+      RouteConstants.chatThreadParam
+    )!;
     this.loadMessages(this.threadId);
 
     this.notificationService.messageReceived$
       .pipe(takeUntil(this.ngUnsubscribe))
       .subscribe((incomingMessage: IncomingMessageNotification) => {
-        this.chats.push(incomingMessage.chat);
+        this.chats.push(new ChatUi(incomingMessage.chat));
         setTimeout(() => this.scrollToBottom(), 50);
         //test purpose
         this.toastr.show("Message received");
@@ -110,8 +116,8 @@ export class ChatThreadComponent implements OnInit, AfterViewInit, OnDestroy {
     this.httpservice
       .getThreadContents(threadId)
       .pipe(takeUntil(this.ngUnsubscribe))
-      .subscribe((data : ChatThread) => {
-        this.chats = data?.chats;
+      .subscribe((data: ChatThread) => {
+        this.chats = ChatUi.GetAllChats(data?.chats);
         this.friendInfoList = data?.memberInfoList;
         this.mapUserNames();
       });
@@ -159,41 +165,77 @@ export class ChatThreadComponent implements OnInit, AfterViewInit, OnDestroy {
     this.replyToMessage = null;
   }
 
-  reactTo(event: any) {
-    // this.reactToMessageId = "";
+  reactTo(event: reactionModal) {
+    const react: Reaction = {
+      senderId: this.currentUserId,
+      type: event?.title,
+    };
+    const currentUserReact = this.getUserReact(this.reactToMessageId!, react);
+    if (currentUserReact?.type != react.type) {
+      // add
+    }
+
+    this.httpservice.addReact(react, this.threadId, this.reactToMessageId!);
+  }
+
+  getUserReact(messageId: string, react: Reaction) {
+    let chat = this.chats.find((x) => x.id == messageId);
+    const pos = chat?.reactLocations?.[react.type];
+    if (!pos) return null;
+    const currentUserReact = chat?.groupedReactions?.[pos].reactions.find(
+      (x) => x.senderId == this.currentUserId
+    );
+    if (!currentUserReact) return null;
+    return currentUserReact;
+  }
+
+  deleteReact(chat: ChatUi, react: Reaction) {
+    this.httpservice
+      .deleteReact(react.id!, this.threadId, chat.id!)
+      .pipe(take(1))
+      .subscribe((res) => {
+        const reactions = chat?.groupedReactions?.find(
+          (x) => x.title == react.type
+        )?.reactions;
+        
+        const index = reactions?.findIndex((x) => x.id == react.id);
+        if (index && index != -1) {
+          reactions?.splice(index, 1);
+        }
+      });
   }
 
   deleteMsg(event: any) {}
 
   sendMessage(): void {
-    // if (!this.newMessage.trim()) return;
-    // const messagePayload: ChatOverview = {
-    //   // receiverId: this.friendId,
-    //   content: this.newMessage,
-    //   // isSeen: false,
-    //   senderId: this.currentUserId,
-    //   sentAt: new Date(),
-    // };
+    if (!this.newMessage.trim()) return;
+    const messagePayload: Chat = {
+      content: this.newMessage,
+      senderId: this.currentUserId,
+      sentAt: new Date(),
+      chatThreadId: this.threadId,
+      isSeen: false,
+    };
 
-    // if (this.replyToMessage) {
-    //   messagePayload.replyToMessageId = this.replyToMessage.id;
-    //   this.replyToMessage = null;
-    // }
+    if (this.replyToMessage) {
+      messagePayload.replyToMessageId = this.replyToMessage.id;
+      this.replyToMessage = null;
+    }
 
-    // this.httpservice
-    //   .sendMessage(messagePayload)
-    //   .subscribe((sentMessage: ChatOverview) => {
-    //     this.newMessage = "";
-    //     this.chats.push(sentMessage);
-    //     setTimeout(() => this.scrollToBottom(), 50);
-    //   });
+    this.httpservice
+      .sendMessage(messagePayload)
+      .subscribe((sentMessage: Chat) => {
+        this.newMessage = "";
+        this.chats.push(new ChatUi(sentMessage));
+        setTimeout(() => this.scrollToBottom(), 50);
+      });
   }
 
   mapUserNames() {
-    for(let friendInfo of this.friendInfoList){
+    for (let friendInfo of this.friendInfoList) {
       this.userNameMap[friendInfo.id] = friendInfo.username;
     }
-    
+
     this.userNameMap[this.currentUserId] = "You";
   }
 
@@ -230,7 +272,6 @@ export class ChatThreadComponent implements OnInit, AfterViewInit, OnDestroy {
       };
       this.reactToMessageId = msg.id ?? "";
     });
-    // this.reactToMessageId = msg.id;
   }
 
   handleDocumentClick = (event: MouseEvent) => {
@@ -241,6 +282,10 @@ export class ChatThreadComponent implements OnInit, AfterViewInit, OnDestroy {
       this.cdRef.detectChanges();
     }
   };
+
+  getTitles(reactions: Reaction[]): string {
+    return reactions.map((r) => this.userNameMap[r.senderId]).join(",");
+  }
 
   ngOnDestroy(): void {
     document.removeEventListener("click", this.handleDocumentClick);

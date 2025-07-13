@@ -26,13 +26,16 @@ public class DataSeeder
         var (threads, threadMembers) = GetThreadInfo(friendships);
         var threadIds = threadMembers.Where(x => x.UserId == users[0].Id).Select(x => x.ChatThreadId).Distinct().ToList();
         //var messages = GetMessagesForFirstUser(users, threadIds, threadMembers);
+        
         var messages = GetMessages(threadMembers);
+        var reactions = GetReactions(messages, threadMembers);
         AddDummyUsers(users);
         _context.Users.AddRange(users);
         _context.Friendships.AddRange(friendships);
         _context.ChatThreadMembers.AddRange(threadMembers);
         _context.ChatThreads.AddRange(threads);
         _context.Messages.AddRange(messages);
+        _context.Reactions.AddRange(reactions);
 
         _context.SaveChanges();
     }
@@ -178,12 +181,11 @@ public class DataSeeder
                 messages.Add(message);
             }
         }
+
         return messages;
     }
     private List<Message> GetMessagesForFirstUser(List<User> users, List<Guid> threadIds, List<ChatThreadMember> ThreadMembers) {
         var threadInfoDict = ThreadMembers.GroupBy(t => t.ChatThreadId, t => t).ToDictionary( g => g.Key, g => g.ToList());
-
-    
         var messages = new List<Message>();
         var customMessageContents = new List<string>()
         {
@@ -213,21 +215,41 @@ public class DataSeeder
                         SentAt = new DateTime(2025, 6, 11, random.Next(24), random.Next(60), random.Next(60), DateTimeKind.Utc)
                     };
                     messages.Add(message);
-
-
                 }
-            }
-            for(int fdx = 0; fdx < totalMessages; fdx++)
-            {
             }
         }
         return messages;
+    }
+
+    private List<Reaction> GetReactions(List<Message> messages, List<ChatThreadMember> members)
+    {
+        var chatThreadDict = members
+            .GroupBy(m => m.ChatThreadId, m => m)
+            .ToDictionary(m => m.Key, m => m.ToList());
+        var reactions = new List<Reaction>();
+        foreach (var m in messages)
+        {
+            chatThreadDict.TryGetValue(m.ChatThreadId, out var threadMembers);
+            var reactionTypes = new string[] { "Like", "Love", "Laugh", "Sad", "Surprised" };
+            var random = new Random();
+            foreach(var member in threadMembers)
+            {
+                var reaction = new Reaction
+                {
+                    Id = Guid.NewGuid(),
+                    ReactionToMessageId = m.Id,
+                    UserId = member.UserId,
+                    UpdatedAt = DateTime.UtcNow,
+                    Type = reactionTypes[random.Next(reactionTypes.Length)]
+                };
+                reactions.Add(reaction);
+            }
+        }
+        return reactions;
     }
     private Guid GetGuid(int number, char ch)
     {
         var gd = $"00000000-0000-0000-0000-{ch}{new string('0', 11 - number.ToString().Length)}{number}";
         return Guid.Parse(gd);
     }
-
-
 }
