@@ -25,7 +25,18 @@ import {
 } from "../../../models/Dtos";
 import { FormsModule } from "@angular/forms";
 import { NotificationService } from "../../../core/services/notification.service";
-import { Subject, take, takeUntil } from "rxjs";
+import {
+  Subject,
+  take,
+  takeUntil,
+  map,
+  EMPTY,
+  Observable,
+  switchMap,
+  concatMap,
+  concat,
+  of,
+} from "rxjs";
 import { ToastrService } from "ngx-toastr";
 import { RouteConstants } from "../../../core/constants";
 import { FriendInfoService } from "../../../core/global/friend-info.service";
@@ -170,39 +181,74 @@ export class ChatThreadComponent implements OnInit, AfterViewInit, OnDestroy {
       senderId: this.currentUserId,
       type: event?.title,
     };
-    const currentUserReact = this.getUserReact(this.reactToMessageId!, react);
-    if (currentUserReact?.type != react.type) {
-      // add
+    const chat = this.chats.find((x) => x.id == this.reactToMessageId);
+    const currentUserReact = this.getUserReact(
+      this.reactToMessageId!,
+      this.currentUserId
+    );
+    let deleteReact$: Observable<any> = of(null)
+    let addReact$: Observable<any> = of(null);
+    if (currentUserReact) {
+      deleteReact$ = this.deleteReact(chat!, currentUserReact);
     }
-
-    this.httpservice.addReact(react, this.threadId, this.reactToMessageId!);
+    if (!currentUserReact || currentUserReact?.type != react.type) {
+      // add
+      addReact$ = this.addReact(react, chat!);
+    }
+    deleteReact$
+      .pipe(
+        takeUntil(this.ngUnsubscribe),
+        concatMap(() => addReact$)
+      )
+      .subscribe(() => {});
   }
 
-  getUserReact(messageId: string, react: Reaction) {
+  getUserReact(messageId: string, userId: string) {
     let chat = this.chats.find((x) => x.id == messageId);
-    const pos = chat?.reactLocations?.[react.type];
-    if (!pos) return null;
-    const currentUserReact = chat?.groupedReactions?.[pos].reactions.find(
-      (x) => x.senderId == this.currentUserId
-    );
-    if (!currentUserReact) return null;
+    const currentUserReact = chat?.groupedReactions
+      .map((x) => x.reactions.find((y) => y.senderId == userId))
+      .find((z) => z);
+    // const pos = chat?.reactLocations?.[react.type];
+    // if (!pos) return null;
+    // const currentUserReact = chat?.groupedReactions?.[pos].reactions.find(
+    //   (x) => x.senderId == this.currentUserId
+    // );
+    // if (!currentUserReact) return null;
     return currentUserReact;
   }
 
   deleteReact(chat: ChatUi, react: Reaction) {
-    this.httpservice
+    return this.httpservice
       .deleteReact(react.id!, this.threadId, chat.id!)
-      .pipe(take(1))
-      .subscribe((res) => {
-        const reactions = chat?.groupedReactions?.find(
-          (x) => x.title == react.type
-        )?.reactions;
-        
-        const index = reactions?.findIndex((x) => x.id == react.id);
-        if (index && index != -1) {
-          reactions?.splice(index, 1);
+      .pipe(
+        takeUntil(this.ngUnsubscribe),
+        map((res) => {
+          const reactions = chat?.groupedReactions?.find(
+            (x) => x.title == react.type
+          )?.reactions;
+
+          const index = reactions?.findIndex((x) => x.id == react.id);
+          if (index != undefined && index != -1) {
+            reactions?.splice(index, 1);
+          }
+        })
+      );
+  }
+
+  addReact(react: Reaction, chat: ChatUi) {
+    return this.httpservice.addReact(react, this.threadId, chat.id!).pipe(
+      takeUntil(this.ngUnsubscribe),
+      map((res: Reaction) => {
+        let location = chat?.reactLocations?.[react.type];
+        if (location == undefined)
+          location = chat?.groupedReactions?.length ?? 0;
+        chat.reactLocations[react.type] = location;
+        if (chat.groupedReactions.length == location) {
+          chat.groupedReactions.push({ title: react.type, reactions: [] });
         }
-      });
+        chat.groupedReactions[location].reactions.push(res);
+      })
+    );
   }
 
   deleteMsg(event: any) {}

@@ -29,9 +29,10 @@
           <div class="text">{{ msg.content }}</div>
           <div class="timestamp">{{ msg.sentAt | date : "MMM d, h:mm a" }}</div>
         </div>
-        @if (msg.groupedReactions?.length) {
+        @if (msg.groupedReactions.length) {
         <div class="reaction-line">
           @for (item of msg.groupedReactions; track $index) {
+          @if(item.reactions.length > 0){
           <span class="reaction-bubble" [title]="getTitles(item.reactions)">
             <i
               [class]="reactionModalsDict.get(item.title)?.class"
@@ -39,7 +40,7 @@
             ></i>
             <span class="reaction-count">{{ item.reactions.length }}</span>
           </span>
-          }
+          } }
         </div>
         }
       </div>

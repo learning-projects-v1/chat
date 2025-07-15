@@ -21,8 +21,8 @@ export class ChatUi implements Chat {
   sentAt: Date = new Date();
   reactions?: Reaction[] | undefined;
 
-  groupedReactions?: GroupedReactions[];
-  reactLocations?: locationDict;
+  groupedReactions: GroupedReactions[] = [];
+  reactLocations: locationDict = {};
 
   /**
    *

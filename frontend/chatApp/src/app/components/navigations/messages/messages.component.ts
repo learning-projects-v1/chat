@@ -6,6 +6,7 @@ import { Subject, takeUntil } from "rxjs";
 import { NotificationService } from "../../../core/services/notification.service";
 import { Chat, ChatThreadPreview, UserInfoDto } from "../../../models/Dtos";
 import { FriendInfoService } from "../../../core/global/friend-info.service";
+import { UserService } from "../../../core/services/auth.service";
 
 export interface ConnectedUser {
   userId: string;
@@ -25,12 +26,14 @@ export class MessagesComponent implements OnInit, OnDestroy {
   chats: Chat[] = [];
   ngUnsubscribe: Subject<void> = new Subject<void>();
   friendInfosMap: Map<string, UserInfoDto> = new Map();
+  currentUser?: UserInfoDto;
 
   constructor(
     private router: Router,
     private httpService: HttpClientService,
     private notificationService: NotificationService,
-    private friendInfoService: FriendInfoService
+    private friendInfoService: FriendInfoService,
+    private userInfoService: UserService
   ) {}
 
   ngOnInit(): void {
@@ -46,7 +49,8 @@ export class MessagesComponent implements OnInit, OnDestroy {
       .subscribe((res) => {
         // this.messagePreviews.push(res);
       });
-      this.friendInfosMap = this.friendInfoService.getFriendInfosMap();
+
+      this.friendInfosMap = this.friendInfoService.getFriendInfosMap();   
   }
 
   getUserName(id: string){
