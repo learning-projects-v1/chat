@@ -23,4 +23,13 @@ public class NotificationHub : Hub
         await Groups.AddToGroupAsync(Context.ConnectionId, userId);
     }
 
+    public async Task JoinThread(string threadId)
+    {
+        await Groups.AddToGroupAsync(Context.ConnectionId, threadId);
+    }
+
+    public async Task LeaveThread(string threadId)
+    {
+        await Groups.RemoveFromGroupAsync(Context.ConnectionId, threadId);
+    }
 }

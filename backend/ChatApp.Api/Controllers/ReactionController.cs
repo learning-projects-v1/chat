@@ -1,4 +1,5 @@
 ﻿using ChatApp.API.Helper;
+using ChatApp.API.Hubs;
 using ChatApp.Application.DTOs;
 using ChatApp.Application.Interfaces;
 using ChatApp.Domain.Models;
@@ -15,27 +16,35 @@ public class ReactionController : ControllerBase
     private readonly IReactionRepository _reactionRepository;
     private readonly IMessageRepository _messageRepository;
     private readonly IUnitOfWork _unitOfWork;
-    public ReactionController(IReactionRepository reactionRepository, IUnitOfWork unitOfWork, IMessageRepository messageRepository)
+    private readonly IChatThreadMemberRepository _chatThreadMemberRepository;
+    private readonly IRealTimeNotifier _realTimeNotifier;
+    public ReactionController(IReactionRepository reactionRepository, IUnitOfWork unitOfWork, IMessageRepository messageRepository, IChatThreadMemberRepository chatThreadMemberRepository, IRealTimeNotifier notifier
+        )
     {
         _reactionRepository = reactionRepository;
         _unitOfWork = unitOfWork;
         _messageRepository = messageRepository;
+        _chatThreadMemberRepository = chatThreadMemberRepository;
+        _realTimeNotifier = notifier;
     }
     [HttpPost("")]
-    public async Task<IActionResult> AddReaction(Guid threadId, Guid messageId, ReactionDto reactionDto)
+    public async Task<IActionResult> AddReaction(ReactionDto reactionDto)
     {
         var userId = UserClaimsHelper.GetUserId(User);
-        var message = await _messageRepository.GetItemByIdAsync(messageId);
+        var message = await _messageRepository.GetItemByIdAsync(reactionDto.MessageId);
         var reaction = new Reaction
         {
             UpdatedAt = DateTime.UtcNow,
-            ReactionToMessageId = messageId,
+            ReactionToMessageId = reactionDto.MessageId,
             UserId = userId,
             Type = reactionDto.Type,
         };
         await _reactionRepository.AddAsync(reaction);
         await _unitOfWork.SaveChangesAsync();
         reactionDto.Id = reaction.Id;
+
+        var threadParticipents = await _chatThreadMemberRepository.GetThreadMembersAsync(reactionDto.ThreadId);
+        await _realTimeNotifier.NotifyReact(threadParticipents.Select(x => x.Id.ToString()).ToList(), reactionDto);
         return Ok(reactionDto);
     }
 
@@ -46,5 +55,13 @@ public class ReactionController : ControllerBase
         _reactionRepository.RemoveAsync(reaction);
         await _unitOfWork.SaveChangesAsync();
         return Ok(new { message = "deleted" });
+    }
+
+    [HttpPost("update")]
+    public async Task<IActionResult> UpdateReaction(ReactionDto reactionDto)
+    {
+
+        //var existingReaction = await _reactionRepository.Get
+        return default;
     }
 }

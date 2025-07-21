@@ -4,7 +4,7 @@ import { environment } from "../../environments/environment";
 import { LoginRequest, RegisterRequest } from "../../models/AuthModels";
 import { apiEndpoints } from "../api-endpoints";
 import { Observable } from "rxjs";
-import { Chat, ChatOverview, ChatThread, ChatThreadPreview, UserInfoDto, User, Reaction } from "../../models/Dtos";
+import { Chat, ChatOverview, ChatThread, ChatThreadPreview, UserInfoDto, User, ReactionDto } from "../../models/Dtos";
 
 @Injectable({providedIn: "root"})
 export class HttpClientService{   
@@ -64,8 +64,8 @@ export class HttpClientService{
         return this.http.post<Chat>(apiEndpoints.SendMessage(messagePayload.chatThreadId), messagePayload);
     } 
  
-    addReact(reaction: Reaction, threadId: string, messageId: string){
-        return this.http.post<Reaction>(apiEndpoints.AddReaction(threadId, messageId), reaction)    
+    addReact(reaction: ReactionDto){
+        return this.http.post<ReactionDto>(apiEndpoints.AddReaction(reaction.threadId!, reaction.messageId!), reaction)    
     }
 
     deleteReact(reactId: string, threadId: string, messageId: string){

@@ -11,4 +11,7 @@ public class ReactionDto
     public Guid Id { get; set; }
     public string Type { get; set; }
     public Guid SenderId { get; set;}
+    public Guid ThreadId { get; set; }
+    public Guid MessageId { get; set; }
+    public DateTime UpdatedAt { get; set; }
 }

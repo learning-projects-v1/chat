@@ -21,7 +21,8 @@ import {
   IncomingMessageNotification,
   User,
   Chat,
-  Reaction,
+  IncomingReactionNotification,
+  ReactionDto,
 } from "../../../models/Dtos";
 import { FormsModule } from "@angular/forms";
 import { NotificationService } from "../../../core/services/notification.service";
@@ -107,10 +108,16 @@ export class ChatThreadComponent implements OnInit, AfterViewInit, OnDestroy {
     this.notificationService.messageReceived$
       .pipe(takeUntil(this.ngUnsubscribe))
       .subscribe((incomingMessage: IncomingMessageNotification) => {
-        this.chats.push(new ChatUi(incomingMessage.chat));
-        setTimeout(() => this.scrollToBottom(), 50);
-        //test purpose
-        this.toastr.show("Message received");
+        if(this.chats.find(x => x.id !== incomingMessage.chat.id)){
+          this.chats.push(new ChatUi(incomingMessage.chat));
+        }
+      });
+
+    this.notificationService.reactionReceived(this.threadId)
+      .pipe(takeUntil(this.ngUnsubscribe))
+      .subscribe((incomingReaction: IncomingReactionNotification) => {
+        const chat = this.chats.find(x => x.id == incomingReaction.messageId);
+        chat?.updateByLatestReaction(incomingReaction);
       });
 
     this.currentUserInfo = this.userService.getUserInfo();
@@ -118,7 +125,7 @@ export class ChatThreadComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   ngAfterViewInit(): void {
-    setTimeout(() => this.scrollToBottom(), 50);
+    setTimeout(() => this.scrollToBottom());
     this.focusInput();
     document.addEventListener("click", this.handleDocumentClick);
   }
@@ -177,30 +184,43 @@ export class ChatThreadComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   reactTo(event: reactionModal) {
-    const react: Reaction = {
+    const react: ReactionDto = {
       senderId: this.currentUserId,
       type: event?.title,
+      messageId: this.reactToMessageId!,
+      threadId: this.threadId,
     };
-    const chat = this.chats.find((x) => x.id == this.reactToMessageId);
-    const currentUserReact = this.getUserReact(
-      this.reactToMessageId!,
-      this.currentUserId
-    );
-    let deleteReact$: Observable<any> = of(null)
-    let addReact$: Observable<any> = of(null);
-    if (currentUserReact) {
-      deleteReact$ = this.deleteReact(chat!, currentUserReact);
-    }
-    if (!currentUserReact || currentUserReact?.type != react.type) {
-      // add
-      addReact$ = this.addReact(react, chat!);
-    }
-    deleteReact$
-      .pipe(
-        takeUntil(this.ngUnsubscribe),
-        concatMap(() => addReact$)
-      )
-      .subscribe(() => {});
+    this.httpservice.addReact(react).pipe(takeUntil(this.ngUnsubscribe)).subscribe(res => {
+      /// react success
+    })
+
+
+    // const chat = this.chats.find((x) => x.id == this.reactToMessageId);
+    // const currentUserReact = this.getUserReact(
+    //   this.reactToMessageId!,
+    //   this.currentUserId
+    // );
+    // let deleteReact$: Observable<any> = of(null);
+    // let addReact$: Observable<any> = of(null);
+    // if (currentUserReact) {
+    //   deleteReact$ = this.deleteReact(chat!, currentUserReact);
+    // }
+    // if (!currentUserReact || currentUserReact?.type != react.type) {
+    //   // add
+    //   const reactDto = {
+    //     ...react,
+    //     messageId: this.reactToMessageId,
+    //     threadId: this.threadId,
+    //   } as ReactionDto;
+
+    //   addReact$ = this.addReact(reactDto, chat!);
+    // }
+    // deleteReact$
+    //   .pipe(
+    //     takeUntil(this.ngUnsubscribe),
+    //     concatMap(() => addReact$)
+    //   )
+    //   .subscribe(() => {});
   }
 
   getUserReact(messageId: string, userId: string) {
@@ -217,39 +237,48 @@ export class ChatThreadComponent implements OnInit, AfterViewInit, OnDestroy {
     return currentUserReact;
   }
 
-  deleteReact(chat: ChatUi, react: Reaction) {
-    return this.httpservice
-      .deleteReact(react.id!, this.threadId, chat.id!)
-      .pipe(
-        takeUntil(this.ngUnsubscribe),
-        map((res) => {
-          const reactions = chat?.groupedReactions?.find(
-            (x) => x.title == react.type
-          )?.reactions;
+  // deleteReact(chat: ChatUi, react: ReactionDto) {
+  //   return this.httpservice
+  //     .deleteReact(react.id!, this.threadId, chat.id!)
+  //     .pipe(
+  //       takeUntil(this.ngUnsubscribe),
+  //       map((res) => {
+  //         const reactions = chat?.groupedReactions?.find(
+  //           (x) => x.title == react.type
+  //         )?.reactions;
 
-          const index = reactions?.findIndex((x) => x.id == react.id);
-          if (index != undefined && index != -1) {
-            reactions?.splice(index, 1);
-          }
-        })
-      );
-  }
+  //         const index = reactions?.findIndex((x) => x.id == react.id);
+  //         if (index != undefined && index != -1) {
+  //           reactions?.splice(index, 1);
+  //         }
+  //       })
+  //     );
+  // }
 
-  addReact(react: Reaction, chat: ChatUi) {
-    return this.httpservice.addReact(react, this.threadId, chat.id!).pipe(
-      takeUntil(this.ngUnsubscribe),
-      map((res: Reaction) => {
-        let location = chat?.reactLocations?.[react.type];
-        if (location == undefined)
-          location = chat?.groupedReactions?.length ?? 0;
-        chat.reactLocations[react.type] = location;
-        if (chat.groupedReactions.length == location) {
-          chat.groupedReactions.push({ title: react.type, reactions: [] });
-        }
-        chat.groupedReactions[location].reactions.push(res);
-      })
-    );
-  }
+  // addReactUi(react: Reaction, chat: ChatUi) {
+  //   if(!chat)return;
+  //   if(!chat.groupedReactions)chat.groupedReactions = [];
+  //   if(!chat.reactLocations)chat.reactLocations = {};
+
+  //   let location = chat.reactLocations?.[react.type];
+  //   if (location == undefined) location = chat.groupedReactions.length ?? 0;
+  //   chat.reactLocations[react.type] = location;
+  //   if (chat.groupedReactions.length == location) {
+  //     chat.groupedReactions.push({ title: react.type, reactions: [] });
+  //   }
+  //   if(!chat.groupedReactions[location].reactions.find(x => x.id == react.id)){
+  //     chat.groupedReactions[location].reactions.push(react);
+  //   }
+  // }
+
+  // addReact(react: ReactionDto, chat: ChatUi) {
+  //   return this.httpservice.addReact(react).pipe(
+  //     takeUntil(this.ngUnsubscribe),
+  //     map((res: Reaction) => {
+  //     //  this.addReactUi(res, chat);
+  //     })
+  //   );
+  // }
 
   deleteMsg(event: any) {}
 
@@ -272,8 +301,8 @@ export class ChatThreadComponent implements OnInit, AfterViewInit, OnDestroy {
       .sendMessage(messagePayload)
       .subscribe((sentMessage: Chat) => {
         this.newMessage = "";
-        this.chats.push(new ChatUi(sentMessage));
-        setTimeout(() => this.scrollToBottom(), 50);
+        // this.chats.push(new ChatUi(sentMessage));
+        // setTimeout(() => this.scrollToBottom(), 50);
       });
   }
 
@@ -329,7 +358,7 @@ export class ChatThreadComponent implements OnInit, AfterViewInit, OnDestroy {
     }
   };
 
-  getTitles(reactions: Reaction[]): string {
+  getTitles(reactions: ReactionDto[]): string {
     return reactions.map((r) => this.userNameMap[r.senderId]).join(",");
   }
 

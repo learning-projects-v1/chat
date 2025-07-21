@@ -23,8 +23,13 @@ public class RealTimeNotifier : IRealTimeNotifier
         await _hubContext.Clients.Groups(ReceiverId.ToString()).SendAsync(GlobalConstants.MessageReceived, payload);
     }
 
-    public Task NotifyMessageToAll(Guid threadId, ChatPreviewDto payload)
+    public async Task NotifyMessageToAll(List<string> threadMembers, ChatPreviewDto payload)
     {
-        throw new NotImplementedException();
+        await Task.WhenAll(threadMembers.Select((t) => _hubContext.Clients.Group(t).SendAsync(GlobalConstants.MessageAllNotification, payload)));
+    }
+
+    public async Task NotifyReact(List<string> threadMembers, ReactionDto reaction)
+    {
+        await Task.WhenAll(threadMembers.Select((t) => _hubContext.Clients.Group(t).SendAsync(GlobalConstants.ReactionNotification, reaction)));
     }
 }

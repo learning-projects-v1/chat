@@ -13,14 +13,9 @@ export interface Chat {
   isSeen?: boolean;
   replyToMessageId?: string;
   sentAt: Date; // ISO string, will be parsed to Date
-  reactions?: Reaction[]
+  reactions?: ReactionDto[]
 }
 
-export interface Reaction{
-  id?: string,
-  type: string,
-  senderId: string
-}
 
 export interface ChatOverview {
   id?: string,
@@ -53,4 +48,15 @@ export interface IncomingMessageNotification{
   chat: Chat
 }
 
-export type locationDict = {[title: string]: number}
+export interface ReactionDto{
+  id?: string,
+  type: string,
+  senderId: string,
+  threadId?: string,
+  messageId?: string,
+  UpdatedAt?: Date
+}
+
+export type IncomingReactionNotification = ReactionDto;
+
+export type locationDict = {[title: string]: number }

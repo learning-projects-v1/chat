@@ -9,7 +9,7 @@ namespace ChatApp.Application.Interfaces;
 
 public interface IChatThreadMemberRepository : IRepository<ChatThreadMember>
 {
-    Task<List<User>> GetThreadMembers(Guid threadId);
-    Task<List<ChatThread>> GetAllJoinedThreads(Guid userId);
+    Task<List<User>> GetThreadMembersAsync(Guid threadId);
+    Task<List<ChatThread>> GetAllJoinedThreadsAsync(Guid userId);
     Task<bool> IsMember(Guid threadId, Guid userId);
 }

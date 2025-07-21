@@ -20,7 +20,7 @@ public class ChatThreadMemberRepository : BaseRepository<ChatThreadMember>, ICha
         _context = context;
     }
 
-    public async Task<List<ChatThread>> GetAllJoinedThreads(Guid userId)
+    public async Task<List<ChatThread>> GetAllJoinedThreadsAsync(Guid userId)
     {
        return  await _context.ChatThreadMembers
             .Where(x => x.UserId == userId)
@@ -30,7 +30,7 @@ public class ChatThreadMemberRepository : BaseRepository<ChatThreadMember>, ICha
               ).ToListAsync();
     }
 
-    public async Task<List<User>> GetThreadMembers(Guid threadId)
+    public async Task<List<User>> GetThreadMembersAsync(Guid threadId)
     {
         /// maybe use navigation properties later instead of join
         var y = await _context.ChatThreadMembers

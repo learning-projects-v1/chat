@@ -47,7 +47,7 @@ public class MessagesController: ControllerBase
             .Select( r => new ReactionDto { Id = r.Id, Type = r.Type, SenderId = r.UserId})
             .ToList()
         }).ToList();
-        var senders = await _chatThreadMemberRepository.GetThreadMembers(threadId);
+        var senders = await _chatThreadMemberRepository.GetThreadMembersAsync(threadId);
         var sendersDict = senders.ToDictionary(s => s.Id, t => new UserInfoDto()
         {
             FullName = t.FullName,
@@ -102,23 +102,27 @@ public class MessagesController: ControllerBase
         await _unitOfWork.SaveChangesAsync();
         //await _realTimeNotifier.NotifyMessage(message.ReceiverId, payload);
         chatDto.Id = message.Id;
-        _ = Task.Run(async () =>
-        {
-            var threadMembers = await _chatThreadMemberRepository.GetThreadMembers(chatDto.ChatThreadId);
-            var tasks = threadMembers.Where(t => t.Id != chatDto.SenderId)
-                .Select(async t =>
-                {
-                    try
-                    {
-                        await _realTimeNotifier.NotifyMessage(t.Id, payload);
-                    }
-                    catch (Exception ex)
-                    {
-                        Console.WriteLine($"Failed to notify sent message to user {t.UserName}");
-                    }
-                });
-            await Task.WhenAll(tasks);
-        });
+        var threadMembers = await _chatThreadMemberRepository.GetThreadMembersAsync(chatDto.ChatThreadId);
+        await _realTimeNotifier.NotifyMessageToAll(threadMembers.Select(x => x.Id.ToString()).ToList(), payload);
+        //_ = Task.Run(async () =>
+        //{
+        //    var threadMembers = await _chatThreadMemberRepository.GetThreadMembersAsync(chatDto.ChatThreadId);
+        //    var tasks = threadMembers.Where(t => t.Id != chatDto.SenderId)
+        //        .Select(async t =>
+        //        {
+        //            try
+        //            {
+        //                await _realTimeNotifier.NotifyMessage(t.Id, payload);
+        //            }
+        //            catch (Exception ex)
+        //            {
+        //                Console.WriteLine($"Failed to notify sent message to user {t.UserName}");
+        //            }
+        //        });
+        //    await Task.WhenAll(tasks);
+        //});
+
+
         return Ok(chatDto); 
     }
 }

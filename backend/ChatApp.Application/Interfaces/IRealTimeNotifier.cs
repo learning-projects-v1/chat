@@ -11,6 +11,6 @@ public interface IRealTimeNotifier
 {
     Task NotifyFriendRequest(string ReceiverId, FriendRequestResponse payload);
     Task NotifyMessage(Guid ReceiverId, ChatPreviewDto payload);
-    Task NotifyMessageToAll(Guid threadId, ChatPreviewDto payload);
-
+    Task NotifyMessageToAll(List<string> threadMembers, ChatPreviewDto payload);
+    Task NotifyReact(List<string> threadMembers, ReactionDto reaction);
 }

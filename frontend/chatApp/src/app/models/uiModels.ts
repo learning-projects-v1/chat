@@ -1,4 +1,4 @@
-import { Chat, locationDict, Reaction } from "./Dtos";
+import { Chat, locationDict, ReactionDto} from "./Dtos";
 
 export interface NavItem {
   label: string;
@@ -8,7 +8,7 @@ export interface NavItem {
 
 export type GroupedReactions = {
   title: string;
-  reactions: Reaction[];
+  reactions: ReactionDto[];
 };
 
 export class ChatUi implements Chat {
@@ -19,7 +19,7 @@ export class ChatUi implements Chat {
   isSeen?: boolean | undefined;
   replyToMessageId?: string | undefined;
   sentAt: Date = new Date();
-  reactions?: Reaction[] | undefined;
+  reactions?: ReactionDto[] | undefined;
 
   groupedReactions: GroupedReactions[] = [];
   reactLocations: locationDict = {};
@@ -39,26 +39,42 @@ export class ChatUi implements Chat {
     this.GroupReactions(chat?.reactions);
   }
 
-  addReaction(reaction: Reaction) {}
+  private addReaction(reaction: ReactionDto) {}
 
-  removeReaction(reaction: Reaction) {}
+  private removeReaction(id: string) {
 
-  GroupReactions(reactionDtos?: Reaction[]){
-    let groupedReactions: GroupedReactions[] = [];
-    let positions: { [title: string]: number } = {};
-
-    reactionDtos?.forEach((r) => {
-      if (positions && positions[r.type]!= undefined) {
-        const id = positions[r.type];
-        groupedReactions[id].reactions.push(r);
-      } else {
-        positions[r.type] = groupedReactions.length;
-        groupedReactions.push({ title: r.type, reactions: [r] });
-      }
-    });
-    this.groupedReactions = groupedReactions;
-    this.reactLocations = positions;
   }
+
+  updateByLatestReaction(reaction: ReactionDto){
+
+  }
+
+  GroupReactions(reactionDtos?: ReactionDto[]){
+    reactionDtos?.forEach(r => {
+      let index = this.groupedReactions.findIndex(x => x.title == r.type);
+      if(index == -1){
+        this.groupedReactions.push({title: r.type, reactions: []});
+        index = this.groupedReactions.length - 1;
+      }
+      this.groupedReactions[index].reactions.push(r);
+    })
+  }
+  // GroupReactions(reactionDtos?: Reaction[]){
+  //   let groupedReactions: GroupedReactions[] = [];
+  //   let positions: { [title: string]: number } = {};
+
+  //   reactionDtos?.forEach((r) => {
+  //     if (positions && positions[r.type]!= undefined) {
+  //       const id = positions[r.type];
+  //       groupedReactions[id].reactions.push(r);
+  //     } else {
+  //       positions[r.type] = groupedReactions.length;
+  //       groupedReactions.push({ title: r.type, reactions: [r] });
+  //     }
+  //   });
+  //   this.groupedReactions = groupedReactions;
+  //   this.reactLocations = positions;
+  // }
 
   static GetAllChats(chats: Chat[]){
     let chatsUi : ChatUi[] = [];
