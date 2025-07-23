@@ -52,7 +52,7 @@ public class ReactionController : ControllerBase
     public async Task<IActionResult> DeleteReaction(Guid threadId, Guid messageId, Guid reactId)
     {
         var reaction = await _reactionRepository.GetItemByIdAsync(reactId);
-        _reactionRepository.RemoveAsync(reaction);
+        _reactionRepository.Remove(reaction);
         await _unitOfWork.SaveChangesAsync();
         return Ok(new { message = "deleted" });
     }
@@ -60,8 +60,34 @@ public class ReactionController : ControllerBase
     [HttpPost("update")]
     public async Task<IActionResult> UpdateReaction(ReactionDto reactionDto)
     {
-
-        //var existingReaction = await _reactionRepository.Get
-        return default;
+        var existingReaction = await _reactionRepository.GetReaction(reactionDto.MessageId, reactionDto.SenderId);
+        if (existingReaction == null) {
+            var reaction = new Reaction
+            {
+                Type = reactionDto.Type,
+                UpdatedAt = DateTime.UtcNow,
+                UserId = reactionDto.SenderId,
+                ReactionToMessageId = reactionDto.MessageId,
+            };
+            await _reactionRepository.AddAsync(reaction);
+            await _unitOfWork.SaveChangesAsync();
+            reactionDto.Id = reaction.Id;
+        }
+        else
+        {
+            if(reactionDto.Type == existingReaction.Type)
+            {
+                _reactionRepository.Remove(existingReaction);
+                reactionDto.Type = "";
+            }
+            else
+            {
+                existingReaction.Type = reactionDto.Type;
+            }
+            await _unitOfWork.SaveChangesAsync();
+        }
+        var threadMembers = await _chatThreadMemberRepository.GetThreadMembersAsync(reactionDto.ThreadId);
+        await _realTimeNotifier.NotifyReact(threadMembers.Select(x => x.Id.ToString()).ToList(), reactionDto);
+        return Ok(new { message = "OK" });
     }
 }

@@ -28,4 +28,10 @@ public class ReactionRepository : BaseRepository<Reaction>, IReactionRepository
             .ToListAsync();
         return reactions;
     }
+
+    public async Task<Reaction> GetReaction(Guid messageId, Guid userId)
+    {
+        var reaction = await _context.Reactions.FirstOrDefaultAsync(r => r.ReactionToMessageId == messageId && r.UserId == userId);
+        return reaction;
+    }
 }

@@ -30,6 +30,7 @@ public class RealTimeNotifier : IRealTimeNotifier
 
     public async Task NotifyReact(List<string> threadMembers, ReactionDto reaction)
     {
+        Console.WriteLine("Reaction Notification sent!");
         await Task.WhenAll(threadMembers.Select((t) => _hubContext.Clients.Group(t).SendAsync(GlobalConstants.ReactionNotification, reaction)));
     }
 }

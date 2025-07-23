@@ -15,12 +15,16 @@ public class ChatOverviewController: ControllerBase
     private readonly IFriendshipRepository _friendshipRepository;
     private readonly IUnitOfWork _unitOfWork;
     private readonly IMessageRepository _messageRepository;
-    public ChatOverviewController(IUserRepository userRepository, IFriendshipRepository friendshipRepository, IUnitOfWork unitOfWork, IMessageRepository messageRepository)
+    private readonly IChatThreadRepository _chatThreadRepository;
+    private readonly IChatThreadMemberRepository _chatThreadMemberRepository;
+    public ChatOverviewController(IUserRepository userRepository, IFriendshipRepository friendshipRepository, IUnitOfWork unitOfWork, IMessageRepository messageRepository, IChatThreadRepository chatThreadRepository, IChatThreadMemberRepository chatThreadMemberRepository)
     {
         _userRepository = userRepository;
         _friendshipRepository = friendshipRepository;
         _unitOfWork = unitOfWork;
         _messageRepository = messageRepository;
+        _chatThreadRepository = chatThreadRepository;
+        _chatThreadMemberRepository = chatThreadMemberRepository;
     }
 
     [HttpGet()]
@@ -30,51 +34,20 @@ public class ChatOverviewController: ControllerBase
         var latestMessages = await _messageRepository.GetLatestMessages(userId);
         var orderedMessages = latestMessages.OrderByDescending(c => c.SentAt).ToList();
         var chatDtos = orderedMessages.Select(m => new ChatDto(m)).ToList();
+        foreach(var chatDto in chatDtos)
+        {
+            var threadInfo = await _chatThreadRepository.GetItemByIdAsync(chatDto.ChatThreadId);
+            if (threadInfo.IsGroup)
+            {
+                chatDto.ChatTitle = threadInfo.ThreadName;
+            }
+            else
+            {
+                var threadMembers = await _chatThreadMemberRepository.GetThreadMembersAsync(chatDto.ChatThreadId);
+                var otherMember = threadMembers.FirstOrDefault(x => x.Id != userId);
+                chatDto.ChatTitle = otherMember.UserName;
+            }
+        }
         return Ok(chatDtos);
-
-        //var friends = await _friendshipRepository.GetAllFriendsAsync(userId);
-        //var latestMessages = await _messageRepository.GetLatestMessages(userId);
-        //var latestMessagesDict = latestMessages.ToDictionary(m => m.ChatThreadId, m => m);
-        //var results = new List<ChatPreviewDto>();
-
-        //foreach(var friend in friends)
-        //{
-        //    latestMessagesDict.TryGetValue(friend.Id, out var message);
-        //    if(message == null)
-        //    {
-        //        message = new()
-        //        {
-        //            Content = "No messages yet",
-        //            Id = Guid.NewGuid(),
-        //            SenderId = Guid.Empty,
-        //            ReceiverId = userId,
-        //            IsSeen = false,
-        //            SentAt = DateTime.MinValue,
-        //        };
-        //    }
-        //    var chatDto = new ChatDto()
-        //    {
-        //        Id = message.Id,
-        //        Content = message.Content ?? "No messages yet",
-        //        SentAt = message.SentAt,
-        //        IsSeen = false,
-        //        ReceiverId = message.ReceiverId,
-        //        SenderId = message.SenderId
-        //    };
-
-        //    var friendInfoDto = new SenderInfo()
-        //    {
-        //        Id = friend.Id,
-        //        Username = friend.UserName,
-        //    };
-
-        //    results.Add(new ChatPreviewDto()
-        //    {
-        //        Chat = chatDto,
-        //        SenderInfo = friendInfoDto,
-        //    });
-        //}
-        //results = results.OrderByDescending(r => r.Chat.SentAt).ToList();
-        //return Ok(latestMessages.OrderByDescending(c => c.SentAt).ToList());
     }
 }

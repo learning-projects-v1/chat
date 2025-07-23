@@ -104,25 +104,6 @@ public class MessagesController: ControllerBase
         chatDto.Id = message.Id;
         var threadMembers = await _chatThreadMemberRepository.GetThreadMembersAsync(chatDto.ChatThreadId);
         await _realTimeNotifier.NotifyMessageToAll(threadMembers.Select(x => x.Id.ToString()).ToList(), payload);
-        //_ = Task.Run(async () =>
-        //{
-        //    var threadMembers = await _chatThreadMemberRepository.GetThreadMembersAsync(chatDto.ChatThreadId);
-        //    var tasks = threadMembers.Where(t => t.Id != chatDto.SenderId)
-        //        .Select(async t =>
-        //        {
-        //            try
-        //            {
-        //                await _realTimeNotifier.NotifyMessage(t.Id, payload);
-        //            }
-        //            catch (Exception ex)
-        //            {
-        //                Console.WriteLine($"Failed to notify sent message to user {t.UserName}");
-        //            }
-        //        });
-        //    await Task.WhenAll(tasks);
-        //});
-
-
         return Ok(chatDto); 
     }
 }

@@ -50,7 +50,7 @@ public class MessagesRepository : BaseRepository<Message>, IMessageRepository
         var reactionsWithUsers = _context.Reactions.Include(r => r.User);
         var messages = await _context.Messages
             .Where(m => m.ChatThreadId == threadId)
-            .OrderByDescending(m => m.SentAt)           /// may use limit later
+            .OrderBy(m => m.SentAt)           /// may use limit later
             .GroupJoin(reactionsWithUsers, a => a.Id, b => b.ReactionToMessageId, (a, b) => new Message {
                 Id = a.Id,
                 ChatThreadId = a.ChatThreadId,

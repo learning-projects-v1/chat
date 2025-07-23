@@ -190,7 +190,7 @@ export class ChatThreadComponent implements OnInit, AfterViewInit, OnDestroy {
       messageId: this.reactToMessageId!,
       threadId: this.threadId,
     };
-    this.httpservice.addReact(react).pipe(takeUntil(this.ngUnsubscribe)).subscribe(res => {
+    this.httpservice.updateReact(react).pipe(takeUntil(this.ngUnsubscribe)).subscribe(res => {
       /// react success
     })
 
@@ -228,57 +228,9 @@ export class ChatThreadComponent implements OnInit, AfterViewInit, OnDestroy {
     const currentUserReact = chat?.groupedReactions
       .map((x) => x.reactions.find((y) => y.senderId == userId))
       .find((z) => z);
-    // const pos = chat?.reactLocations?.[react.type];
-    // if (!pos) return null;
-    // const currentUserReact = chat?.groupedReactions?.[pos].reactions.find(
-    //   (x) => x.senderId == this.currentUserId
-    // );
-    // if (!currentUserReact) return null;
+    
     return currentUserReact;
   }
-
-  // deleteReact(chat: ChatUi, react: ReactionDto) {
-  //   return this.httpservice
-  //     .deleteReact(react.id!, this.threadId, chat.id!)
-  //     .pipe(
-  //       takeUntil(this.ngUnsubscribe),
-  //       map((res) => {
-  //         const reactions = chat?.groupedReactions?.find(
-  //           (x) => x.title == react.type
-  //         )?.reactions;
-
-  //         const index = reactions?.findIndex((x) => x.id == react.id);
-  //         if (index != undefined && index != -1) {
-  //           reactions?.splice(index, 1);
-  //         }
-  //       })
-  //     );
-  // }
-
-  // addReactUi(react: Reaction, chat: ChatUi) {
-  //   if(!chat)return;
-  //   if(!chat.groupedReactions)chat.groupedReactions = [];
-  //   if(!chat.reactLocations)chat.reactLocations = {};
-
-  //   let location = chat.reactLocations?.[react.type];
-  //   if (location == undefined) location = chat.groupedReactions.length ?? 0;
-  //   chat.reactLocations[react.type] = location;
-  //   if (chat.groupedReactions.length == location) {
-  //     chat.groupedReactions.push({ title: react.type, reactions: [] });
-  //   }
-  //   if(!chat.groupedReactions[location].reactions.find(x => x.id == react.id)){
-  //     chat.groupedReactions[location].reactions.push(react);
-  //   }
-  // }
-
-  // addReact(react: ReactionDto, chat: ChatUi) {
-  //   return this.httpservice.addReact(react).pipe(
-  //     takeUntil(this.ngUnsubscribe),
-  //     map((res: Reaction) => {
-  //     //  this.addReactUi(res, chat);
-  //     })
-  //   );
-  // }
 
   deleteMsg(event: any) {}
 
@@ -337,6 +289,7 @@ export class ChatThreadComponent implements OnInit, AfterViewInit, OnDestroy {
 
   showReactionButtons(msg: Chat, event: MouseEvent) {
     setTimeout(() => {
+
       const modalHeight = 34;
       const modalWidth = 140;
       const target = (event.target as HTMLElement).closest("button");
@@ -346,6 +299,7 @@ export class ChatThreadComponent implements OnInit, AfterViewInit, OnDestroy {
         left: rect!.left - modalWidth / 2,
       };
       this.reactToMessageId = msg.id ?? "";
+ 
     });
   }
 

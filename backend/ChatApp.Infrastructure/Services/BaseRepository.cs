@@ -26,12 +26,12 @@ public class BaseRepository<T> : IRepository<T> where T : class
         return await _context.FindAsync<T>(id);
     }
 
-    public void RemoveAsync(T entity, CancellationToken cancellationToken = default)
+    public void Remove(T entity, CancellationToken cancellationToken = default)
     {
         _context.Remove<T>(entity);
     }
 
-    public void UpdateAsync(T entity, CancellationToken cancellationToken = default)
+    public void Update(T entity, CancellationToken cancellationToken = default)
     {
         _context.Update<T>(entity);
     }

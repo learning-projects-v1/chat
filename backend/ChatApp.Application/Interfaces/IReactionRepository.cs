@@ -11,4 +11,5 @@ public interface IReactionRepository : IRepository<Reaction>
 {
     Task<List<Reaction>> GetReactions(Guid messageId);
     Task<List<Reaction>> GetAllReactions(Guid ThreadId);
+    Task<Reaction> GetReaction(Guid messageId, Guid userId);
 }

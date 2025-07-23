@@ -6,12 +6,9 @@
     @if(chats && chats.length > 0){
       @for(chat of chats; track chat.id){
       <div class="card" (click)="goToChat(chat.chatThreadId)">
-        <!-- <div class="avatar">{{ messagePreview.friendInfo.username}}</div> -->
         <div class="info">
-          <div class="name">{{ friendInfosMap.get(chat.senderId)?.username  ?? "username"}} </div>
-          <!-- <div class="name">{{ getUserName(chat.senderId)}} </div> -->
-
-          <div class="mutual">{{ chat.content }}</div>
+          <div class="name">{{ chat.chatTitle ?? "UserName"}} </div>
+          <div class="mutual"><strong>{{friendInfosMap.get(chat.senderId)?.username}}</strong>: {{ chat.content }}</div>
           <div class="time">{{ chat.sentAt| date: 'MMM d, h:mm a'  }}</div>
         </div>
       </div>

@@ -17,6 +17,7 @@ public class ChatDto
     public Guid? ReplyToMessageId { get; set; }
     public DateTime SentAt { get; set; }
     public List<ReactionDto>? Reactions { get; set; }
+    public string? ChatTitle { get; set; }
     public ChatDto()
     {
            

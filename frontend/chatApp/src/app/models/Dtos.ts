@@ -6,14 +6,15 @@ export interface User{
 }
 
 export interface Chat {
-  id?: string;
-  content: string;
-  senderId: string;
-  chatThreadId: string;
-  isSeen?: boolean;
-  replyToMessageId?: string;
-  sentAt: Date; // ISO string, will be parsed to Date
-  reactions?: ReactionDto[]
+  id?: string,
+  content: string,
+  senderId: string,
+  chatThreadId: string,
+  isSeen?: boolean,
+  replyToMessageId?: string,
+  sentAt: Date, // ISO string, will be parsed to Date
+  reactions?: ReactionDto[],
+  chatTitle?: string
 }
 
 

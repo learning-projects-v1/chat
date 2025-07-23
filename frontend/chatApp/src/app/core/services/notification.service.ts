@@ -1,7 +1,7 @@
 import * as signalR from "@microsoft/signalr";
 import { Injectable } from "@angular/core";
 import { apiEndpoints } from "../api-endpoints";
-import { BehaviorSubject, filter, Observable, Subject } from "rxjs";
+import { BehaviorSubject, concatWith, filter, Observable, Subject } from "rxjs";
 import {
   ChatOverview,
   ChatThread,
@@ -41,6 +41,9 @@ export class NotificationService {
       })
       .catch(console.error);
 
+    this.hubConnection.onclose(err => {
+      console.warn("Hub disconnecetd");
+    })
     this.hubConnection.on(
       GlobalConstants.FriendRequestReceived,
       (payload: FriendRequestReceivedResponse) => {

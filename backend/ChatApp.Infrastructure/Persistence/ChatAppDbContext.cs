@@ -97,9 +97,6 @@ public class ChatAppDbContext : DbContext
             .HasForeignKey(m => m.ReactionToMessageId);
 
             entity
-                .HasIndex(r => r.ReactionToMessageId);
-
-            entity
             .HasOne<User>(r => r.User)
             .WithMany()
             .HasForeignKey(m => m.UserId);
@@ -113,10 +110,6 @@ public class ChatAppDbContext : DbContext
                   .HasMaxLength(20);
         });
 
-        //modelBuilder.Entity<ChatThread>(entity =>
-        //{
-
-        //});
 
         modelBuilder.Entity<ChatThreadMember>(entity =>
         {

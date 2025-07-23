@@ -62,8 +62,12 @@ export class HttpClientService{
 
     sendMessage(messagePayload: Chat) {
         return this.http.post<Chat>(apiEndpoints.SendMessage(messagePayload.chatThreadId), messagePayload);
-    } 
- 
+    }
+
+    updateReact(reaction: ReactionDto){
+        return this.http.post<ReactionDto>(apiEndpoints.UpdateReaction(reaction.threadId!, reaction.messageId!), reaction)    
+    }
+
     addReact(reaction: ReactionDto){
         return this.http.post<ReactionDto>(apiEndpoints.AddReaction(reaction.threadId!, reaction.messageId!), reaction)    
     }

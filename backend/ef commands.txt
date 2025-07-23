@@ -1,5 +1,5 @@
 
-dotnet ef migrations add "build error fix 4" --project ChatApp.Infrastructure --startup-project ChatApp.API
+dotnet ef migrations add "ef reaction model index changed" --project ChatApp.Infrastructure --startup-project ChatApp.API
 
 dotnet ef database update --project ChatApp.Infrastructure --startup-project ChatApp.API
 

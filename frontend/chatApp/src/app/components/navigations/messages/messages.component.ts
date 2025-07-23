@@ -53,6 +53,10 @@ export class MessagesComponent implements OnInit, OnDestroy {
       this.friendInfosMap = this.friendInfoService.getFriendInfosMap();   
   }
 
+  getChatHeader(){
+
+  }
+  
   getUserName(id: string){
     let val =  this.friendInfosMap.get(id);
     return val?.username;

@@ -46,7 +46,19 @@ export class ChatUi implements Chat {
   }
 
   updateByLatestReaction(reaction: ReactionDto){
-
+    const userReact = this.groupedReactions.find(g => g.reactions.find(r => r.senderId == reaction.senderId));
+    if(userReact){
+      let indx = userReact.reactions.findIndex(x => x.senderId == reaction.senderId);
+      userReact.reactions.splice(indx, 1);
+    }
+    if(reaction.type){
+      let indx = this.groupedReactions.findIndex(g => g.title == reaction.type);
+      if(indx == -1){
+        this.groupedReactions.push({title : reaction.type, reactions: []});
+        indx = this.groupedReactions.length - 1;
+      }
+      this.groupedReactions[indx].reactions.push(reaction);
+    }
   }
 
   GroupReactions(reactionDtos?: ReactionDto[]){
