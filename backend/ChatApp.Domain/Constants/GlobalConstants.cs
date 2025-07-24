@@ -12,6 +12,8 @@ public static class GlobalConstants
     public static string FriendRequestReceived = "FriendRequestReceived";
     public static string MessageAllNotification = "MessageAllNotification";
     public static string ReactionNotification = "ReactionNotification";
+    public static string MessageSeenNotification = "MessageSeenNotification";
+
     public static class AuthorizationPolicy
     {
         public static string ThreadMember = "ThreadMember";

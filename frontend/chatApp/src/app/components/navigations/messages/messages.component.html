@@ -1,18 +1,18 @@
-<div class="messages-container">
-  <h2>Chats</h2>
+  <div class="messages-container">
+    <h2>Chats</h2>
 
 
-  <div class="card-list-vertical">
-    @if(chats && chats.length > 0){
-      @for(chat of chats; track chat.id){
-      <div class="card" (click)="goToChat(chat.chatThreadId)">
-        <div class="info">
-          <div class="name">{{ chat.chatTitle ?? "UserName"}} </div>
-          <div class="mutual"><strong>{{friendInfosMap.get(chat.senderId)?.username}}</strong>: {{ chat.content }}</div>
-          <div class="time">{{ chat.sentAt| date: 'MMM d, h:mm a'  }}</div>
+    <div class="card-list-vertical">
+      @if(chats && chats.length > 0){
+        @for(chat of chats; track chat.id){
+        <div class="card" (click)="goToChat(chat.chatThreadId)">
+          <div class="info">
+            <div class="name">{{ chat.chatTitle ?? "UserName"}} </div>
+            <div class="mutual"><strong>{{friendInfosMap.get(chat.senderId)?.username}}</strong>: {{ chat.content }}</div>
+            <div class="time">{{ chat.sentAt| date: 'MMM d, h:mm a'  }}</div>
+          </div>
         </div>
-      </div>
+        }
       }
-    }
+    </div>
   </div>
-</div>

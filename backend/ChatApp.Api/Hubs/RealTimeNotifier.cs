@@ -23,6 +23,11 @@ public class RealTimeNotifier : IRealTimeNotifier
         await _hubContext.Clients.Groups(ReceiverId.ToString()).SendAsync(GlobalConstants.MessageReceived, payload);
     }
 
+    public async Task NotifyMessagesSeenStatus(List<string> threadMembers, List<MessageSeenStatusDto> seenStatuses)
+    {
+        await Task.WhenAll(threadMembers.Select((t) => _hubContext.Clients.Group(t).SendAsync(GlobalConstants.MessageSeenNotification, seenStatuses)));
+    }
+
     public async Task NotifyMessageToAll(List<string> threadMembers, ChatPreviewDto payload)
     {
         await Task.WhenAll(threadMembers.Select((t) => _hubContext.Clients.Group(t).SendAsync(GlobalConstants.MessageAllNotification, payload)));
@@ -30,7 +35,6 @@ public class RealTimeNotifier : IRealTimeNotifier
 
     public async Task NotifyReact(List<string> threadMembers, ReactionDto reaction)
     {
-        Console.WriteLine("Reaction Notification sent!");
         await Task.WhenAll(threadMembers.Select((t) => _hubContext.Clients.Group(t).SendAsync(GlobalConstants.ReactionNotification, reaction)));
     }
 }

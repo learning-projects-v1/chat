@@ -174,7 +174,6 @@ public class DataSeeder
                     Id = Guid.NewGuid(),
                     ChatThreadId = member.ChatThreadId,
                     Content = messageText,
-                    IsSeen = false,
                     SenderId = member.UserId,
                     SentAt = new DateTime(2025, 6, 11, random.Next(24), random.Next(60), random.Next(60), DateTimeKind.Utc)
                 };
@@ -209,7 +208,6 @@ public class DataSeeder
                     {
                         Content = content,
                         Id = Guid.NewGuid(),
-                        IsSeen = false,
                         ChatThreadId = threadId,
                         SenderId = threadMembers[memberIndex].UserId,
                         SentAt = new DateTime(2025, 6, 11, random.Next(24), random.Next(60), random.Next(60), DateTimeKind.Utc)

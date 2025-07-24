@@ -13,9 +13,10 @@ public class ChatDto
     public string Content { get; set; }
     public Guid SenderId { get; set; }
     public Guid ChatThreadId { get; set; }
-    public bool IsSeen { get; set; } = false;
     public Guid? ReplyToMessageId { get; set; }
     public DateTime SentAt { get; set; }
+    public bool IsSeen { get; set; } = false;
+    public List<MessageSeenStatus>? MessageSeenStatuses { get; set; }
     public List<ReactionDto>? Reactions { get; set; }
     public string? ChatTitle { get; set; }
     public ChatDto()

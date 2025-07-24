@@ -1,4 +1,5 @@
-﻿using ChatApp.Domain.Models;
+﻿using ChatApp.Application.DTOs;
+using ChatApp.Domain.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,5 +10,6 @@ namespace ChatApp.Application.Interfaces;
 
 public interface IMessageSeenStatusRepository : IRepository<MessageSeenStatus>
 {
-    Task<User> GetSeenUsers(Guid messageId);
+    Task<MessageSeenStatus> GetSeenStatuses(Guid messageId);
+    Task BatchUpdateSeenStatusAsync(IEnumerable<MessageSeenStatus> messageSeenStatuses);
 }

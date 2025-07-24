@@ -1,9 +1,11 @@
-﻿using ChatApp.Application.DTOs;
+﻿using ChatApp.API.Helper;
+using ChatApp.Application.DTOs;
 using ChatApp.Application.Interfaces;
 using ChatApp.Application.Mappings;
 using ChatApp.Domain.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.SignalR;
 using System.Security.Claims;
 
 namespace ChatApp.API.Controllers;
@@ -17,9 +19,11 @@ public class MessagesController: ControllerBase
     IUserRepository _userRepository;
     IChatThreadRepository _chatThreadRepository;
     IChatThreadMemberRepository _chatThreadMemberRepository;
+    IMessageSeenStatusRepository _messageSeenStatusRepository;
     IUnitOfWork _unitOfWork;
     IRealTimeNotifier _realTimeNotifier;
-    public MessagesController(IMessageRepository messageRepository, IUnitOfWork unitOfWork, IUserRepository userRepository, IRealTimeNotifier notifier, IChatThreadRepository chatThreadRepository, IChatThreadMemberRepository chatThreadMemberRepository)
+
+    public MessagesController(IMessageRepository messageRepository, IUnitOfWork unitOfWork, IUserRepository userRepository, IRealTimeNotifier notifier, IChatThreadRepository chatThreadRepository, IChatThreadMemberRepository chatThreadMemberRepository, IMessageSeenStatusRepository messageSeenStatusRepository)
     {
         _messageRepository = messageRepository;
         _unitOfWork = unitOfWork;
@@ -27,6 +31,7 @@ public class MessagesController: ControllerBase
         _realTimeNotifier = notifier;
         _chatThreadRepository = chatThreadRepository;
         _chatThreadMemberRepository = chatThreadMemberRepository;
+        _messageSeenStatusRepository = messageSeenStatusRepository;
     }
 
     // get all messages in a thread
@@ -70,7 +75,6 @@ public class MessagesController: ControllerBase
         var message = new Message()
         {
             Content = chatDto.Content,
-            IsSeen = chatDto.IsSeen,
             ChatThreadId = chatDto.ChatThreadId,
             ReplyToMessageId = chatDto.ReplyToMessageId,
             SentAt = chatDto.SentAt,
@@ -105,5 +109,32 @@ public class MessagesController: ControllerBase
         var threadMembers = await _chatThreadMemberRepository.GetThreadMembersAsync(chatDto.ChatThreadId);
         await _realTimeNotifier.NotifyMessageToAll(threadMembers.Select(x => x.Id.ToString()).ToList(), payload);
         return Ok(chatDto); 
+    }
+
+    [HttpPost("seen-status")]
+    public async Task<IActionResult> UpdateMessageSeenStatuses(List<Guid> messageIds, Guid threadId)
+    {
+        var userId = UserClaimsHelper.GetUserId(User);
+        var seenStatuses = messageIds.Select(id => new MessageSeenStatus
+        { 
+            MessageId = id,
+            SeenAt = DateTime.UtcNow,
+            UserId = userId
+        });
+        await _messageSeenStatusRepository.BatchUpdateSeenStatusAsync(seenStatuses);
+        await _unitOfWork.SaveChangesAsync();
+
+        var seenStatusDtos = seenStatuses
+            .Select(x => new MessageSeenStatusDto() {
+                Id = x.Id,
+                SeenAt = x.SeenAt,
+                MessageId = x.MessageId,
+                UserId = userId,
+                ThreadId = threadId
+            }).ToList();
+
+        var threadMembers = await _chatThreadMemberRepository.GetThreadMembersAsync(threadId);
+        await _realTimeNotifier.NotifyMessagesSeenStatus(threadMembers.Select(x => x.Id.ToString()).ToList(), seenStatusDtos);
+        return Ok(messageIds);
     }
 }
