@@ -1,4 +1,4 @@
-import { Chat, locationDict, ReactionDto} from "./Dtos";
+import { Chat, locationDict, ReactionDto, SeenStatus} from "./Dtos";
 
 export interface NavItem {
   label: string;
@@ -16,14 +16,13 @@ export class ChatUi implements Chat {
   content: string = "";
   senderId: string = "";
   chatThreadId: string = "";
-  isSeen?: boolean | undefined;
   replyToMessageId?: string | undefined;
   sentAt: Date = new Date();
   reactions?: ReactionDto[] | undefined;
-
   groupedReactions: GroupedReactions[] = [];
   reactLocations: locationDict = {};
-
+  messageSeenStatuses?: SeenStatus[];
+  chatTitle?: string | undefined;
   /**
    *
    */
@@ -31,13 +30,15 @@ export class ChatUi implements Chat {
     this.chatThreadId = chat?.chatThreadId;
     this.content = chat?.content;
     this.id = chat?.id;
-    this.isSeen = chat?.isSeen;
+    this.messageSeenStatuses = chat?.messageSeenStatuses;
     this.replyToMessageId = chat?.replyToMessageId;
     this.sentAt = chat?.sentAt;
     this.senderId = chat?.senderId;
     this.reactions = chat?.reactions;
     this.GroupReactions(chat?.reactions);
   }
+
+
 
   private addReaction(reaction: ReactionDto) {}
 

@@ -6,6 +6,7 @@ import {
   HostListener,
   OnDestroy,
   OnInit,
+  viewChild,
   ViewChild,
 } from "@angular/core";
 import { ActivatedRoute } from "@angular/router";
@@ -42,6 +43,7 @@ import { ToastrService } from "ngx-toastr";
 import { RouteConstants } from "../../../core/constants";
 import { FriendInfoService } from "../../../core/global/friend-info.service";
 import { ChatUi } from "../../../models/uiModels";
+import { SeenObserverDirective } from "../../../seen-observer.directive";
 
 interface reactionModal {
   class: string;
@@ -58,6 +60,7 @@ interface reactionModal {
 export class ChatThreadComponent implements OnInit, AfterViewInit, OnDestroy {
   @ViewChild("scrollAnchor") private scrollAnchor!: ElementRef;
   @ViewChild("messageInput") messageInputRef!: ElementRef<HTMLInputElement>;
+  @ViewChild("scrollContainer") scrollContainer!: ElementRef;
 
   threadId: string = "";
   friendId!: string;
@@ -241,7 +244,6 @@ export class ChatThreadComponent implements OnInit, AfterViewInit, OnDestroy {
       senderId: this.currentUserId,
       sentAt: new Date(),
       chatThreadId: this.threadId,
-      isSeen: false,
     };
 
     if (this.replyToMessage) {
@@ -314,6 +316,22 @@ export class ChatThreadComponent implements OnInit, AfterViewInit, OnDestroy {
 
   getTitles(reactions: ReactionDto[]): string {
     return reactions.map((r) => this.userNameMap[r.senderId]).join(",");
+  }
+
+
+  onScroll(event: Event): void {
+    const target = event.target as HTMLElement;
+    const scrollTop = target.scrollTop;
+    const scrollHeight = target.scrollHeight;
+    const clientHeight = target.clientHeight;
+
+    const scrolledRatio = (scrollTop + clientHeight) / scrollHeight;
+    if (scrolledRatio > 0.8) {
+    // if (!this.seenCalled && scrolledRatio > 0.8) {
+      // this.seenCalled = true;
+      // this.updateSeenStatuses();
+      // this.httpservice
+    }
   }
 
   ngOnDestroy(): void {

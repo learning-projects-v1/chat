@@ -3,6 +3,7 @@ using System;
 using ChatApp.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace ChatApp.Infrastructure.Migrations
 {
     [DbContext(typeof(ChatAppDbContext))]
-    partial class ChatAppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250803014806_ef reaction index changed")]
+    partial class efreactionindexchanged
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -66,10 +69,9 @@ namespace ChatApp.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("UserId");
+                    b.HasIndex("ChatThreadId");
 
-                    b.HasIndex("ChatThreadId", "UserId")
-                        .IsUnique();
+                    b.HasIndex("UserId");
 
                     b.ToTable("ChatThreadMembers");
                 });
@@ -146,6 +148,9 @@ namespace ChatApp.Infrastructure.Migrations
                     b.Property<Guid>("MessageId")
                         .HasColumnType("uuid");
 
+                    b.Property<Guid?>("MessageId1")
+                        .HasColumnType("uuid");
+
                     b.Property<DateTime>("SeenAt")
                         .HasColumnType("timestamp with time zone");
 
@@ -155,6 +160,8 @@ namespace ChatApp.Infrastructure.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("MessageId");
+
+                    b.HasIndex("MessageId1");
 
                     b.ToTable("MessageSeenStatuses");
                 });
@@ -246,21 +253,17 @@ namespace ChatApp.Infrastructure.Migrations
 
             modelBuilder.Entity("ChatApp.Domain.Models.ChatThreadMember", b =>
                 {
-                    b.HasOne("ChatApp.Domain.Models.ChatThread", "Thread")
-                        .WithMany("ThreadMembers")
+                    b.HasOne("ChatApp.Domain.Models.ChatThread", null)
+                        .WithMany()
                         .HasForeignKey("ChatThreadId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("ChatApp.Domain.Models.User", "User")
-                        .WithMany("Members")
+                    b.HasOne("ChatApp.Domain.Models.User", null)
+                        .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-
-                    b.Navigation("Thread");
-
-                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("ChatApp.Domain.Models.Friendship", b =>
@@ -312,13 +315,15 @@ namespace ChatApp.Infrastructure.Migrations
 
             modelBuilder.Entity("ChatApp.Domain.Models.MessageSeenStatus", b =>
                 {
-                    b.HasOne("ChatApp.Domain.Models.Message", "Message")
-                        .WithMany("SeenStatuses")
+                    b.HasOne("ChatApp.Domain.Models.Message", null)
+                        .WithMany()
                         .HasForeignKey("MessageId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("Message");
+                    b.HasOne("ChatApp.Domain.Models.Message", null)
+                        .WithMany("SeenStatuses")
+                        .HasForeignKey("MessageId1");
                 });
 
             modelBuilder.Entity("ChatApp.Domain.Models.Reaction", b =>
@@ -340,11 +345,6 @@ namespace ChatApp.Infrastructure.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("ChatApp.Domain.Models.ChatThread", b =>
-                {
-                    b.Navigation("ThreadMembers");
-                });
-
             modelBuilder.Entity("ChatApp.Domain.Models.Message", b =>
                 {
                     b.Navigation("Reactions");
@@ -357,8 +357,6 @@ namespace ChatApp.Infrastructure.Migrations
                     b.Navigation("FriendRequestsReceived");
 
                     b.Navigation("FriendRequestsSent");
-
-                    b.Navigation("Members");
 
                     b.Navigation("ReceivedMessages");
 

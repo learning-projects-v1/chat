@@ -50,7 +50,8 @@ public class MessagesController: ControllerBase
             SentAt = m.SentAt,
             Reactions = m.Reactions
             .Select( r => new ReactionDto { Id = r.Id, Type = r.Type, SenderId = r.UserId})
-            .ToList()
+            .ToList(),
+            MessageSeenStatuses = m.SeenStatuses.ToList()
         }).ToList();
         var senders = await _chatThreadMemberRepository.GetThreadMembersAsync(threadId);
         var sendersDict = senders.ToDictionary(s => s.Id, t => new UserInfoDto()

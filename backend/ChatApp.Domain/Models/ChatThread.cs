@@ -13,4 +13,7 @@ public class ChatThread
     public string? AvatarUrl { get; set; }
     public DateTime CreatedAt { get; set; }
     public bool IsGroup { get; set; }
+
+    // navigation
+    public ICollection<ChatThreadMember> ThreadMembers { get; set; }
 }

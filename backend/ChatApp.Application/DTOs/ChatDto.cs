@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 
 namespace ChatApp.Application.DTOs;
 
+// todo: later add IsSeen for optimizing current user seen status get/update
 public class ChatDto
 {
     public Guid Id { get; set; }

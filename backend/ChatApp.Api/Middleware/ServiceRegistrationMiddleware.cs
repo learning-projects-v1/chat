@@ -17,7 +17,7 @@ public static class ServiceRegistrationMiddleware
         services.AddScoped<IChatThreadMemberRepository, ChatThreadMemberRepository>();
         services.AddScoped<IChatThreadRepository, ChatThreadRepository>();
         services.AddScoped<IReactionRepository, ReactionRepository>();
-        //services.AddScoped<IMessageSeenStatusRepository, MessageSeenS>();
+        services.AddScoped<IMessageSeenStatusRepository, MessageSeenStatusRepository>();
         services.AddScoped<IRealTimeNotifier, RealTimeNotifier>();
         services.AddScoped<IUnitOfWork, UnitOfWork>();
         services.AddScoped<IAuthService, AuthService>();

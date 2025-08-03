@@ -45,24 +45,31 @@ public class MessagesRepository : BaseRepository<Message>, IMessageRepository
         return messages;
     }
 
+    // replace with include later
     public async Task<List<Message>> GetChatsWithReactions(Guid threadId)
     {
-        var reactionsWithUsers = _context.Reactions.Include(r => r.User);
-        var messages = await _context.Messages
+        var allMessages = await _context
+            .Messages
             .Where(m => m.ChatThreadId == threadId)
-            .OrderBy(m => m.SentAt)           /// may use limit later
-            .GroupJoin(reactionsWithUsers, a => a.Id, b => b.ReactionToMessageId, (a, b) => new Message {
-                Id = a.Id,
-                ChatThreadId = a.ChatThreadId,
-                Content = a.Content,
-                ReplyToMessageId = a.ReplyToMessageId,
-                SenderId = a.SenderId,
-                SentAt = a.SentAt,
-                Reactions = b.ToList()
-            })
-            .ToListAsync();
+            .Include(m => m.Reactions)
+            .Include(m => m.SeenStatuses).ToListAsync();
+            
+        //var reactionsWithUsers = _context.Reactions.Include(r => r.User);
+        //var messages = await _context.Messages
+        //    .Where(m => m.ChatThreadId == threadId)
+        //    .OrderBy(m => m.SentAt)           /// may use limit later
+        //    .GroupJoin(reactionsWithUsers, a => a.Id, b => b.ReactionToMessageId, (a, b) => new Message {
+        //        Id = a.Id,
+        //        ChatThreadId = a.ChatThreadId,
+        //        Content = a.Content,
+        //        ReplyToMessageId = a.ReplyToMessageId,
+        //        SenderId = a.SenderId,
+        //        SentAt = a.SentAt,
+        //        Reactions = b.ToList()
+        //    })
+        //    .ToListAsync();
 
-        return messages;
+        return allMessages;
     }
 
 }

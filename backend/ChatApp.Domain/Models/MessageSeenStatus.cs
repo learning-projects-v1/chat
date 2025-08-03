@@ -12,4 +12,7 @@ public class MessageSeenStatus
     public Guid MessageId { get; set; }
     public Guid UserId { get; set; }
     public DateTime SeenAt { get; set; }
+
+    // navigation
+    public Message Message { get; set; }
 }

@@ -14,10 +14,12 @@ public class Message
     public string Content { get; set; }
     public DateTime SentAt { get; set; } = DateTime.UtcNow;
     public Guid? ReplyToMessageId { get; set; }
-    // references
+    
+
+    // navigation properties
     public User Sender { get; set; }
     //public ChatThread ChatThread { get; set; }
     public Message ReplyToMessage { get; set; }
     public ICollection<Reaction> Reactions { get; set; }
-    public ICollection<MessageSeenStatus> SeenStatus { get; set; }
+    public ICollection<MessageSeenStatus> SeenStatuses { get; set; }
 }

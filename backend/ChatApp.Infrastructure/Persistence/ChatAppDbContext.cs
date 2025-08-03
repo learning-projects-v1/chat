@@ -93,7 +93,7 @@ public class ChatAppDbContext : DbContext
             /// message - reaction
             entity
             .HasOne<Message>(r => r.ReactionToMessage)
-            .WithMany()
+            .WithMany(m => m.Reactions)
             .HasForeignKey(m => m.ReactionToMessageId);
 
             entity
@@ -113,25 +113,31 @@ public class ChatAppDbContext : DbContext
 
         modelBuilder.Entity<ChatThreadMember>(entity =>
         {
-            entity
-                .HasOne<ChatThread>()
-                .WithMany()
-                .HasForeignKey(c => c.ChatThreadId);
+            entity.HasKey(e => e.Id);
 
             entity
-                .HasOne<User>()
-                .WithMany()
-                .HasForeignKey(c => c.UserId);
+                .HasOne(e => e.Thread)
+                .WithMany(t => t.ThreadMembers)
+                .HasForeignKey(e => e.ChatThreadId)
+                .OnDelete(DeleteBehavior.Cascade);
 
-            entity.HasIndex(e => e.UserId);
-            entity.HasIndex(e => e.ChatThreadId);
+            entity
+                .HasOne(e => e.User)
+                .WithMany(u => u.Members)
+                .HasForeignKey(e => e.UserId)
+                .IsRequired()
+                .OnDelete(DeleteBehavior.Cascade);
 
+            entity
+                .HasIndex(e => new { e.ChatThreadId, e.UserId })
+                .IsUnique();
         });
+
 
         modelBuilder.Entity<MessageSeenStatus>(entity =>
         {
-            entity.HasOne<Message>()
-            .WithMany()
+            entity.HasOne<Message>(e => e.Message)
+            .WithMany(m => m.SeenStatuses)
             .HasForeignKey(m => m.MessageId);
 
             entity.HasIndex(e => e.MessageId);
