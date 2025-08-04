@@ -1,5 +1,5 @@
 
-dotnet ef migrations add "user to thread members navigation added" --project ChatApp.Infrastructure --startup-project ChatApp.API
+dotnet ef migrations add "user to thread members navigation added 4" --project ChatApp.Infrastructure --startup-project ChatApp.API
 
 dotnet ef database update --project ChatApp.Infrastructure --startup-project ChatApp.API
 

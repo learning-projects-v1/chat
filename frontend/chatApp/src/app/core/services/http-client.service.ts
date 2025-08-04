@@ -76,6 +76,10 @@ export class HttpClientService{
         return this.http.delete(apiEndpoints.DeleteReaction(reactId, threadId, messageId))
     }
     
+    updateSeenStatus(threadId: string, messageIds: string[]){
+        return this.http.post(apiEndpoints.UpdateSeenStatus(threadId), messageIds)
+    }
+
     test(testMessage: string) {
         let  params = new HttpParams();
         params = params.append("message", testMessage);

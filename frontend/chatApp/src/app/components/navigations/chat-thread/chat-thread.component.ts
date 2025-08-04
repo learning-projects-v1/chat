@@ -1,13 +1,17 @@
 import {
+  AfterViewChecked,
   AfterViewInit,
   ChangeDetectorRef,
   Component,
   ElementRef,
   HostListener,
+  NgZone,
   OnDestroy,
   OnInit,
+  QueryList,
   viewChild,
   ViewChild,
+  ViewChildren,
 } from "@angular/core";
 import { ActivatedRoute } from "@angular/router";
 import { HttpClientService } from "../../../core/services/http-client.service";
@@ -24,6 +28,7 @@ import {
   Chat,
   IncomingReactionNotification,
   ReactionDto,
+  SeenStatus,
 } from "../../../models/Dtos";
 import { FormsModule } from "@angular/forms";
 import { NotificationService } from "../../../core/services/notification.service";
@@ -57,10 +62,13 @@ interface reactionModal {
   styleUrls: ["./chat-thread.component.scss"],
   imports: [CommonModule, FormsModule],
 })
-export class ChatThreadComponent implements OnInit, AfterViewInit, OnDestroy {
+export class ChatThreadComponent
+  implements OnInit, AfterViewInit, OnDestroy
+{
   @ViewChild("scrollAnchor") private scrollAnchor!: ElementRef;
   @ViewChild("messageInput") messageInputRef!: ElementRef<HTMLInputElement>;
   @ViewChild("scrollContainer") scrollContainer!: ElementRef;
+  @ViewChildren("messageElement") messageElements!: QueryList<ElementRef>;
 
   threadId: string = "";
   friendId!: string;
@@ -78,6 +86,9 @@ export class ChatThreadComponent implements OnInit, AfterViewInit, OnDestroy {
   reactionModals: reactionModal[] = [];
   friendInfosMap: UserInfoDto[] = [];
   reactionModalsDict: Map<string, reactionModal> = new Map();
+  hasUpdatedSeenStatus: boolean = false;
+  hoveredMessageId: string | null = null;
+  hasScrolledInitially = false;
 
   constructor(
     private route: ActivatedRoute,
@@ -86,7 +97,8 @@ export class ChatThreadComponent implements OnInit, AfterViewInit, OnDestroy {
     private notificationService: NotificationService,
     private toastr: ToastrService,
     private cdRef: ChangeDetectorRef,
-    private friendInfoService: FriendInfoService
+    private friendInfoService: FriendInfoService,
+    private zone: NgZone
   ) {
     this.reactionModals = [
       { class: "fas fa-thumbs-up", title: "Like", style: "color:#3b82f6;" },
@@ -111,15 +123,16 @@ export class ChatThreadComponent implements OnInit, AfterViewInit, OnDestroy {
     this.notificationService.messageReceived$
       .pipe(takeUntil(this.ngUnsubscribe))
       .subscribe((incomingMessage: IncomingMessageNotification) => {
-        if(this.chats.find(x => x.id !== incomingMessage.chat.id)){
+        if (this.chats.find((x) => x.id !== incomingMessage.chat.id)) {
           this.chats.push(new ChatUi(incomingMessage.chat));
         }
       });
 
-    this.notificationService.reactionReceived(this.threadId)
+    this.notificationService
+      .reactionReceived(this.threadId)
       .pipe(takeUntil(this.ngUnsubscribe))
       .subscribe((incomingReaction: IncomingReactionNotification) => {
-        const chat = this.chats.find(x => x.id == incomingReaction.messageId);
+        const chat = this.chats.find((x) => x.id == incomingReaction.messageId);
         chat?.updateByLatestReaction(incomingReaction);
       });
 
@@ -128,7 +141,12 @@ export class ChatThreadComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   ngAfterViewInit(): void {
-    setTimeout(() => this.scrollToBottom());
+    this.messageElements.changes.subscribe(() => {
+      if(!this.hasScrolledInitially){
+        this.scrollToBottom();
+        this.hasScrolledInitially = true;
+      }
+    });
     this.focusInput();
     document.addEventListener("click", this.handleDocumentClick);
   }
@@ -193,10 +211,12 @@ export class ChatThreadComponent implements OnInit, AfterViewInit, OnDestroy {
       messageId: this.reactToMessageId!,
       threadId: this.threadId,
     };
-    this.httpservice.updateReact(react).pipe(takeUntil(this.ngUnsubscribe)).subscribe(res => {
-      /// react success
-    })
-
+    this.httpservice
+      .updateReact(react)
+      .pipe(takeUntil(this.ngUnsubscribe))
+      .subscribe((res) => {
+        /// react success
+      });
 
     // const chat = this.chats.find((x) => x.id == this.reactToMessageId);
     // const currentUserReact = this.getUserReact(
@@ -231,7 +251,7 @@ export class ChatThreadComponent implements OnInit, AfterViewInit, OnDestroy {
     const currentUserReact = chat?.groupedReactions
       .map((x) => x.reactions.find((y) => y.senderId == userId))
       .find((z) => z);
-    
+
     return currentUserReact;
   }
 
@@ -291,7 +311,6 @@ export class ChatThreadComponent implements OnInit, AfterViewInit, OnDestroy {
 
   showReactionButtons(msg: Chat, event: MouseEvent) {
     setTimeout(() => {
-
       const modalHeight = 34;
       const modalWidth = 140;
       const target = (event.target as HTMLElement).closest("button");
@@ -301,7 +320,6 @@ export class ChatThreadComponent implements OnInit, AfterViewInit, OnDestroy {
         left: rect!.left - modalWidth / 2,
       };
       this.reactToMessageId = msg.id ?? "";
- 
     });
   }
 
@@ -318,8 +336,9 @@ export class ChatThreadComponent implements OnInit, AfterViewInit, OnDestroy {
     return reactions.map((r) => this.userNameMap[r.senderId]).join(",");
   }
 
-
   onScroll(event: Event): void {
+    if (this.hasUpdatedSeenStatus) return;
+
     const target = event.target as HTMLElement;
     const scrollTop = target.scrollTop;
     const scrollHeight = target.scrollHeight;
@@ -327,11 +346,23 @@ export class ChatThreadComponent implements OnInit, AfterViewInit, OnDestroy {
 
     const scrolledRatio = (scrollTop + clientHeight) / scrollHeight;
     if (scrolledRatio > 0.8) {
-    // if (!this.seenCalled && scrolledRatio > 0.8) {
-      // this.seenCalled = true;
-      // this.updateSeenStatuses();
-      // this.httpservice
+      this.hasUpdatedSeenStatus = true;
+      this.httpservice
+        .updateSeenStatus(
+          this.threadId,
+          this.chats.map((c) => c.id!)
+        )
+        .pipe(takeUntil(this.ngUnsubscribe))
+        .subscribe((res) => {
+          console.log("Updated: " + (res ?? "undefined"));
+        });
     }
+  }
+
+  getSeenStatusesText(seenStatuses: SeenStatus[]) {
+    return seenStatuses
+      .map((x) => this.userNameMap[x.userId] ?? "not found")
+      .join(",");
   }
 
   ngOnDestroy(): void {

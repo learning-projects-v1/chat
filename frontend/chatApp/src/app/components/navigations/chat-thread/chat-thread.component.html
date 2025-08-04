@@ -8,6 +8,7 @@
       *ngFor="let msg of chats"
       [class.mine]="isSenderMe(msg.senderId)"
       class="chat-container"
+      #messageElement
     >
       <div class="bubble-and-username">
         @if(msg.replyToMessageId){
@@ -25,10 +26,27 @@
           {{ userNameMap[msg.senderId] }}
         </div>
         }
+
         <div class="chat-bubble">
           <div class="text">{{ msg.content }}</div>
           <div class="timestamp">{{ msg.sentAt | date : "MMM d, h:mm a" }}</div>
+
+          <!-- seen by -->
+          <div
+            class="seen-by"
+            *ngIf="msg.messageSeenStatuses?.length"
+            (mouseenter)="hoveredMessageId = msg.id!"
+            (mouseleave)="hoveredMessageId = null"
+          >
+            <i class="fas fa-eye"></i>
+            <span class="count">{{ msg.messageSeenStatuses?.length }}</span>
+            <div class="seen-tooltip" *ngIf="hoveredMessageId === msg.id">
+              seen by {{ getSeenStatusesText(msg.messageSeenStatuses!) }}
+            </div>
+          </div>
+          <!-- seen by -->
         </div>
+
         @if (msg.groupedReactions.length) {
         <div class="reaction-line">
           @for (item of msg.groupedReactions; track $index) {

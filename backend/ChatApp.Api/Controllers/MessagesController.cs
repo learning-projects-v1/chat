@@ -51,7 +51,9 @@ public class MessagesController: ControllerBase
             Reactions = m.Reactions
             .Select( r => new ReactionDto { Id = r.Id, Type = r.Type, SenderId = r.UserId})
             .ToList(),
-            MessageSeenStatuses = m.SeenStatuses.ToList()
+            MessageSeenStatuses = m.SeenStatuses
+            .Select(x => new MessageSeenStatusDto { Id = x.Id, MessageId = x.MessageId, SeenAt = x.SeenAt, UserId = x.UserId, ThreadId = m.ChatThreadId})
+            .ToList()
         }).ToList();
         var senders = await _chatThreadMemberRepository.GetThreadMembersAsync(threadId);
         var sendersDict = senders.ToDictionary(s => s.Id, t => new UserInfoDto()
@@ -116,8 +118,13 @@ public class MessagesController: ControllerBase
     public async Task<IActionResult> UpdateMessageSeenStatuses(List<Guid> messageIds, Guid threadId)
     {
         var userId = UserClaimsHelper.GetUserId(User);
-        var seenStatuses = messageIds.Select(id => new MessageSeenStatus
-        { 
+        var userSeenMessages = await _messageSeenStatusRepository.GetUserSeenMessages(userId);
+        var seenThreadMessageIds = userSeenMessages.Where(m => m.Message.ChatThreadId == threadId).Select(x => x.MessageId).ToList();
+        var unseenMessageIds = messageIds.Except(seenThreadMessageIds).ToList();
+        //var unseenMessages = userSeenMessages.Where(u => (u.Message.ChatThreadId == threadId) && !messageIds.Contains(u.Message.Id));
+        var seenStatuses = unseenMessageIds.Select(id => new MessageSeenStatus
+        {
+            Id = Guid.NewGuid(),
             MessageId = id,
             SeenAt = DateTime.UtcNow,
             UserId = userId

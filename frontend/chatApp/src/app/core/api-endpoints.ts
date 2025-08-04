@@ -20,5 +20,7 @@ export const apiEndpoints = {
     
     AddReaction: (threadId: string, messageId: string) => `${environment.baseUrl}/api/threads/${threadId}/messages/${messageId}/reactions`,
     UpdateReaction: (threadId: string, messageId: string) => `${environment.baseUrl}/api/threads/${threadId}/messages/${messageId}/reactions/update`,
-    DeleteReaction: (reactId: string, threadId: string, messageId: string) => `${environment.baseUrl}/api/threads/${threadId}/messages/${messageId}/reactions/${reactId}`
+    DeleteReaction: (reactId: string, threadId: string, messageId: string) => `${environment.baseUrl}/api/threads/${threadId}/messages/${messageId}/reactions/${reactId}`,
+
+    UpdateSeenStatus: (threadId: string) => `${environment.baseUrl}/api/threads/${threadId}/messages/seen-status`
 }

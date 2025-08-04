@@ -12,4 +12,5 @@ public interface IMessageSeenStatusRepository : IRepository<MessageSeenStatus>
 {
     Task<MessageSeenStatus> GetSeenStatuses(Guid messageId);
     Task BatchUpdateSeenStatusAsync(IEnumerable<MessageSeenStatus> messageSeenStatuses);
+    Task<List<MessageSeenStatus>> GetUserSeenMessages(Guid userId);
 }

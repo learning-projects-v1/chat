@@ -17,7 +17,7 @@ public class ChatDto
     public Guid? ReplyToMessageId { get; set; }
     public DateTime SentAt { get; set; }
     public bool IsSeen { get; set; } = false;
-    public List<MessageSeenStatus>? MessageSeenStatuses { get; set; }
+    public List<MessageSeenStatusDto>? MessageSeenStatuses { get; set; }
     public List<ReactionDto>? Reactions { get; set; }
     public string? ChatTitle { get; set; }
     public ChatDto()

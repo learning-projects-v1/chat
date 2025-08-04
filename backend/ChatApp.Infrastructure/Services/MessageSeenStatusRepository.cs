@@ -1,6 +1,7 @@
 ﻿using ChatApp.Application.Interfaces;
 using ChatApp.Domain.Models;
 using ChatApp.Infrastructure.Persistence;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -25,5 +26,10 @@ public class MessageSeenStatusRepository : BaseRepository<MessageSeenStatus>, IM
     public Task<MessageSeenStatus> GetSeenStatuses(Guid messageId)
     {
         throw new NotImplementedException();
+    }
+
+    public async Task<List<MessageSeenStatus>> GetUserSeenMessages(Guid userId)
+    {
+        return await _context.MessageSeenStatuses.Where(m => m.UserId == userId).Include(m => m.Message).ToListAsync();
     }
 }
