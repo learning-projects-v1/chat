@@ -51,8 +51,10 @@ public class MessagesRepository : BaseRepository<Message>, IMessageRepository
         var allMessages = await _context
             .Messages
             .Where(m => m.ChatThreadId == threadId)
+            .OrderBy(m => m.SentAt)
             .Include(m => m.Reactions)
             .Include(m => m.SeenStatuses).ToListAsync();
+            
             
         //var reactionsWithUsers = _context.Reactions.Include(r => r.User);
         //var messages = await _context.Messages

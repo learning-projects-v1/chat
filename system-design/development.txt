@@ -1,30 +1,102 @@
+✅ Phase 1: Finalize Features Locally (Month 1–2)
+🧠 Focus: Build missing features, refine existing ones, prep for deployment
 
+🗓️ Month 1:
+✅ Group chat (SignalR, DB models, UI/UX)
 
-#todo:
+✅ Image/file upload (store locally, preview)
 
-#features:
-reply feature
-react feature
-notification on chat preview on new message
-notification on connections on update
-seen/unseen
-send image/txt file etc
-update profile pic
-group chat
-optimize when showing a long chat history
-pagination on connections tab
+✅ Seen/Read statuses per message in group
 
-#techs/tools
-testing
-graphql
-message broker
-containarize
-multiple api server
-multiple db, db technologies
-deploy
+➕ Start designing final data schema
 
-#maybe
-search on message
-audio call
-send anonymous message
-setting for whether to take anonymous message
+🗓️ Month 2:
+✅ Typing indicator
+
+✅ Notification icon with unseen count
+
+✅ Local image validation/resizing
+
+➕ Clean project structure, document API
+
+✅ Phase 2: Start Infra + Cloud Thinking (Month 3–4)
+🧠 Focus: Containerize, optimize codebase, simulate microservices
+
+🗓️ Month 3:
+🐳 Add Docker + Docker Compose
+
+🟦 Integrate Redis (for presence, caching, backplane)
+
+➕ Break chat & auth into separate services (if time allows)
+
+🗓️ Month 4:
+🚀 Set up PostgreSQL replica (read/write separation in code)
+
+✅ Add background job system (Hangfire or hosted worker)
+
+🛑 Add rate limiting using Redis
+
+✅ Phase 3: Deploy, Scale, Learn (Month 5–6)
+🧠 Focus: Cloud deployment, basic scale, build devops muscle
+
+🗓️ Month 5:
+☁️ Deploy to Render/Fly.io for fast CI/CD
+
+⬆️ Migrate image storage to Azure Blob or S3
+
+🧵 CDN setup for media via Cloudflare or Azure CDN
+
+🗓️ Month 6:
+🧩 Setup load balancer (Azure App Gateway or NGINX)
+
+🎯 Enable logging + basic observability (App Insights, Seq, etc.)
+
+➕ Add app-level monitoring dashboard (stats, users, messages sent)
+
+✅ Phase 4: Add Advanced Backend Features (Month 7–8)
+🧠 Focus: Scale simulations, system design showcase
+
+🗓️ Month 7:
+✳️ Add full-text search (Postgres FTS or ElasticSearch)
+
+📦 Simulate DB sharding (user/chat-group-based)
+
+🧊 Archive old messages in "cold" storage
+
+🗓️ Month 8:
+🔄 Add message queue (RabbitMQ or Azure Service Bus)
+
+🧠 Create retry logic, dead-letter support
+
+✏️ Design & test high-concurrency with Locust or k6
+
+✅ Phase 5: Interview Portfolio Polish (Month 9–10)
+🧠 Focus: Sell yourself; show it’s real-world ready
+
+🗓️ Month 9:
+📊 Build Admin dashboard (RBAC, moderation)
+
+✍️ Add architecture diagrams (C4 Model or draw.io)
+
+📘 Create deep-dive README + blog post
+
+🗓️ Month 10:
+🎥 Record 3-min walkthrough video
+
+🧪 Add unit/integration tests for services
+
+📦 Export API docs via Swagger
+
+✅ Phase 6: Extra Projects or Specialization (Month 11–12)
+🧠 Focus: Broaden impact — either Go, games, or a 2nd project
+
+Option A: 💻 Learn Go + mini backend project
+REST + goroutines + channels + Redis
+
+Deploy it with same infra knowledge
+
+Option B: 🎮 Build 1–2 small Unity games
+2D Tower Defense or multiplayer lobby-based game
+
+Publish on itch.io or Play Store
+

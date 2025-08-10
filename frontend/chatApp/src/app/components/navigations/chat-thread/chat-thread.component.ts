@@ -29,6 +29,7 @@ import {
   IncomingReactionNotification,
   ReactionDto,
   SeenStatus,
+  IncomingMessageSeenStatusNotification,
 } from "../../../models/Dtos";
 import { FormsModule } from "@angular/forms";
 import { NotificationService } from "../../../core/services/notification.service";
@@ -62,9 +63,7 @@ interface reactionModal {
   styleUrls: ["./chat-thread.component.scss"],
   imports: [CommonModule, FormsModule],
 })
-export class ChatThreadComponent
-  implements OnInit, AfterViewInit, OnDestroy
-{
+export class ChatThreadComponent implements OnInit, AfterViewInit, OnDestroy {
   @ViewChild("scrollAnchor") private scrollAnchor!: ElementRef;
   @ViewChild("messageInput") messageInputRef!: ElementRef<HTMLInputElement>;
   @ViewChild("scrollContainer") scrollContainer!: ElementRef;
@@ -89,6 +88,7 @@ export class ChatThreadComponent
   hasUpdatedSeenStatus: boolean = false;
   hoveredMessageId: string | null = null;
   hasScrolledInitially = false;
+  scrollTriggerRatio = 0.8;
 
   constructor(
     private route: ActivatedRoute,
@@ -125,6 +125,11 @@ export class ChatThreadComponent
       .subscribe((incomingMessage: IncomingMessageNotification) => {
         if (this.chats.find((x) => x.id !== incomingMessage.chat.id)) {
           this.chats.push(new ChatUi(incomingMessage.chat));
+          // this.hasScrolledInitially = false;
+          // const ratio = this.getScrolledRatio(this.scrollContainer.nativeElement);
+          // if(ratio > 0.95){
+          //   this.scrollToBottom();
+          // }
         }
       });
 
@@ -136,15 +141,48 @@ export class ChatThreadComponent
         chat?.updateByLatestReaction(incomingReaction);
       });
 
+    // todo: optimize later
+    this.notificationService
+      .messageSeenStatusUpdated(this.threadId)
+      .pipe(takeUntil(this.ngUnsubscribe))
+      .subscribe(
+        (
+          incomingMessageSeenStatuses: IncomingMessageSeenStatusNotification[]
+        ) => {
+          this.chats.forEach((chat) => {
+            // incomingMessageSeenStatuses.forEach(incomingSeenMessage => {
+            //   if(incomingSeenMessage.messageId == chat.id && !chat.messageSeenStatuses?.some(x => x.messageId == incomingSeenMessage.messageId && x.userId == incomingSeenMessage.userId)){
+            //     chat.messageSeenStatuses?.push(incomingSeenMessage);
+            //   }
+            // })
+
+            chat.messageSeenStatuses ??= [];
+
+            // Filter only relevant & unique seen statuses for this chat
+            const newStatuses = incomingMessageSeenStatuses.filter(
+              (incoming) =>
+                incoming.messageId === chat.id &&
+                !chat.messageSeenStatuses!.some(
+                  (existing) =>
+                    existing.messageId === incoming.messageId &&
+                    existing.userId === incoming.userId
+                )
+            );
+
+            // Append them all at once
+            chat.messageSeenStatuses.push(...newStatuses);
+          });
+        }
+      );
+
     this.currentUserInfo = this.userService.getUserInfo();
     this.currentUserId = this.currentUserInfo.UserId;
   }
 
   ngAfterViewInit(): void {
     this.messageElements.changes.subscribe(() => {
-      if(!this.hasScrolledInitially){
+      if (!this.hasScrolledInitially) {
         this.scrollToBottom();
-        this.hasScrolledInitially = true;
       }
     });
     this.focusInput();
@@ -216,34 +254,8 @@ export class ChatThreadComponent
       .pipe(takeUntil(this.ngUnsubscribe))
       .subscribe((res) => {
         /// react success
+        console.log(`Reaction updated: ${res.toString()}`);
       });
-
-    // const chat = this.chats.find((x) => x.id == this.reactToMessageId);
-    // const currentUserReact = this.getUserReact(
-    //   this.reactToMessageId!,
-    //   this.currentUserId
-    // );
-    // let deleteReact$: Observable<any> = of(null);
-    // let addReact$: Observable<any> = of(null);
-    // if (currentUserReact) {
-    //   deleteReact$ = this.deleteReact(chat!, currentUserReact);
-    // }
-    // if (!currentUserReact || currentUserReact?.type != react.type) {
-    //   // add
-    //   const reactDto = {
-    //     ...react,
-    //     messageId: this.reactToMessageId,
-    //     threadId: this.threadId,
-    //   } as ReactionDto;
-
-    //   addReact$ = this.addReact(reactDto, chat!);
-    // }
-    // deleteReact$
-    //   .pipe(
-    //     takeUntil(this.ngUnsubscribe),
-    //     concatMap(() => addReact$)
-    //   )
-    //   .subscribe(() => {});
   }
 
   getUserReact(messageId: string, userId: string) {
@@ -275,8 +287,6 @@ export class ChatThreadComponent
       .sendMessage(messagePayload)
       .subscribe((sentMessage: Chat) => {
         this.newMessage = "";
-        // this.chats.push(new ChatUi(sentMessage));
-        // setTimeout(() => this.scrollToBottom(), 50);
       });
   }
 
@@ -338,14 +348,9 @@ export class ChatThreadComponent
 
   onScroll(event: Event): void {
     if (this.hasUpdatedSeenStatus) return;
+    const scrolledRatio = this.getScrolledRatio(event.target as HTMLElement)
 
-    const target = event.target as HTMLElement;
-    const scrollTop = target.scrollTop;
-    const scrollHeight = target.scrollHeight;
-    const clientHeight = target.clientHeight;
-
-    const scrolledRatio = (scrollTop + clientHeight) / scrollHeight;
-    if (scrolledRatio > 0.8) {
+    if (scrolledRatio > this.scrollTriggerRatio) {
       this.hasUpdatedSeenStatus = true;
       this.httpservice
         .updateSeenStatus(
@@ -357,6 +362,14 @@ export class ChatThreadComponent
           console.log("Updated: " + (res ?? "undefined"));
         });
     }
+  }
+
+  getScrolledRatio(target: HTMLElement){
+    const scrollTop = target.scrollTop;
+    const scrollHeight = target.scrollHeight;
+    const clientHeight = target.clientHeight;
+    const scrolledRatio = (scrollTop + clientHeight) / scrollHeight;
+    return scrolledRatio;
   }
 
   getSeenStatusesText(seenStatuses: SeenStatus[]) {

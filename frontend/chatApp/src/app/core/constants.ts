@@ -2,7 +2,8 @@ export const GlobalConstants = {
     FriendRequestReceived : "FriendRequestReceived",
     MessageReceived: "MessageReceived",
     MessageAllNotification: "MessageAllNotification",
-    ReactionNotification: "ReactionNotification"
+    ReactionNotification: "ReactionNotification",
+    MessageSeenNotification: "MessageSeenNotification"
 }
 
 export const RouteConstants = {

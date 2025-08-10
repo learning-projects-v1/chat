@@ -68,3 +68,7 @@ export interface SeenStatus{
   userId: string,
   seenAt: Date,
 }
+
+export interface IncomingMessageSeenStatusNotification extends SeenStatus{
+  threadId: string
+}

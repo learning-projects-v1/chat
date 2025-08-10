@@ -114,6 +114,7 @@ public class MessagesController: ControllerBase
         return Ok(chatDto); 
     }
 
+
     [HttpPost("seen-status")]
     public async Task<IActionResult> UpdateMessageSeenStatuses(List<Guid> messageIds, Guid threadId)
     {

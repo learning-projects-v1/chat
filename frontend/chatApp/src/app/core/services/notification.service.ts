@@ -6,6 +6,7 @@ import {
   ChatOverview,
   ChatThread,
   IncomingMessageNotification,
+  IncomingMessageSeenStatusNotification,
   IncomingReactionNotification,
   User,
 } from "../../models/Dtos";
@@ -20,10 +21,12 @@ export class NotificationService {
     new Subject<FriendRequestReceivedResponse>();
   private messageReceivedSource = new Subject<IncomingMessageNotification>();
   private reactionReceivedSource = new Subject<IncomingReactionNotification>();
+  private messageSeenSource = new Subject<IncomingMessageSeenStatusNotification[]>();
 
   friendRequestReceived$ = this.friendRequestReceivedSource.asObservable();
   messageReceived$ = this.messageReceivedSource.asObservable();
   reactionReceived$ = this.reactionReceivedSource.asObservable();
+  messageSeen$ = this.messageSeenSource.asObservable();
 
   connect(token: string, userId: string) {
     this.hubConnection = new signalR.HubConnectionBuilder()
@@ -64,6 +67,17 @@ export class NotificationService {
         return this.reactionReceivedSource.next(payload);
       }
     );
+
+    this.hubConnection.on(
+      GlobalConstants.MessageSeenNotification,
+      (payload: IncomingMessageSeenStatusNotification[]) => {
+        return this.messageSeenSource.next(payload);
+      }
+    )
+  }
+
+  messageSeenStatusUpdated(threadId: string){
+    return this.messageSeen$.pipe(filter(incomingSeen => incomingSeen.some(y => y.threadId == threadId)));
   }
 
   reactionReceived(threadid: string): Observable<IncomingReactionNotification>{
