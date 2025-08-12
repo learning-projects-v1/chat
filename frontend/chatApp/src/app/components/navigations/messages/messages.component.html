@@ -8,7 +8,7 @@
         <div class="card" (click)="goToChat(chat.chatThreadId)">
           <div class="info">
             <div class="name">{{ chat.chatTitle ?? "UserName"}} </div>
-            <div class="mutual"><strong>{{friendInfosMap.get(chat.senderId)?.username}}</strong>: {{ chat.content }}</div>
+            <div class="mutual"><strong>{{friendInfosMap.get(chat.senderId)?.username}}</strong>: {{ cutLongText(chat.content) }}</div>
             <div class="time">{{ chat.sentAt| date: 'MMM d, h:mm a'  }}</div>
           </div>
         </div>

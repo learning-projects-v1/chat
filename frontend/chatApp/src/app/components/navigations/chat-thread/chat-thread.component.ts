@@ -150,14 +150,7 @@ export class ChatThreadComponent implements OnInit, AfterViewInit, OnDestroy {
           incomingMessageSeenStatuses: IncomingMessageSeenStatusNotification[]
         ) => {
           this.chats.forEach((chat) => {
-            // incomingMessageSeenStatuses.forEach(incomingSeenMessage => {
-            //   if(incomingSeenMessage.messageId == chat.id && !chat.messageSeenStatuses?.some(x => x.messageId == incomingSeenMessage.messageId && x.userId == incomingSeenMessage.userId)){
-            //     chat.messageSeenStatuses?.push(incomingSeenMessage);
-            //   }
-            // })
-
             chat.messageSeenStatuses ??= [];
-
             // Filter only relevant & unique seen statuses for this chat
             const newStatuses = incomingMessageSeenStatuses.filter(
               (incoming) =>
@@ -183,8 +176,18 @@ export class ChatThreadComponent implements OnInit, AfterViewInit, OnDestroy {
     this.messageElements.changes.subscribe(() => {
       if (!this.hasScrolledInitially) {
         this.scrollToBottom();
+        this.hasScrolledInitially = true;
+        return;
+      }
+
+      const scrolledRatio = this.getScrolledRatio(
+        this.scrollContainer.nativeElement
+      );
+      if (scrolledRatio >= this.scrollTriggerRatio) {
+        this.scrollToBottom();
       }
     });
+
     this.focusInput();
     document.addEventListener("click", this.handleDocumentClick);
   }
@@ -287,6 +290,7 @@ export class ChatThreadComponent implements OnInit, AfterViewInit, OnDestroy {
       .sendMessage(messagePayload)
       .subscribe((sentMessage: Chat) => {
         this.newMessage = "";
+        this.scrollToBottom();
       });
   }
 
@@ -346,16 +350,15 @@ export class ChatThreadComponent implements OnInit, AfterViewInit, OnDestroy {
     return reactions.map((r) => this.userNameMap[r.senderId]).join(",");
   }
 
+  //todo: optimize
   onScroll(event: Event): void {
-    if (this.hasUpdatedSeenStatus) return;
-    const scrolledRatio = this.getScrolledRatio(event.target as HTMLElement)
-
+    const scrolledRatio = this.getScrolledRatio(event.target as HTMLElement);
     if (scrolledRatio > this.scrollTriggerRatio) {
-      this.hasUpdatedSeenStatus = true;
+      // const unseenMessages = this.chats.filter(x => x.messageSeenStatuses?.some(y => y.userId == this.currentUserId));
       this.httpservice
         .updateSeenStatus(
           this.threadId,
-          this.chats.map((c) => c.id!)
+          this.chats.map(x => x.id!)
         )
         .pipe(takeUntil(this.ngUnsubscribe))
         .subscribe((res) => {
@@ -364,7 +367,7 @@ export class ChatThreadComponent implements OnInit, AfterViewInit, OnDestroy {
     }
   }
 
-  getScrolledRatio(target: HTMLElement){
+  getScrolledRatio(target: HTMLElement) {
     const scrollTop = target.scrollTop;
     const scrollHeight = target.scrollHeight;
     const clientHeight = target.clientHeight;

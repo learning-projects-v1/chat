@@ -5,7 +5,6 @@ using ChatApp.Application.Mappings;
 using ChatApp.Domain.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.SignalR;
 using System.Security.Claims;
 
 namespace ChatApp.API.Controllers;
@@ -77,6 +76,7 @@ public class MessagesController: ControllerBase
     {
         var message = new Message()
         {
+            Id = Guid.NewGuid(),
             Content = chatDto.Content,
             ChatThreadId = chatDto.ChatThreadId,
             ReplyToMessageId = chatDto.ReplyToMessageId,
@@ -104,13 +104,19 @@ public class MessagesController: ControllerBase
             SenderInfo = userInfoDto
         };
 
+        var seenStatus = new MessageSeenStatus() { Id = Guid.NewGuid(), MessageId = message.Id, SeenAt = DateTime.UtcNow, UserId = userId };
         ///Todo: begin transaction
         await _messageRepository.AddAsync(message);
+        await _messageSeenStatusRepository.AddAsync(seenStatus);
         await _unitOfWork.SaveChangesAsync();
+
         //await _realTimeNotifier.NotifyMessage(message.ReceiverId, payload);
         chatDto.Id = message.Id;
+        var seenStatusDto = new MessageSeenStatusDto() { Id = seenStatus.Id, MessageId = message.Id, SeenAt = seenStatus.SeenAt, ThreadId = message.ChatThreadId, UserId = userId };
         var threadMembers = await _chatThreadMemberRepository.GetThreadMembersAsync(chatDto.ChatThreadId);
-        await _realTimeNotifier.NotifyMessageToAll(threadMembers.Select(x => x.Id.ToString()).ToList(), payload);
+        var threadMemberIds = threadMembers.Select(x => x.Id.ToString()).ToList();
+        await _realTimeNotifier.NotifyMessageToAll(threadMemberIds, payload);
+        await _realTimeNotifier.NotifyMessagesSeenStatus(threadMemberIds, new() { seenStatusDto });
         return Ok(chatDto); 
     }
 

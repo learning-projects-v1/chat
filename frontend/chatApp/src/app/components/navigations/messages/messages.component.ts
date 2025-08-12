@@ -21,12 +21,14 @@ export interface ConnectedUser {
   styleUrls: ["./messages.component.scss"],
   imports: [CommonModule],
 })
+
 export class MessagesComponent implements OnInit, OnDestroy {
   // messagePreviews: ChatThreadPreview[] = [];
   chats: Chat[] = [];
   ngUnsubscribe: Subject<void> = new Subject<void>();
   friendInfosMap: Map<string, UserInfoDto> = new Map();
   currentUser?: UserInfoDto;
+  maxTextLength = 130;
 
   constructor(
     private router: Router,
@@ -66,6 +68,9 @@ export class MessagesComponent implements OnInit, OnDestroy {
     this.router.navigate(["/chat", threadId]);
   }
 
+  cutLongText(text: string){
+    return text.length > this.maxTextLength? text.substring(0, this.maxTextLength-1)+"...": text;
+  }
   
   ngOnDestroy(): void {
     this.ngUnsubscribe.next();

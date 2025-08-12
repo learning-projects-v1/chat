@@ -77,6 +77,11 @@
     .text {
       font-size: 0.95rem;
       color: #222;
+
+      white-space: pre-wrap; /* preserve line breaks but wrap text */
+      word-wrap: break-word; /* break long words */
+      overflow-wrap: break-word; /* modern syntax */
+      max-width: 80%;
     }
 
     .timestamp {
@@ -88,9 +93,9 @@
   }
 
   .seen-by {
-    position: absolute;
-    bottom: -1.2rem; /* slightly more space below bubble */
-    right: -0.5rem; /* aligns to right edge of bubble */
+    position: relative; /* anchor for tooltip */
+    bottom: -1.5rem;
+    right: -0.5rem;
     display: flex;
     align-items: center;
     gap: 4px;
@@ -101,9 +106,9 @@
 
   .seen-tooltip {
     position: absolute;
-    top: 100%; /* appears below the "seen-by" container */
-    right: 0; /* right-align with the eye icon */
-    margin-top: 4px; /* small gap between icon and tooltip */
+    bottom: 100%; /* appear above by default */
+    right: 0;
+    transform: translateY(-4px); /* space without pushing layout */
     max-width: 400px;
     background-color: #fff;
     color: #333;
@@ -116,7 +121,21 @@
     z-index: 99;
     border: 1px solid #e0e0e0;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-    pointer-events: none;
+
+    /* hidden by default */
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.15s ease, transform 0.15s ease;
+
+    pointer-events: auto; /* allow selecting/copying text */
+  }
+
+  /* show on hover (either icon or tooltip) */
+  .seen-by:hover .seen-tooltip,
+  .seen-tooltip:hover {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(-8px);
   }
 
   // seen bubble working
