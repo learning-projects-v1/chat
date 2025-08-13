@@ -3,7 +3,7 @@
     <h2>Chat</h2>
   </div>
 
-  <div class="all-chat-messages" (scroll)="onScroll($event)" #scrollContainer>
+  <div class="all-chat-messages" #scrollContainer>
     <div
       *ngFor="let msg of chats"
       [class.mine]="isSenderMe(msg.senderId)"

@@ -44,6 +44,8 @@ import {
   concatMap,
   concat,
   of,
+  fromEvent,
+  debounceTime,
 } from "rxjs";
 import { ToastrService } from "ngx-toastr";
 import { RouteConstants } from "../../../core/constants";
@@ -183,15 +185,18 @@ export class ChatThreadComponent implements OnInit, AfterViewInit, OnDestroy {
         return;
       }
 
+
       const scrolledRatio = this.getScrolledRatio(
         this.scrollContainer.nativeElement
       );
       if (scrolledRatio >= this.scrollTriggerRatio) {
         this.scrollToBottom();
-        
       }
     });
 
+    fromEvent(this.scrollContainer.nativeElement, 'scroll')
+    .pipe(debounceTime(2000))
+    .subscribe(() => this.onScroll())
     this.focusInput();
     document.addEventListener("click", this.handleDocumentClick);
   }
@@ -357,8 +362,9 @@ export class ChatThreadComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   //todo: optimize
-  onScroll(event: Event): void {
-    const scrolledRatio = this.getScrolledRatio(event.target as HTMLElement);
+  onScroll(): void {
+    const element = this.scrollContainer.nativeElement as HTMLElement;
+    const scrolledRatio = this.getScrolledRatio(element);
     if (scrolledRatio > this.scrollTriggerRatio) {
       // const unseenMessages = this.chats.filter(x => x.messageSeenStatuses?.some(y => y.userId == this.currentUserId));
       this.httpservice
