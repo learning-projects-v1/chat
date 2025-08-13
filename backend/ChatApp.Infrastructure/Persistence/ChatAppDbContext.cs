@@ -140,7 +140,7 @@ public class ChatAppDbContext : DbContext
             .WithMany(m => m.SeenStatuses)
             .HasForeignKey(m => m.MessageId);
 
-            entity.HasIndex(e => e.MessageId);
+            entity.HasIndex(e => new { e.MessageId, e.UserId }).IsUnique();
         });
     }
 }

@@ -1,0 +1,71 @@
+RabbitMQ Playground Checklist
+Setup
+
+Install RabbitMQ locally via Docker:
+docker run -d --hostname rabbit --name rabbitmq -p 5672:5672 -p 15672:15672 rabbitmq:3-management
+
+Web UI: http://localhost:15672 (user: guest / pass: guest)
+
+Basic Publish/Consume
+
+Create simple publisher → consumer with MassTransit.
+
+Verify:
+
+Queue created in UI
+
+Messages show in Ready state before consumed
+
+Messages disappear after ack
+
+Exchange Types
+
+Direct: Exact routing key match
+
+Fanout: Broadcast to all queues
+
+Topic: Pattern matching routing keys
+
+Headers: Routing based on headers
+
+Test each type in MassTransit.
+
+Message Durability
+
+Create non-durable queue (messages lost on broker restart)
+
+Create durable queue (messages survive restart)
+
+Publish persistent messages:
+ctx.SetDeliveryMode(MassTransit.DeliveryMode.Persistent)
+
+Restart RabbitMQ and observe difference.
+
+Acknowledgements & Retries
+
+Make consumer throw exception.
+
+Configure retry: e.UseMessageRetry(r => r.Interval(3, TimeSpan.FromSeconds(5)));
+
+Observe retries in UI.
+
+Configure dead-letter queue and watch poison messages move.
+
+Parallelism & Prefetch
+
+Set e.PrefetchCount = 5.
+
+Run multiple consumer instances.
+
+Observe load balancing in UI.
+
+Delayed & Scheduled Messages
+
+Enable delayed message exchange plugin in RabbitMQ.
+
+Schedule message with:
+_publishEndpoint.ScheduleSend(DateTime.UtcNow.AddSeconds(30), new MyMessage());
+
+Watch it appear in queue after delay.
+
+Request/Response Pattern

@@ -89,6 +89,8 @@ export class ChatThreadComponent implements OnInit, AfterViewInit, OnDestroy {
   hoveredMessageId: string | null = null;
   hasScrolledInitially = false;
   scrollTriggerRatio = 0.8;
+  unseenMessageIds : string[] = [];
+
 
   constructor(
     private route: ActivatedRoute,
@@ -125,6 +127,7 @@ export class ChatThreadComponent implements OnInit, AfterViewInit, OnDestroy {
       .subscribe((incomingMessage: IncomingMessageNotification) => {
         if (this.chats.find((x) => x.id !== incomingMessage.chat.id)) {
           this.chats.push(new ChatUi(incomingMessage.chat));
+          this.unseenMessageIds.push(incomingMessage.chat.id!);
           // this.hasScrolledInitially = false;
           // const ratio = this.getScrolledRatio(this.scrollContainer.nativeElement);
           // if(ratio > 0.95){
@@ -162,7 +165,7 @@ export class ChatThreadComponent implements OnInit, AfterViewInit, OnDestroy {
                 )
             );
 
-            // Append them all at once
+          
             chat.messageSeenStatuses.push(...newStatuses);
           });
         }
@@ -185,6 +188,7 @@ export class ChatThreadComponent implements OnInit, AfterViewInit, OnDestroy {
       );
       if (scrolledRatio >= this.scrollTriggerRatio) {
         this.scrollToBottom();
+        
       }
     });
 
@@ -200,6 +204,7 @@ export class ChatThreadComponent implements OnInit, AfterViewInit, OnDestroy {
         this.chats = ChatUi.GetAllChats(data?.chats);
         this.friendInfoList = data?.memberInfoList;
         this.mapUserNames();
+        this.unseenMessageIds = this.chats.filter((chat: Chat) => chat.messageSeenStatuses!.every(x => x.userId != this.currentUserId)).map(y => y.id!);
       });
   }
 
@@ -290,6 +295,7 @@ export class ChatThreadComponent implements OnInit, AfterViewInit, OnDestroy {
       .sendMessage(messagePayload)
       .subscribe((sentMessage: Chat) => {
         this.newMessage = "";
+        this.unseenMessageIds.push(sentMessage.id!);
         this.scrollToBottom();
       });
   }
@@ -358,10 +364,11 @@ export class ChatThreadComponent implements OnInit, AfterViewInit, OnDestroy {
       this.httpservice
         .updateSeenStatus(
           this.threadId,
-          this.chats.map(x => x.id!)
+          this.unseenMessageIds
         )
         .pipe(takeUntil(this.ngUnsubscribe))
         .subscribe((res) => {
+          this.unseenMessageIds = [];
           console.log("Updated: " + (res ?? "undefined"));
         });
     }

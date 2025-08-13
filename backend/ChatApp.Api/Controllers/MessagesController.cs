@@ -129,6 +129,7 @@ public class MessagesController: ControllerBase
         var seenThreadMessageIds = userSeenMessages.Where(m => m.Message.ChatThreadId == threadId).Select(x => x.MessageId).ToList();
         var unseenMessageIds = messageIds.Except(seenThreadMessageIds).ToList();
         //var unseenMessages = userSeenMessages.Where(u => (u.Message.ChatThreadId == threadId) && !messageIds.Contains(u.Message.Id));
+        
         var seenStatuses = unseenMessageIds.Select(id => new MessageSeenStatus
         {
             Id = Guid.NewGuid(),
