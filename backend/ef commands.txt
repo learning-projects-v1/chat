@@ -8,3 +8,6 @@ dotnet ef database drop --project ChatApp.Infrastructure --startup-project ChatA
 ----
 dotnet ef migrations remove --project ChatApp.Infrastructure --startup-project ChatApp.API
 
+
+
+docker exec -it chat-postgres psql -U postgres -d ChatAppDb
