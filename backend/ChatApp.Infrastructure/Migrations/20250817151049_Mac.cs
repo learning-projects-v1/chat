@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace ChatApp.Infrastructure.Migrations
 {
     /// <inheritdoc />
-    public partial class efreactionmodelindexchanged : Migration
+    public partial class Mac : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -157,8 +157,7 @@ namespace ChatApp.Infrastructure.Migrations
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
                     MessageId = table.Column<Guid>(type: "uuid", nullable: false),
                     UserId = table.Column<Guid>(type: "uuid", nullable: false),
-                    SeenAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
-                    MessageId1 = table.Column<Guid>(type: "uuid", nullable: false)
+                    SeenAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -166,12 +165,6 @@ namespace ChatApp.Infrastructure.Migrations
                     table.ForeignKey(
                         name: "FK_MessageSeenStatuses_Messages_MessageId",
                         column: x => x.MessageId,
-                        principalTable: "Messages",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_MessageSeenStatuses_Messages_MessageId1",
-                        column: x => x.MessageId1,
                         principalTable: "Messages",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
@@ -185,17 +178,11 @@ namespace ChatApp.Infrastructure.Migrations
                     ReactionToMessageId = table.Column<Guid>(type: "uuid", nullable: false),
                     UserId = table.Column<Guid>(type: "uuid", nullable: false),
                     Type = table.Column<string>(type: "character varying(20)", maxLength: 20, nullable: false),
-                    UpdatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
-                    MessageId = table.Column<Guid>(type: "uuid", nullable: true)
+                    UpdatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Reactions", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_Reactions_Messages_MessageId",
-                        column: x => x.MessageId,
-                        principalTable: "Messages",
-                        principalColumn: "Id");
                     table.ForeignKey(
                         name: "FK_Reactions_Messages_ReactionToMessageId",
                         column: x => x.ReactionToMessageId,
@@ -211,9 +198,10 @@ namespace ChatApp.Infrastructure.Migrations
                 });
 
             migrationBuilder.CreateIndex(
-                name: "IX_ChatThreadMembers_ChatThreadId",
+                name: "IX_ChatThreadMembers_ChatThreadId_UserId",
                 table: "ChatThreadMembers",
-                column: "ChatThreadId");
+                columns: new[] { "ChatThreadId", "UserId" },
+                unique: true);
 
             migrationBuilder.CreateIndex(
                 name: "IX_ChatThreadMembers_UserId",
@@ -252,19 +240,10 @@ namespace ChatApp.Infrastructure.Migrations
                 column: "UserId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_MessageSeenStatuses_MessageId",
+                name: "IX_MessageSeenStatuses_MessageId_UserId",
                 table: "MessageSeenStatuses",
-                column: "MessageId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_MessageSeenStatuses_MessageId1",
-                table: "MessageSeenStatuses",
-                column: "MessageId1");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Reactions_MessageId",
-                table: "Reactions",
-                column: "MessageId");
+                columns: new[] { "MessageId", "UserId" },
+                unique: true);
 
             migrationBuilder.CreateIndex(
                 name: "IX_Reactions_ReactionToMessageId_UserId",

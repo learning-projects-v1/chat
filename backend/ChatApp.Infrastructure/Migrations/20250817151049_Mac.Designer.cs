@@ -12,8 +12,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace ChatApp.Infrastructure.Migrations
 {
     [DbContext(typeof(ChatAppDbContext))]
-    [Migration("20250816180436_ef reaction model index changed")]
-    partial class efreactionmodelindexchanged
+    [Migration("20250817151049_Mac")]
+    partial class Mac
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -69,9 +69,10 @@ namespace ChatApp.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("ChatThreadId");
-
                     b.HasIndex("UserId");
+
+                    b.HasIndex("ChatThreadId", "UserId")
+                        .IsUnique();
 
                     b.ToTable("ChatThreadMembers");
                 });
@@ -148,9 +149,6 @@ namespace ChatApp.Infrastructure.Migrations
                     b.Property<Guid>("MessageId")
                         .HasColumnType("uuid");
 
-                    b.Property<Guid>("MessageId1")
-                        .HasColumnType("uuid");
-
                     b.Property<DateTime>("SeenAt")
                         .HasColumnType("timestamp with time zone");
 
@@ -159,9 +157,8 @@ namespace ChatApp.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("MessageId");
-
-                    b.HasIndex("MessageId1");
+                    b.HasIndex("MessageId", "UserId")
+                        .IsUnique();
 
                     b.ToTable("MessageSeenStatuses");
                 });
@@ -170,9 +167,6 @@ namespace ChatApp.Infrastructure.Migrations
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
-
-                    b.Property<Guid?>("MessageId")
                         .HasColumnType("uuid");
 
                     b.Property<Guid>("ReactionToMessageId")
@@ -190,8 +184,6 @@ namespace ChatApp.Infrastructure.Migrations
                         .HasColumnType("uuid");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("MessageId");
 
                     b.HasIndex("UserId");
 
@@ -258,17 +250,21 @@ namespace ChatApp.Infrastructure.Migrations
 
             modelBuilder.Entity("ChatApp.Domain.Models.ChatThreadMember", b =>
                 {
-                    b.HasOne("ChatApp.Domain.Models.ChatThread", null)
-                        .WithMany()
+                    b.HasOne("ChatApp.Domain.Models.ChatThread", "Thread")
+                        .WithMany("ThreadMembers")
                         .HasForeignKey("ChatThreadId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("ChatApp.Domain.Models.User", null)
-                        .WithMany()
+                    b.HasOne("ChatApp.Domain.Models.User", "User")
+                        .WithMany("Members")
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.Navigation("Thread");
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("ChatApp.Domain.Models.Friendship", b =>
@@ -320,15 +316,9 @@ namespace ChatApp.Infrastructure.Migrations
 
             modelBuilder.Entity("ChatApp.Domain.Models.MessageSeenStatus", b =>
                 {
-                    b.HasOne("ChatApp.Domain.Models.Message", null)
-                        .WithMany()
-                        .HasForeignKey("MessageId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
                     b.HasOne("ChatApp.Domain.Models.Message", "Message")
-                        .WithMany("SeenStatus")
-                        .HasForeignKey("MessageId1")
+                        .WithMany("SeenStatuses")
+                        .HasForeignKey("MessageId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
@@ -337,12 +327,8 @@ namespace ChatApp.Infrastructure.Migrations
 
             modelBuilder.Entity("ChatApp.Domain.Models.Reaction", b =>
                 {
-                    b.HasOne("ChatApp.Domain.Models.Message", null)
-                        .WithMany("Reactions")
-                        .HasForeignKey("MessageId");
-
                     b.HasOne("ChatApp.Domain.Models.Message", "ReactionToMessage")
-                        .WithMany()
+                        .WithMany("Reactions")
                         .HasForeignKey("ReactionToMessageId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -358,11 +344,16 @@ namespace ChatApp.Infrastructure.Migrations
                     b.Navigation("User");
                 });
 
+            modelBuilder.Entity("ChatApp.Domain.Models.ChatThread", b =>
+                {
+                    b.Navigation("ThreadMembers");
+                });
+
             modelBuilder.Entity("ChatApp.Domain.Models.Message", b =>
                 {
                     b.Navigation("Reactions");
 
-                    b.Navigation("SeenStatus");
+                    b.Navigation("SeenStatuses");
                 });
 
             modelBuilder.Entity("ChatApp.Domain.Models.User", b =>
@@ -370,6 +361,8 @@ namespace ChatApp.Infrastructure.Migrations
                     b.Navigation("FriendRequestsReceived");
 
                     b.Navigation("FriendRequestsSent");
+
+                    b.Navigation("Members");
 
                     b.Navigation("ReceivedMessages");
 

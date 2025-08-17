@@ -1,5 +1,5 @@
 
-dotnet ef migrations add "make {messageId, userId} unique for seen status" --project ChatApp.Infrastructure --startup-project ChatApp.API
+dotnet ef migrations add "Mac" --project ChatApp.Infrastructure --startup-project ChatApp.API
 
 dotnet ef database update --project ChatApp.Infrastructure --startup-project ChatApp.API
 
@@ -8,6 +8,3 @@ dotnet ef database drop --project ChatApp.Infrastructure --startup-project ChatA
 ----
 dotnet ef migrations remove --project ChatApp.Infrastructure --startup-project ChatApp.API
 
-
-
-docker exec -it chat-postgres psql -U postgres -d ChatAppDb
