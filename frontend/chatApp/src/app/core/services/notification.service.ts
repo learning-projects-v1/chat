@@ -47,6 +47,7 @@ export class NotificationService {
     this.hubConnection.onclose(err => {
       console.warn("Hub disconnecetd");
     })
+      
     this.hubConnection.on(
       GlobalConstants.FriendRequestReceived,
       (payload: FriendRequestReceivedResponse) => {

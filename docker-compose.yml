@@ -12,7 +12,26 @@ services:
     ports:
       - "5432:5432"
     volumes:
-      - pgdata:/val/lib/postgresql/data
-        
+      - pgdata:/var/lib/postgresql/data
+
+# rabitmq
+  rabbitmq:
+    image: rabbitmq:4.1-management
+    container_name: rabbitmq
+    restart: unless-stopped
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    
+    environment:
+      RABBITMQ_DEFAULT_USER: guest
+      RABBITMQ_DEFAULT_PASS: guest
+      
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+    
+  
+  
 volumes:
   pgdata:
+  rabbitmq_data:
