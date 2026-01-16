@@ -40,7 +40,68 @@ A full-stack real-time chat application built as a resume and learning project, 
 ### Presence
 - Online / offline user status tracking
 
-### Architecture
+## Screenshots
+Authentication
+<p align="center"> <img src="https://github.com/user-attachments/assets/10f43200-c687-43d4-ac0d-23e00d5b41c5" alt="login" width="800" /> </p>
+
+Login Screen
+User authentication using JWT, providing secure access to the application.
+
+Connections & Social Features
+<p align="center"> <img src="https://github.com/user-attachments/assets/fe4f39dd-674f-4d7a-9658-933131a3d863" alt="connections" width="800" /> </p>
+
+Connections Overview
+View existing friends, pending requests, and suggested users.
+
+<p align="center"> <img src="https://github.com/user-attachments/assets/c083db00-f17a-480d-99ae-58b6af4a3b26" alt="send-friend-request" width="800" /> </p>
+
+Send Friend Request
+Initiate a connection request to another user.
+
+Messaging Overview
+<p align="center"> <img src="https://github.com/user-attachments/assets/098c2c03-ccf3-4157-9169-6ef610562a08" alt="messages" width="800" /> </p>
+
+Chat Overview
+List of recent conversations with quick access to active chats.
+
+Real-Time Chat
+<p align="center"> <img src="https://github.com/user-attachments/assets/72d12355-e8ca-4a12-b276-4eefcc4771c9" alt="chat" width="800" /> </p>
+
+Active Chat Window
+Real-time 1-to-1 messaging powered by SignalR with persistent message history.
+
+<p align="center"> <img src="https://github.com/user-attachments/assets/342f3c14-a0f7-412d-a28f-674fdc0e4999" alt="chat-2" width="800" /> </p>
+
+Extended Chat Interaction
+Demonstrates continued conversation flow and UI consistency.
+
+Message Interactions
+<p align="center"> <img src="https://github.com/user-attachments/assets/f0f3ff03-69fc-4b31-be1a-b67d945b26b2" alt="reply" width="800" /> </p>
+
+Reply to Message
+Reply to a specific message within a conversation thread.
+
+<p align="center"> <img src="https://github.com/user-attachments/assets/47a1648f-3302-49af-ba3a-5763c7e84f0c" alt="react" width="800" /> </p>
+
+Message Reactions
+React to messages for quick, expressive feedback.
+
+<p align="center"> <img src="https://github.com/user-attachments/assets/d88fe01e-500f-48e1-905a-52f32409fc61" alt="seen-status" width="800" /> </p>
+
+Seen Status Indicator
+Displays message read/seen status in real time.
+<!-- <img width="1512" height="982" alt="send-friend-request" src="https://github.com/user-attachments/assets/c083db00-f17a-480d-99ae-58b6af4a3b26" />
+<img width="1512" height="982" alt="seen-status" src="https://github.com/user-attachments/assets/d88fe01e-500f-48e1-905a-52f32409fc61" />
+<img width="1512" height="982" alt="reply" src="https://github.com/user-attachments/assets/f0f3ff03-69fc-4b31-be1a-b67d945b26b2" />
+<img width="1512" height="982" alt="react" src="https://github.com/user-attachments/assets/47a1648f-3302-49af-ba3a-5763c7e84f0c" />
+<img width="1512" height="982" alt="messages" src="https://github.com/user-attachments/assets/098c2c03-ccf3-4157-9169-6ef610562a08" />
+<img width="1512" height="982" alt="login" src="https://github.com/user-attachments/assets/10f43200-c687-43d4-ac0d-23e00d5b41c5" />
+<img width="1512" height="982" alt="connections" src="https://github.com/user-attachments/assets/fe4f39dd-674f-4d7a-9658-933131a3d863" />
+<img width="1512" height="982" alt="chat-2" src="https://github.com/user-attachments/assets/342f3c14-a0f7-412d-a28f-674fdc0e4999" />
+<img width="1512" height="982" alt="chat" src="https://github.com/user-attachments/assets/72d12355-e8ca-4a12-b276-4eefcc4771c9" /> -->
+
+
+## Architecture
 - Clear controller separation:
   - Auth
   - User
