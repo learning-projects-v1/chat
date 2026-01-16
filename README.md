@@ -47,13 +47,13 @@ Authentication
 Login Screen
 User authentication using JWT, providing secure access to the application.
 
-Connections & Social Features
-<p align="center"> <img src="https://github.com/user-attachments/assets/fe4f39dd-674f-4d7a-9658-933131a3d863" alt="connections" width="800" /> </p>
+#### Connections & Social Features
+<p align="center"> <img src="https://github.com/user-attachments/assets/a3fea6bf-019e-46a2-91de-fcad47f8b4f1" alt="connections" width="800" /> </p>
 
-Connections Overview
+#### Connections Overview
 View existing friends, pending requests, and suggested users.
 
-<p align="center"> <img src="https://github.com/user-attachments/assets/c083db00-f17a-480d-99ae-58b6af4a3b26" alt="send-friend-request" width="800" /> </p>
+<p align="center"> <img src="https://github.com/user-attachments/assets/6dd3166a-cf92-40be-8f5e-b8fa7c3f6f43" alt="send-friend-request" width="800" /> </p>
 
 #### Send Friend Request
 Initiate a connection request to another user.
