@@ -20,6 +20,8 @@ public class DataSeeder
 
     public void SeedInitialData()
     {
+        // Skip seeding if data already exists (e.g. on redeploy)
+        if (_context.Users.Any()) return;
 
         var users = GetUsers();
         var friendships = GetFriendships(users);
