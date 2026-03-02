@@ -1,4 +1,4 @@
 
 export const environment = {
-    baseUrl: "https://YOUR-BACKEND-NAME.onrender.com"
+    baseUrl: "https://chatapp-api-33wq.onrender.com"
 }
