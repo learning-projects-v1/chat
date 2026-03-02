@@ -11,11 +11,18 @@ var jwtSection = builder.Configuration.GetSection("JwtSettings");
 builder.Services.Configure<JwtSettings>(jwtSection);
 var jwtSettings = jwtSection.Get<JwtSettings>();
 
+var allowedOrigins = new List<string> { "http://localhost:4200" };
+var frontendOrigin = builder.Configuration["AllowedFrontendOrigin"];
+if (!string.IsNullOrEmpty(frontendOrigin))
+{
+    allowedOrigins.Add(frontendOrigin);
+}
+
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowFrontend", policy =>
     {
-        policy.WithOrigins("http://localhost:4200")
+        policy.WithOrigins(allowedOrigins.ToArray())
               .AllowAnyHeader()
               .AllowAnyMethod()
               .AllowCredentials();  
@@ -41,9 +48,8 @@ if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
+    app.UseHttpsRedirection();
 }
-
-app.UseHttpsRedirection();
 
 app.UseAuthentication();
 app.UseAuthorization();

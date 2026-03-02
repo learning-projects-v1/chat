@@ -1,0 +1,30 @@
+databases:
+  - name: chatapp-db
+    plan: free
+    databaseName: chatappdb
+    user: chatapp_user
+
+services:
+  - type: web
+    name: chatapp-api
+    runtime: docker
+    dockerfilePath: ./Dockerfile
+    dockerContext: ./
+    plan: free
+    envVars:
+      - key: ConnectionStrings__DefaultConnection
+        fromDatabase:
+          name: chatapp-db
+          property: connectionString
+      - key: JwtSettings__Secret
+        generateValue: true
+      - key: JwtSettings__Issuer
+        value: ChatApp
+      - key: JwtSettings__Audience
+        value: ChatAppUsers
+      - key: JwtSettings__AccessTokenExpirationMinutes
+        value: "600"
+      - key: JwtSettings__RefreshTokenExpirationHours
+        value: "24"
+      - key: AllowedFrontendOrigin
+        sync: false
