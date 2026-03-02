@@ -1,6 +1,8 @@
 # Chat App
 
 A full-stack real-time chat application built as a resume and learning project, focusing on clean architecture, modern web technologies, and extensibility for future system-design improvements.
+## Live link
+https://chatapp-frontend-5cl3.onrender.com/
 
 ## Tech Stack
 ### Backend
