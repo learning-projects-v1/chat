@@ -1,5 +1,6 @@
 import { RegisterComponent } from './components/auth/register/register.component';
 import { LoginComponent } from './components/auth/login/login.component';
+import { LandingComponent } from './components/auth/landing/landing.component';
 import { NotFoundComponent } from './components/not-found/not-found.component';
 import { Routes } from '@angular/router';
 import { HomeComponent } from './components/home/home.component';
@@ -10,12 +11,12 @@ import { FriendInfoResolver } from './core/resolvers/friend-info.resolver';
 import { GlobalConstants, RouteConstants } from './core/constants';
 
 export const routes: Routes = [
-  { path: '', redirectTo: '/login', pathMatch: 'full' },
+  { path: '', component: LandingComponent },
   { path: 'register', component: RegisterComponent },
   { path: 'login', component: LoginComponent },
   { path: 'home', component: HomeComponent },
   { path: 'connections', component: ConnectionsComponent },
-  { path: 'messages', component: MessagesComponent, resolve: {friends: FriendInfoResolver} },
+  { path: 'messages', component: MessagesComponent, resolve: { friends: FriendInfoResolver } },
   { path: RouteConstants.chatThreadRoute, component: ChatThreadComponent },
   { path: '**', component: NotFoundComponent },
 ];

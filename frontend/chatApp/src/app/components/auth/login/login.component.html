@@ -1,7 +1,27 @@
 <div class="login-container">
+  <!-- Seeded user quick login -->
+  <div class="quick-login">
+    <h2>Quick Login</h2>
+    <p class="hint">Select a demo user to log in instantly</p>
+    <select [(ngModel)]="selectedSeededUser">
+      <option value="" disabled>-- Select a user --</option>
+      <option *ngFor="let user of seededUsers" [value]="user.email">
+        {{ user.label }}
+      </option>
+    </select>
+    <button type="button" (click)="onSeededLogin()" [disabled]="!selectedSeededUser" class="btn-quick">
+      Login as Demo User
+    </button>
+  </div>
+
+  <div class="divider">
+    <span>or login with credentials</span>
+  </div>
+
+  <!-- Regular login form -->
   <form [formGroup]="loginForm" (ngSubmit)="onSubmit()">
     <h2>Login</h2>
-    
+
     <div class="form-group">
       <label>Email</label>
       <input type="email" formControlName="email" placeholder="Enter email" />
@@ -20,4 +40,8 @@
 
     <button type="submit" [disabled]="loginForm.invalid">Login</button>
   </form>
+
+  <p class="register-link">
+    Don't have an account? <a routerLink="/register">Register here</a>
+  </p>
 </div>

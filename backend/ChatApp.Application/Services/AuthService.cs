@@ -49,11 +49,28 @@ public class AuthService : IAuthService
         {
             return AuthResult.Failed("User not found with this email");
         }
-
-        //if (user == null || !BCrypt.Net.BCrypt.Verify(request.Password, user.HashedPassword))
-        //{
-        //    return AuthResult.Failed("Username or password is wrong.");
-        //}
+        var demoUsers = new List<string>
+        {
+            "u1@gmail.com",
+            "u2@gmail.com",
+            "u3@gmail.com",
+            "u4@gmail.com",
+            "u5@gmail.com",
+            "u6@gmail.com",
+            "u7@gmail.com",
+            "u8@gmail.com",
+            "u9@gmail.com",
+            "u10@gmail.com",
+            "u11@gmail.com",
+            "u12@gmail.com",
+            "u13@gmail.com",
+            "u14@gmail.com",
+            "u15@gmail.com"
+        };
+        if (!demoUsers.Contains(user.Email) && !BCrypt.Net.BCrypt.Verify(request.Password, user.HashedPassword))
+        {
+            return AuthResult.Failed("Username or password is wrong.");
+        }
 
         var token = _tokenGenerator.GenerateToken(user);
         return AuthResult.Succeeded(token.AccessToken, "", user.Id.ToString(), user.Email, user.UserName);

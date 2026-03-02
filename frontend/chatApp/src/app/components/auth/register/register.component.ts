@@ -6,6 +6,7 @@ import { HttpClientService } from '../../../core/services/http-client.service';
 import { catchError, take, throwError } from 'rxjs';
 import { ToastrService } from 'ngx-toastr';
 import { RegisterRequest } from '../../../models/AuthModels';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-register',
@@ -17,7 +18,7 @@ import { RegisterRequest } from '../../../models/AuthModels';
 export class RegisterComponent {
   registerForm: FormGroup;
   testMessage: string = "TEST";
-  constructor(private fb: FormBuilder, private httpService: HttpClientService, private toastr: ToastrService) {
+  constructor(private fb: FormBuilder, private httpService: HttpClientService, private toastr: ToastrService, private router: Router) {
     this.registerForm = this.fb.group({
       username: ['', Validators.required],
       email: ['', [Validators.required, Validators.email]],
@@ -43,6 +44,7 @@ export class RegisterComponent {
       ).subscribe({
         next: (res: any) => {
           this.toastr.show(res?.message ?? "Front-end: registered");
+          this.router.navigate(['/login']);
         },
         error: (err: any) => {
           console.error(`error: ${err.message}`);
@@ -56,4 +58,8 @@ export class RegisterComponent {
       this.toastr.show(res?.message);
     })
   }
+
+goToLogin(): void {
+  this.router.navigate(['/login']);
+}
 }
