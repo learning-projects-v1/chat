@@ -10,6 +10,7 @@ RUN dotnet restore ChatApp.Api/ChatApp.API.csproj
 
 # Copy everything and publish
 COPY . .
+RUN dotnet restore ChatApp.Api/ChatApp.API.csproj
 RUN dotnet publish ChatApp.Api/ChatApp.API.csproj -c Release -o /app/publish --no-restore
 
 # Runtime stage
