@@ -14,6 +14,8 @@ import { LoginRequest } from '../../../models/AuthModels';
 import { UserService } from '../../../core/services/auth.service';
 import { Router, RouterModule } from '@angular/router';
 import { NotificationService } from '../../../core/services/notification.service';
+import { HttpErrorResponse } from '@angular/common/http';
+import { ErrorMessageService } from '../../../core/services/error-message.service';
 
 interface SeededUser {
   label: string;
@@ -39,7 +41,8 @@ export class LoginComponent {
     private toastr: ToastrService,
     private userService: UserService,
     private router: Router,
-    private notificationService: NotificationService
+    private notificationService: NotificationService,
+    private errorMessageService: ErrorMessageService
   ) {
     this.loginForm = this.fb.group({
       email: ['', [Validators.required, Validators.email]],
@@ -81,8 +84,17 @@ export class LoginComponent {
       .pipe(
         take(1),
         catchError((err) => {
-          this.toastr.error(err?.message ?? 'Login failed');
-          return throwError(() => new Error('Login error'));
+          if (err instanceof HttpErrorResponse && err.status === 400) {
+            this.toastr.error('Invalid email or password.');
+          } else {
+            this.toastr.error(
+              this.errorMessageService.getFriendlyMessage(
+                err,
+                'Login failed. Please try again.'
+              )
+            );
+          }
+          return throwError(() => err);
         })
       )
       .subscribe({

@@ -1,48 +1,58 @@
 <div class="connections-container">
-  <h2>Friend Requests</h2>
-  <div class="card-list" *ngIf="pendingRequests.length > 0; else noRequests">
-    <div class="card" *ngFor="let user of pendingRequests">
-      <div class="avatar">{{ user.username.charAt(0) }}</div>
-      <div class="info">
-        <div class="name">{{ user.username }}</div>
-
-        <div class="actions">
-          <button class="accept" (click)="acceptRequest(user.id)">
-            Accept
-          </button>
-          <button class="decline" (click)="declineRequest(user.id)">
-            Decline
-          </button>
+  <section class="section-block">
+    <h2 class="section-title">Friend Requests</h2>
+    <div class="card-list" *ngIf="pendingRequests.length > 0; else noRequests">
+      <div class="card" *ngFor="let user of pendingRequests">
+        <div class="avatar">{{ user.username.charAt(0) }}</div>
+        <div class="info">
+          <div class="name">{{ user.username }}</div>
+          <div class="actions">
+            <button class="accept" (click)="acceptRequest(user.id)">
+              Accept
+            </button>
+            <button class="decline" (click)="declineRequest(user.id)">
+              Decline
+            </button>
+          </div>
         </div>
       </div>
     </div>
-  </div>
-  <ng-template #noRequests><p>No pending requests.</p></ng-template>
+  </section>
+  <ng-template #noRequests><p class="empty-state">No pending requests.</p></ng-template>
 
-  <h2>People You May Know</h2>
-  <div class="card-list" *ngIf="suggestions.length > 0; else noSuggestions">
-    <div class="card" *ngFor="let user of suggestions">
-      <div class="avatar">{{ user.username.charAt(0) }}</div>
-      <div class="info">
-        <div class="name">{{ user.username }}</div>
-        <!-- <div class="mutual">{{  }} mutual friends</div> -->
-        <div class="actions">
-          <button
-            class="send"
-            [disabled]="isRequestSent(user.id)"
-            (click)="sendRequest(user.id)"
-            [ngClass]="{
-              'send-btn': !isRequestSent(user.id),
-              'sent-btn': isRequestSent(user.id)
-            }"
-          >
-            {{ isRequestSent(user.id) ? "Sent" : "Send Request" }}
-          </button>
+  <section class="section-block">
+    <h2 class="section-title">People You May Know</h2>
+    <div class="search-wrap">
+      <input
+        type="text"
+        class="search-input"
+        [formControl]="searchControl"
+        placeholder="Search users by username"
+      />
+    </div>
+    <div class="card-list" *ngIf="suggestions.length > 0; else noSuggestions">
+      <div class="card" *ngFor="let user of suggestions">
+        <div class="avatar">{{ user.username.charAt(0) }}</div>
+        <div class="info">
+          <div class="name">{{ user.username }}</div>
+          <div class="actions">
+            <button
+              class="send"
+              [disabled]="isRequestSent(user.id)"
+              (click)="sendRequest(user.id)"
+              [ngClass]="{
+                'send-btn': !isRequestSent(user.id),
+                'sent-btn': isRequestSent(user.id)
+              }"
+            >
+              {{ isRequestSent(user.id) ? "Sent" : "Send Request" }}
+            </button>
+          </div>
         </div>
       </div>
     </div>
-  </div>
-  <ng-template #noSuggestions><p>No suggestions at the moment.</p></ng-template>
+  </section>
+  <ng-template #noSuggestions><p class="empty-state">No suggestions at the moment.</p></ng-template>
 </div>
 
 <!-- <button (click)="test()"> CLICK </button> -->

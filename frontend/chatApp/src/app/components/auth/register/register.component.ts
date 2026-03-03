@@ -7,6 +7,7 @@ import { catchError, take, throwError } from 'rxjs';
 import { ToastrService } from 'ngx-toastr';
 import { RegisterRequest } from '../../../models/AuthModels';
 import { Router } from '@angular/router';
+import { ErrorMessageService } from '../../../core/services/error-message.service';
 
 @Component({
   selector: 'app-register',
@@ -16,14 +17,25 @@ import { Router } from '@angular/router';
   styleUrls: ['./register.component.scss']
 })
 export class RegisterComponent {
+  private readonly passwordPattern = /^(?=.*[A-Z])(?=.*\d).+$/;
   registerForm: FormGroup;
   testMessage: string = "TEST";
-  constructor(private fb: FormBuilder, private httpService: HttpClientService, private toastr: ToastrService, private router: Router) {
+  constructor(
+    private fb: FormBuilder,
+    private httpService: HttpClientService,
+    private toastr: ToastrService,
+    private router: Router,
+    private errorMessageService: ErrorMessageService
+  ) {
     this.registerForm = this.fb.group({
       username: ['', Validators.required],
       email: ['', [Validators.required, Validators.email]],
-      password: ['', [Validators.required, Validators.minLength(6)]]
+      password: ['', [Validators.required, Validators.minLength(6), Validators.pattern(this.passwordPattern)]]
     });
+  }
+
+  get passwordControl() {
+    return this.registerForm.get('password');
   }
 
   onSubmit() {
@@ -38,12 +50,21 @@ export class RegisterComponent {
       this.httpService.register(request).pipe(
         take(1),
         catchError((err) => {
-          this.toastr.error(err?.error?.message ?? "some error occured");
-          return throwError(()=> new Error("errorrr"));
+          if (this.errorMessageService.isDuplicateUserError(err)) {
+            this.toastr.error('User already exists. Please login instead.');
+          } else {
+            this.toastr.error(
+              this.errorMessageService.getFriendlyMessage(
+                err,
+                'Registration failed. Please try again.'
+              )
+            );
+          }
+          return throwError(() => err);
         })
       ).subscribe({
         next: (res: any) => {
-          this.toastr.show(res?.message ?? "Front-end: registered");
+          this.toastr.success(res?.message ?? "Registered successfully.");
           this.router.navigate(['/login']);
         },
         error: (err: any) => {

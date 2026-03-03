@@ -47,7 +47,7 @@ public class AuthService : IAuthService
         // test purpose
         if (user == null)
         {
-            return AuthResult.Failed("User not found with this email");
+            return AuthResult.Failed("Invalid email or password.");
         }
         var demoUsers = new List<string>
         {
@@ -69,7 +69,7 @@ public class AuthService : IAuthService
         };
         if (!demoUsers.Contains(user.Email) && !BCrypt.Net.BCrypt.Verify(request.Password, user.HashedPassword))
         {
-            return AuthResult.Failed("Username or password is wrong.");
+            return AuthResult.Failed("Invalid email or password.");
         }
 
         var token = _tokenGenerator.GenerateToken(user);

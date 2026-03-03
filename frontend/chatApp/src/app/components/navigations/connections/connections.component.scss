@@ -1,94 +1,160 @@
 .connections-container {
-  padding: 1rem;
+  padding: 1.25rem;
+  height: 100%;
+  overflow-y: auto;
+  background: linear-gradient(180deg, #f7fbff 0%, #eef5fb 100%);
 
-  h2 {
+  .section-block + .section-block {
     margin-top: 2rem;
-    font-size: 1.3rem;
-    color: #333;
+  }
+
+  .section-title {
+    margin: 0;
+    font-size: 1.25rem;
+    color: #16324f;
+    letter-spacing: 0.2px;
+  }
+
+  .empty-state {
+    margin-top: 0.75rem;
+    padding: 0.9rem 1rem;
+    border-radius: 12px;
+    border: 1px dashed #b8cce0;
+    background: #f8fbff;
+    color: #4f6580;
+    font-size: 0.95rem;
+  }
+
+  .search-wrap {
+    margin-top: 0.85rem;
+  }
+
+  .search-input {
+    width: 100%;
+    max-width: 420px;
+    border: 1px solid #c7d7e8;
+    border-radius: 10px;
+    padding: 0.58rem 0.75rem;
+    font-size: 0.95rem;
+    color: #173a5b;
+    background-color: #ffffff;
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
+
+    &::placeholder {
+      color: #7a8da4;
+    }
+
+    &:focus {
+      outline: none;
+      border-color: #2f7cc9;
+      box-shadow: 0 0 0 3px rgba(47, 124, 201, 0.16);
+    }
   }
 
   .card-list {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 1rem;
-    margin-top: 1rem;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 0.9rem;
+    margin-top: 0.9rem;
   }
 
   .card {
-    background: #fff;
-    border-radius: 10px;
-    box-shadow: 0 1px 5px rgba(0, 0, 0, 0.1);
-    padding: 1rem;
+    background: #ffffff;
+    border: 1px solid #dce8f5;
+    border-radius: 14px;
+    box-shadow: 0 10px 24px rgba(12, 41, 72, 0.08);
+    padding: 0.95rem;
     display: flex;
     align-items: center;
-    width: 300px;
+    gap: 0.8rem;
+    min-height: 98px;
+    transition: transform 0.15s ease, box-shadow 0.2s ease;
 
-    .avatar {
-      width: 50px;
-      height: 50px;
-      background: #2980b9;
-      color: white;
-      font-weight: bold;
-      font-size: 1.5rem;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      margin-right: 1rem;
+    &:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 14px 28px rgba(12, 41, 72, 0.12);
     }
+  }
 
-    .info {
-      .name {
-        font-weight: 600;
-        font-size: 1.1rem;
-      }
+  .avatar {
+    width: 48px;
+    height: 48px;
+    flex-shrink: 0;
+    border-radius: 50%;
+    display: grid;
+    place-items: center;
+    color: #ffffff;
+    font-weight: 700;
+    font-size: 1.2rem;
+    background: linear-gradient(140deg, #1f7bd3, #1d4f9b);
+  }
 
-      .mutual {
-        font-size: 0.85rem;
-        color: #666;
-        margin: 0.25rem 0 0.5rem;
-      }
+  .info {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    min-width: 0;
+  }
 
-      .actions {
-        display: flex;
-        gap: 0.5rem;
+  .name {
+    font-weight: 700;
+    color: #153656;
+    font-size: 1rem;
+    margin-bottom: 0.55rem;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    white-space: nowrap;
+  }
 
-        button {
-          padding: 0.4rem 0.8rem;
-          border: none;
-          border-radius: 4px;
-          cursor: pointer;
-        }
+  .actions {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+  }
 
-        .accept {
-          background-color: #2ecc71;
-          color: white;
-        }
+  .actions button {
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 0.86rem;
+    line-height: 1;
+    padding: 0.52rem 0.78rem;
+    transition: transform 0.1s ease, opacity 0.15s ease, box-shadow 0.15s ease;
 
-        .decline {
-          background-color: #e74c3c;
-          color: white;
-        }
+    &:hover:not(:disabled) {
+      transform: translateY(-1px);
+      opacity: 0.95;
+      box-shadow: 0 4px 10px rgba(10, 31, 53, 0.16);
+    }
+  }
 
-        .send-btn {
-          background-color: #3498db;
-          color: white;
+  .accept {
+    background-color: #1ca35e;
+    color: #ffffff;
+  }
 
-          &:hover {
-            background-color: #2980b9;
-          }
-        }
+  .decline {
+    background-color: #dc3545;
+    color: #ffffff;
+  }
 
-        .sent-btn {
-          background-color: #bdc3c7;
-          color: #2c3e50;
-          cursor: default;
-        }
+  .send-btn {
+    background-color: #1976d2;
+    color: #ffffff;
+  }
 
-        button:hover {
-          opacity: 0.9;
-        }
-      }
+  .sent-btn {
+    background-color: #d7e0ea;
+    color: #4a5f77;
+    cursor: default;
+  }
+
+  @media (max-width: 700px) {
+    padding: 0.9rem;
+
+    .card-list {
+      grid-template-columns: 1fr;
     }
   }
 }

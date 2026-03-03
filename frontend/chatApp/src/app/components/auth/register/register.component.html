@@ -20,8 +20,15 @@
     <div class="form-group">
       <label for="password">Password</label>
       <input id="password" formControlName="password" type="password" placeholder="Enter a password" />
-      <div class="error" *ngIf="registerForm.get('password')?.touched && registerForm.get('password')?.invalid">
+      <div class="helper-text">Password must be minimum 6 characters, include one uppercase letter, and one number.</div>
+      <div class="error" *ngIf="passwordControl?.touched && passwordControl?.hasError('required')">
+        Password is required.
+      </div>
+      <div class="error" *ngIf="passwordControl?.touched && passwordControl?.hasError('minlength')">
         Password must be at least 6 characters.
+      </div>
+      <div class="error" *ngIf="passwordControl?.touched && passwordControl?.hasError('pattern')">
+        Password must include at least one uppercase letter and one number.
       </div>
     </div>
 

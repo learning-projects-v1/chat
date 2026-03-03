@@ -12,5 +12,5 @@ public interface IUserRepository : IRepository<User>
     Task<User?> GetUserByEmail(string email);
     Task<User?> GetUserByUsername(string username);
     Task<List<User>> GetAllUsers();
-    Task<List<User>> GetSuggestedUsers(string userId);
+    Task<List<User>> GetSuggestedUsers(string userId, string? usernameQuery = null);
 }

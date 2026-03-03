@@ -21,14 +21,27 @@ public class UsersController : ControllerBase
 
 
     [HttpGet("suggestions")]
-    public async Task<IActionResult> GetSuggestions()
+    public async Task<IActionResult> GetSuggestions([FromQuery] string? username = null)
     {
         var userId = User.FindFirst(ClaimTypes.Name)?.Value;
 
-        var users = await _userRepository.GetSuggestedUsers(userId);
-        var rng = new Random();
-        int maxAmount = 10;
-        var suggestedUsers = users.OrderBy(x => rng.Next()).Take(maxAmount);
+        var users = await _userRepository.GetSuggestedUsers(userId, username);
+
+        IEnumerable<Domain.Models.User> suggestedUsers;
+        if (string.IsNullOrWhiteSpace(username))
+        {
+            var rng = new Random();
+            const int maxAmount = 10;
+            suggestedUsers = users.OrderBy(x => rng.Next()).Take(maxAmount);
+        }
+        else
+        {
+            const int maxAmount = 20;
+            suggestedUsers = users
+                .OrderBy(x => x.UserName)
+                .Take(maxAmount);
+        }
+
         return Ok(suggestedUsers.Select(x => x.ToUserResponseDto()).ToList());
     }
 }

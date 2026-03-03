@@ -38,23 +38,30 @@ public class UserRepository : BaseRepository<User>, IUserRepository
         return await _context.Set<User>().FirstOrDefaultAsync(x => x.UserName == username);
     }
 
-    public Task<List<User>> GetSuggestedUsers(string userId)
+    public async Task<List<User>> GetSuggestedUsers(string userId, string? usernameQuery = null)
     {
-        var userIdGuid = Guid.Parse(userId);
+        if (!Guid.TryParse(userId, out var userIdGuid))
+        {
+            return new List<User>();
+        }
 
-        var allUsers = _context.Users;
-
-        var friendIds = _context.Set<Friendship>()
+        var friendIds = await _context.Set<Friendship>()
             .Where(f => f.SenderId == userIdGuid || f.ReceiverId == userIdGuid)
             .Select(f => f.SenderId == userIdGuid? f.ReceiverId: f.SenderId)
-            .ToList();
+            .ToListAsync();
 
-        var suggestedUsers = _context.Set<User>()
-            .Where(u => u.Id != userIdGuid && !friendIds.Contains(u.Id))
-            .ToList();
+        var suggestedUsersQuery = _context.Set<User>()
+            .AsNoTracking()
+            .Where(u => u.Id != userIdGuid && !friendIds.Contains(u.Id));
 
-        //return suggestedUsers;
-        return Task.FromResult(suggestedUsers);
+        if (!string.IsNullOrWhiteSpace(usernameQuery))
+        {
+            var normalizedQuery = usernameQuery.Trim().ToLower();
+            suggestedUsersQuery = suggestedUsersQuery.Where(u =>
+                u.UserName.ToLower().Contains(normalizedQuery));
+        }
+
+        return await suggestedUsersQuery.ToListAsync();
     }
 
 }

@@ -30,8 +30,12 @@ export class HttpClientService{
     }
 
 
-    getFriendSuggestions(): Observable<UserInfoDto[]> {
-        return this.http.get<UserInfoDto[]>(apiEndpoints.FriendSuggestions, {});
+    getFriendSuggestions(username?: string): Observable<UserInfoDto[]> {
+        let params = new HttpParams();
+        if (username && username.trim().length > 0) {
+            params = params.set("username", username.trim());
+        }
+        return this.http.get<UserInfoDto[]>(apiEndpoints.FriendSuggestions, { params });
     }
 
     
