@@ -68,3 +68,15 @@ frontend/chatApp/dist/
 frontend/chatApp/.angular/
 frontend/chatApp/.env
 frontend/chatApp/.env.*
+
+# === Keys & local secrets (never commit) ===
+*.pem
+*.key
+*.pfx
+*.p12
+id_rsa*
+resources/
+.env.*
+!.env.example
+!**/.env.example
+!**/.env.images.example

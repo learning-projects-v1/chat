@@ -8,7 +8,7 @@ namespace ChatApp.Domain.Models;
 
 public class Reaction
 {
-    public Guid Id { get; set; }
+    public Guid Id { get; set; }    
     public Guid ReactionToMessageId { get; set; }
     public Guid UserId { get; set; }
     public string Type { get; set; }
