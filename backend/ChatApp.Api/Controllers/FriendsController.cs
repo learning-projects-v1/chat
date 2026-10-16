@@ -27,7 +27,7 @@ public class FriendsController : ControllerBase
 
     [Authorize]
     [HttpPost("requests/{receiverId}")]
-    public async Task<IActionResult> SendFriendRequest(string receiverId)
+    public async Task<IActionResult> SendFriendRequestAsync(string receiverId)
     {
         var senderId = User.FindFirst(ClaimTypes.Name)?.Value;
         if(senderId == receiverId)
@@ -65,7 +65,7 @@ public class FriendsController : ControllerBase
 
     [Authorize]
     [HttpPut("requests/{senderId}/accept")]
-    public async Task<IActionResult> AcceptFriendRequest(string senderId)
+    public async Task<IActionResult> AcceptFriendRequestAsync(string senderId)
     {
         var userId = GetUserId();
         if (userId == null) return Unauthorized();
