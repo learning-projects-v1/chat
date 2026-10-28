@@ -74,6 +74,9 @@ public class MessagesController: ControllerBase
     [HttpPost("")]
     public async Task<IActionResult> SendMessage([FromBody] ChatDto chatDto)
     {
+        // The sender is always the authenticated user; chatDto.SenderId from the body is ignored.
+        var userId = UserClaimsHelper.GetUserId(User);
+        chatDto.SenderId = userId;
         var message = new Message()
         {
             Id = Guid.NewGuid(),
@@ -81,10 +84,9 @@ public class MessagesController: ControllerBase
             ChatThreadId = chatDto.ChatThreadId,
             ReplyToMessageId = chatDto.ReplyToMessageId,
             SentAt = chatDto.SentAt,
-            SenderId = chatDto.SenderId
+            SenderId = userId
         };
-        var userId = Guid.Parse(User.FindFirst(ClaimTypes.Name)?.Value);
-        var friendInfo = await _userRepository.GetItemByIdAsync(chatDto.SenderId);
+        var friendInfo = await _userRepository.GetItemByIdAsync(userId);
         if(friendInfo == null)
         {
             return BadRequest(new { message = "Sender not found" });
