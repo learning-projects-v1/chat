@@ -30,11 +30,12 @@ public class MessagesControllerTests
     public async Task SendMessage_ThreadNotFound_ReturnsBadRequest()
     {
         // Arrange: sign in, the sender exists (it's looked up before the thread), the thread returns null
-        SignInAs(Guid.NewGuid());
-        GivenSenderExists(Guid.NewGuid());
-        GivenThreadExists(Guid.NewGuid(), Guid.NewGuid(), Guid.NewGuid());
-        // Act: await _sut.SendMessage(chat)
-        var result = await _sut.SendMessage(Arg.Any<ChatDto>());
+        var me = Guid.NewGuid();
+        SignInAs(me);
+        GivenSenderExists(me);
+        // no GivenThreadExists: an unconfigured substitute returns null for GetItemByIdAsync
+        // Act
+        var result = await _sut.SendMessage(NewChat(Guid.NewGuid(), me));
         // Assert: BadRequestObjectResult · _messageRepository never got AddAsync
         Assert.IsType<BadRequestObjectResult>(result);
         await _messageRepository.DidNotReceive().AddAsync(Arg.Any<Message>(), Arg.Any<CancellationToken>());
@@ -46,21 +47,24 @@ public class MessagesControllerTests
     public async Task SendMessage_Valid_SavesAndNotifiesAllThreadMembers()
     {
         // Arrange: sign in, sender + thread exist, GetThreadMembersAsync returns 2 users
-        SignInAs(Guid.NewGuid());
-        GivenSenderExists(Guid.NewGuid());
-        GivenThreadExists(Guid.NewGuid(), Guid.NewGuid(), Guid.NewGuid());
-        // _userRepository.GetItemByIdAsync(Arg.Any<Guid>(), Arg.Any<CancellationToken>()).Returns((User?)new(){});
-        // _chatThreadRepository.GetItemByIdAsync(Arg.Any<Guid>(), Arg.Any<CancellationToken>())
-        //     .Returns((ChatThread?)new(){});
-        //
+        var me = Guid.NewGuid();
+        var friend = Guid.NewGuid();
+        var threadId = Guid.NewGuid();
+        SignInAs(me);
+        GivenSenderExists(me);
+        GivenThreadExists(threadId, me, friend);
+
         // Act
-        var result = await _sut.SendMessage(Arg.Any<ChatDto>());
+        var result = await _sut.SendMessage(NewChat(threadId, me));
 
         // Assert: OkObjectResult · SaveChangesAsync once · NotifyMessageToAll got both member ids
         Assert.IsType<OkObjectResult>(result);
-    
         await _unitOfWork.Received(1).SaveChangesAsync();
-        await _notifier.Received(1).NotifyMessageToAll(Arg.Any<List<string>>(), Arg.Any<ChatPreviewDto>());
+        await _notifier.Received(1).NotifyMessageToAll(
+            Arg.Is<List<string>>(ids => ids.Count == 2
+                                        && ids.Contains(me.ToString())
+                                        && ids.Contains(friend.ToString())),
+            Arg.Any<ChatPreviewDto>());
     }
 
     [Fact]
@@ -68,15 +72,23 @@ public class MessagesControllerTests
     {
         // Arrange: sign in as `me`, chat.SenderId = someone else, sender + thread exist
         var me = Guid.NewGuid();
+        var someoneElse = Guid.NewGuid();
+        var threadId = Guid.NewGuid();
         SignInAs(me);
-        GivenThreadExists(Guid.NewGuid());
-        // Act  
-        var result = await _sut.SendMessage(new() { SenderId = Guid.NewGuid() });
-        // Assert: AddAsync got a Message with SenderId == me (fails until the controller is fixed)
+        GivenSenderExists(me);
+        GivenSenderExists(someoneElse);
+        GivenThreadExists(threadId, me);
+        // capture the saved message: Arg.Do must be wired up BEFORE the Act
+        Message? saved = null;
+        await _messageRepository.AddAsync(Arg.Do<Message>(m => saved = m), Arg.Any<CancellationToken>());
 
-        Guid senderId = Guid.Empty;
-        await _messageRepository.AddAsync(Arg.Do<Message>(x => senderId = x.SenderId));
-        Assert.False(senderId == me);
+        // Act
+        var result = await _sut.SendMessage(NewChat(threadId, someoneElse));
+
+        // Assert: AddAsync got a Message with SenderId == me (fails until the controller is fixed)
+        Assert.IsType<OkObjectResult>(result);
+        Assert.NotNull(saved);
+        Assert.Equal(me, saved.SenderId);
     }
 
     private void SignInAs(Guid userId)
