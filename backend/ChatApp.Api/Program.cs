@@ -38,6 +38,7 @@ builder.Services
     .AddAuthenticationServices(jwtSettings!)
     .AddCustomAuthorization()
     .AddServices()
+    .AddMessaging(builder.Configuration)
     .AddSignalR();
 
 var app = builder.Build();
