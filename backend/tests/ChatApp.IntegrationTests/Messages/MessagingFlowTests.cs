@@ -1,8 +1,12 @@
 using System.Net;
-using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using ChatApp.Application.DTOs;
+using ChatApp.Application.Interfaces;
+using ChatApp.Infrastructure.Messaging;
+using ChatApp.Infrastructure.Persistence;
 using ChatApp.IntegrationTests.Infrastructure;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace ChatApp.IntegrationTests.Messages;
 
@@ -20,15 +24,15 @@ public class MessagingFlowTests
     public async Task RegisterLoginSendAndFetch_MessageIsStoredAndVisibleToTheOtherMember()
     {
         // Arrange: two real accounts, created and logged in through the API.
-        var alice = await RegisterAndLoginAsync("alice");
-        var bob = await RegisterAndLoginAsync("bob");
+        var alice = await _fixture.RegisterAndLoginAsync("alice");
+        var bob = await _fixture.RegisterAndLoginAsync("bob");
 
         // No API endpoint creates a thread (see ApiFixture.CreateThreadAsync), so arrange it in the DB.
         var threadId = await _fixture.CreateThreadAsync(alice.UserId, bob.UserId);
         var content = $"hello from an integration test {Guid.NewGuid():N}";
 
         // Act 1: Alice sends a message with her JWT.
-        var aliceClient = CreateClientWithToken(alice.AccessToken);
+        var aliceClient = _fixture.CreateClientWithToken(alice.AccessToken);
         var sendResponse = await aliceClient.PostAsJsonAsync($"/api/threads/{threadId}/messages", new ChatDto
         {
             ChatThreadId = threadId,
@@ -43,7 +47,7 @@ public class MessagingFlowTests
 
         // Act 2: Bob fetches the conversation with his own JWT (a separate request, so this
         // proves the message was persisted in PostgreSQL, not just echoed back).
-        var bobClient = CreateClientWithToken(bob.AccessToken);
+        var bobClient = _fixture.CreateClientWithToken(bob.AccessToken);
         var conversation = await bobClient.GetFromJsonAsync<ChatThreadDto>($"/api/threads/{threadId}/messages");
 
         // Assert
@@ -58,6 +62,29 @@ public class MessagingFlowTests
     }
 
     [Fact]
+    public async Task SendMessage_WithoutServiceBus_CreatesTheNotificationInProcess()
+    {
+        // This collection runs with ServiceBus:Enabled = false: the fallback path.
+        Assert.IsType<InProcessEventPublisher>(_fixture.Factory.Services.GetRequiredService<IEventPublisher>());
+
+        var alice = await _fixture.RegisterAndLoginAsync("alice");
+        var bob = await _fixture.RegisterAndLoginAsync("bob");
+        var threadId = await _fixture.CreateThreadAsync(alice.UserId, bob.UserId);
+
+        var response = await _fixture.CreateClientWithToken(alice.AccessToken).PostAsJsonAsync(
+            $"/api/threads/{threadId}/messages",
+            new ChatDto { ChatThreadId = threadId, Content = "hi", SentAt = DateTime.UtcNow });
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        var sent = await response.Content.ReadFromJsonAsync<ChatDto>();
+
+        // No polling needed: in-process, the row exists by the time the request returns.
+        using var scope = _fixture.Factory.Services.CreateScope();
+        var db = scope.ServiceProvider.GetRequiredService<ChatAppDbContext>();
+        var notification = Assert.Single(await db.Notifications.Where(n => n.MessageId == sent!.Id).ToListAsync());
+        Assert.Equal(bob.UserId, notification.UserId);
+    }
+
+    [Fact]
     public async Task GetThreadMessages_WithoutToken_Returns401()
     {
         var client = _fixture.Factory.CreateClient();
@@ -66,38 +93,4 @@ public class MessagingFlowTests
 
         Assert.Equal(HttpStatusCode.Unauthorized, response.StatusCode);
     }
-
-    private HttpClient CreateClientWithToken(string accessToken)
-    {
-        var client = _fixture.Factory.CreateClient();
-        client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
-        return client;
-    }
-
-    private async Task<LoggedInUser> RegisterAndLoginAsync(string name)
-    {
-        // Unique per run: the database is shared across tests and Users.Email is unique.
-        var email = $"{name}-{Guid.NewGuid():N}@example.test";
-        const string password = "Integration-Test-Pa55!";
-        var client = _fixture.Factory.CreateClient();
-
-        var register = await client.PostAsJsonAsync("/api/auth/register",
-            new RegisterRequest { Email = email, Password = password, Username = name });
-        Assert.Equal(HttpStatusCode.OK, register.StatusCode);
-
-        var login = await client.PostAsJsonAsync("/api/auth/login",
-            new LoginRequest { Email = email, Password = password });
-        Assert.Equal(HttpStatusCode.OK, login.StatusCode);
-
-        var body = await login.Content.ReadFromJsonAsync<LoginResponse>();
-        Assert.NotNull(body);
-        Assert.False(string.IsNullOrEmpty(body.AccessToken));
-
-        return new LoggedInUser(Guid.Parse(body.UserId), body.AccessToken);
-    }
-
-    // AuthController.Login returns an anonymous object, so the shape is mirrored here.
-    private sealed record LoginResponse(string AccessToken, string UserId, string Email, string Username);
-
-    private sealed record LoggedInUser(Guid UserId, string AccessToken);
 }

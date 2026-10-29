@@ -27,6 +27,8 @@ jobs:
       - name: Unit tests
         run: dotnet test backend/tests/ChatApp.UnitTests/ChatApp.UnitTests.csproj --configuration Release --no-build --verbosity normal
 
-      # Testcontainers starts PostgreSQL in Docker, which ubuntu-latest runners already have.
+      # Testcontainers starts PostgreSQL, and for the Service Bus tests the Service Bus emulator
+      # plus its SQL Server, in Docker, which ubuntu-latest runners already have.
+      # Set SKIP_SERVICEBUS_TESTS=true to skip the (slower) emulator tests.
       - name: Integration tests
         run: dotnet test backend/tests/ChatApp.IntegrationTests/ChatApp.IntegrationTests.csproj --configuration Release --no-build --verbosity normal
