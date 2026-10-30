@@ -13,6 +13,7 @@ When a message is sent, the API publishes a `MessageSent` event to an Azure Serv
 
 ## Contents
 - [Architecture](#architecture)
+- [Why Service Bus](#why-service-bus)
 - [Run locally](#run-locally)
 - [Tests](#tests)
 - [CI](#ci)
@@ -71,6 +72,26 @@ The same flow runs in two places:
 | `tests/ChatApp.UnitTests`, `tests/ChatApp.IntegrationTests` | See [Tests](#tests). |
 
 The Angular client is in `frontend/chatApp`.
+
+## Why Service Bus
+
+<!-- rewrite in your words -->
+**Queue instead of inline.** Before, `SendMessage` pushed the new message to the thread members over SignalR inside the request. Now the request saves the message, publishes one `MessageSent` event and returns. The notification work (notification rows + the SignalR push) happens in `NotificationWorker`, so a failure there (database hiccup, a bug in the handler) is retried by Service Bus instead of failing the user's send.
+
+<!-- rewrite in your words -->
+**At-least-once delivery.** The worker receives in peek-lock mode with `AutoCompleteMessages = false` and completes a message only after the handler has succeeded. If the handler throws, or the process dies before the complete call, the lock expires and Service Bus delivers the message again. So the same message can arrive more than once, and the handler has to cope with that.
+
+<!-- rewrite in your words -->
+**The duplicate guard.** The chat message id is used as the Service Bus `MessageId`. `MessageSentHandler` checks the `ProcessedMessages` table for that id and skips the message if it is there. Otherwise it writes the notification rows and the `ProcessedMessages` row in one `SaveChanges` (one transaction). If two deliveries race past the check, the primary key on `ProcessedMessages.MessageId` lets only one commit; the other gets `DuplicateKeyException` and is treated as a duplicate. Duplicates are completed, not retried. The SignalR push runs after the commit, so the rows are written once and the live push happens at most once.
+
+<!-- rewrite in your words -->
+**When the worker is down.** The worker runs in the API process. While it is not consuming, messages wait in the queue; the queue's time-to-live is 1 hour and expired messages are dropped (dead-lettering on expiry is off). Users can still send messages, they just don't get the live push until the worker is back.
+
+<!-- rewrite in your words -->
+**Dead-letter queue.** After 5 failed deliveries (`MaxDeliveryCount`, same in the emulator config and the Azure script) Service Bus moves the message to the queue's dead-letter queue. Nothing in the app reads it; you look at it in Service Bus Explorer in the Azure portal.
+
+<!-- rewrite in your words -->
+**Known gap: no outbox.** The message is committed to Postgres before the event is published. If the publish fails, the message is saved but nobody is notified, and the request returns an error even though the message exists. The transactional outbox pattern (write the event to an outbox table in the same transaction, publish it from there) would close this gap; it is not built.
 
 ## Run locally
 
@@ -163,7 +184,7 @@ Public URL: <!-- public URL after B04 runs --> not deployed yet.
 
 ## Known limitations
 
-- **No outbox**: the message is committed before the event is published, so a failed publish leaves a saved message with no notification.
+- **No outbox** (see [Why Service Bus](#why-service-bus)): a failed publish leaves a saved message with no notification.
 - **Notifications are written but not read.** `Notifications` rows are created for each recipient, but no endpoint returns them yet; the client only uses the live SignalR push.
 - **One replica.** The worker and the SignalR hub run in the API process with no SignalR backplane, so the API can't scale out yet.
 - **`ProcessedMessages` grows forever.** Nothing cleans old rows up.
