@@ -7,7 +7,7 @@ Users register and log in, send and accept friend requests, and chat in real tim
 When a message is sent, the API publishes a `MessageSent` event to an Azure Service Bus queue; a background worker turns it into notification rows and a SignalR push.
 
 <!-- record: docs/demo.gif, ~15 s. Two browser windows side by side (e.g. Chrome + a private window), logged in as u1@gmail.com and u2@gmail.com, same thread open.
-     u1 sends a message, it appears live in u2's thread and chat list; u2 replies or reacts. Run the API with the servicebus profile on,
+     u1 sends a message, it appears live in u2's thread and chat list; u2 replies or reacts. Run with Service Bus on (servicebus compose profile + ServiceBus__Enabled=true),
      and show the "Processed MessageSent ..." log line from NotificationWorker in a terminal next to the browsers. Then uncomment the line below. -->
 <!-- ![Demo: two browsers chatting, the second one gets the message through Service Bus](docs/demo.gif) -->
 
@@ -79,7 +79,7 @@ The Angular client is in `frontend/chatApp`.
 **Queue instead of inline.** Before, `SendMessage` pushed the new message to the thread members over SignalR inside the request. Now the request saves the message, publishes one `MessageSent` event and returns. The notification work (notification rows + the SignalR push) happens in `NotificationWorker`, so a failure there (database hiccup, a bug in the handler) is retried by Service Bus instead of failing the user's send.
 
 <!-- rewrite in your words -->
-**At-least-once delivery.** The worker receives in peek-lock mode with `AutoCompleteMessages = false` and completes a message only after the handler has succeeded. If the handler throws, or the process dies before the complete call, the lock expires and Service Bus delivers the message again. So the same message can arrive more than once, and the handler has to cope with that.
+**At-least-once delivery.** The worker receives in peek-lock mode with `AutoCompleteMessages = false` and completes a message only after the handler has succeeded. If the handler throws, the processor abandons the message; if the process dies before the complete call, the lock (30 s) expires. Either way Service Bus delivers the message again. So the same message can arrive more than once, and the handler has to cope with that.
 
 <!-- rewrite in your words -->
 **The duplicate guard.** The chat message id is used as the Service Bus `MessageId`. `MessageSentHandler` checks the `ProcessedMessages` table for that id and skips the message if it is there. Otherwise it writes the notification rows and the `ProcessedMessages` row in one `SaveChanges` (one transaction). If two deliveries race past the check, the primary key on `ProcessedMessages.MessageId` lets only one commit; the other gets `DuplicateKeyException` and is treated as a duplicate. Duplicates are completed, not retried. The SignalR push runs after the commit, so the rows are written once and the live push happens at most once.
