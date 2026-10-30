@@ -95,6 +95,13 @@ public class MessagesController: ControllerBase
         if (thread == null) {
             return BadRequest(new { message = "Thread not found" });
         }
+        
+        var isMember = await _chatThreadMemberRepository.IsMember(chatDto.ChatThreadId, userId);
+        if (!isMember)
+        {
+            return new ForbidResult();
+        }
+
         var userInfoDto = new UserInfoDto()
         {
             Id = friendInfo.Id,
