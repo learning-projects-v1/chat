@@ -163,6 +163,9 @@ dotnet test backend/tests/ChatApp.IntegrationTests/ChatApp.IntegrationTests.cspr
 - **Unit tests** (xUnit + NSubstitute, no database): `AuthService` register/login, `FriendsController` send/accept rules, `MessagesController.SendMessage` (thread not found, publishes `MessageSent` for all thread members, sender taken from the token and not the request body), JWT and claims helpers, and `MessageSentHandler` (notifies everyone except the sender, same message id twice creates one notification, losing the race on the inbox key skips the push).
 - **Integration tests** (`WebApplicationFactory<Program>` + Testcontainers): the real `Program.cs`, DI, JWT auth and EF Core against a PostgreSQL 16 container with the real migrations. They cover register → login → send → fetch, a request without a token getting 401, `/health`, and the in-process notification path. A second fixture adds the Service Bus emulator and its SQL Server, and checks that a notification arrives through the queue and that the same message delivered twice creates one notification. Those two are slower (about a minute to start); set `SKIP_SERVICEBUS_TESTS=true` to skip them.
 
+<!-- rewrite in your words -->
+**Why Testcontainers and not the EF Core InMemory provider.** InMemory is not a relational database: it doesn't run migrations, doesn't enforce unique indexes, has no real transactions and translates queries differently from Npgsql. The duplicate guard depends on a Postgres primary-key violation inside a transaction, and the schema comes from migrations, so those need a real Postgres to be tested at all. The cost is speed and needing Docker.
+
 ## CI
 
 Two GitHub Actions workflows in `.github/workflows/`:
