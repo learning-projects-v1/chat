@@ -1,3 +1,5 @@
+![CI](https://github.com/learning-projects-v1/chat/actions/workflows/ci.yml/badge.svg)
+
 # Chat App
 
 A full-stack real-time chat application built as a resume and learning project, focusing on clean architecture, modern web technologies, and extensibility for future system-design improvements.
