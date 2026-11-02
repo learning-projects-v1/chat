@@ -67,6 +67,21 @@ public class MessagingFlowTests
         Assert.Equal(HttpStatusCode.Unauthorized, response.StatusCode);
     }
 
+    [Fact]
+    public async Task GetThreadMessages_NotInTheThread_CantRead()
+    {
+        // Arrange: two real accounts, created and logged in through the API.
+        var alice = await RegisterAndLoginAsync("alice");
+        var bob = await RegisterAndLoginAsync("bob");
+        var carol = await RegisterAndLoginAsync("carol");
+        var carolClient = CreateClientWithToken(carol.AccessToken);
+        
+        // No API endpoint creates a thread (see ApiFixture.CreateThreadAsync), so arrange it in the DB.
+        var threadId = await _fixture.CreateThreadAsync(alice.UserId, bob.UserId);
+        var result = await carolClient.GetAsync($"/api/threads/{threadId}/messages");
+        Assert.Equal(HttpStatusCode.Forbidden, result.StatusCode);
+    }
+
     private HttpClient CreateClientWithToken(string accessToken)
     {
         var client = _fixture.Factory.CreateClient();
