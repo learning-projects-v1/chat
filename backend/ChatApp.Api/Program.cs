@@ -78,3 +78,6 @@ using (var scope = app.Services.CreateScope())
     }
 }
 app.Run();
+
+// Lets WebApplicationFactory<Program> in the integration tests see the top-level-statements entry point.
+public partial class Program { }

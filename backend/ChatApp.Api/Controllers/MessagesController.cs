@@ -38,6 +38,12 @@ public class MessagesController: ControllerBase
     public async Task<IActionResult> GetThreadContents(Guid threadId)
     {
         var userId = Guid.Parse(User.FindFirst(ClaimTypes.Name)?.Value);
+        var isMember = await _chatThreadMemberRepository.IsMember(threadId, userId);
+        if (!isMember)
+        {
+            return new ForbidResult();
+        }
+
         var messages = await _messageRepository.GetChatsWithReactions(threadId);
         var chatDtos = messages.Select(m => new ChatDto()
         {
