@@ -91,6 +91,21 @@ public class MessagesControllerTests
         Assert.Equal(me, saved.SenderId);
     }
 
+    [Fact]
+    public async Task SendMessage_SenderNotInThread_ReturnsForbid()
+    {
+        var me = Guid.NewGuid();
+        var threadId = Guid.NewGuid();
+        SignInAs(me);
+        GivenSenderExists(me);
+        GivenThreadExists(threadId, me);
+        SenderNotInThread(threadId, me);
+        var result = await _sut.SendMessage(NewChat(threadId, me));
+        Assert.IsType<ForbidResult>(result);
+        await _messageRepository.DidNotReceive().AddAsync(Arg.Any<Message>(), Arg.Any<CancellationToken>());
+        await _unitOfWork.DidNotReceive().SaveChangesAsync();
+    }
+
     private void SignInAs(Guid userId)
     {
         var identity = new ClaimsIdentity(new[] { new Claim(ClaimTypes.Name, userId.ToString()) }, "Test");
@@ -110,6 +125,15 @@ public class MessagesControllerTests
             .Returns(new ChatThread { Id = threadId, ThreadName = "thread" });
         _chatThreadMemberRepository.GetThreadMembersAsync(threadId)
             .Returns(memberIds.Select(id => new User { Id = id, UserName = $"user-{id}" }).ToList());
+        foreach(var member in memberIds)
+        {
+            _chatThreadMemberRepository.IsMember(threadId, member).Returns(true);
+        }
+    }
+
+    private void SenderNotInThread(Guid threadId, Guid senderId)
+    {
+        _chatThreadMemberRepository.IsMember(threadId, senderId).Returns(false);
     }
 
     private static ChatDto NewChat(Guid threadId, Guid senderId) => new()
