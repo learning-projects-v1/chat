@@ -41,6 +41,12 @@ public class MessagesController: ControllerBase
     public async Task<IActionResult> GetThreadContents(Guid threadId)
     {
         var userId = Guid.Parse(User.FindFirst(ClaimTypes.Name)?.Value);
+        var isMember = await _chatThreadMemberRepository.IsMember(threadId, userId);
+        if (!isMember)
+        {
+            return new ForbidResult();
+        }
+
         var messages = await _messageRepository.GetChatsWithReactions(threadId);
         var chatDtos = messages.Select(m => new ChatDto()
         {
@@ -98,6 +104,13 @@ public class MessagesController: ControllerBase
         if (thread == null) {
             return BadRequest(new { message = "Thread not found" });
         }
+
+        var isMember = await _chatThreadMemberRepository.IsMember(chatDto.ChatThreadId, userId);
+        if (!isMember)
+        {
+            return new ForbidResult();
+        }
+
         var seenStatus = new MessageSeenStatus() { Id = Guid.NewGuid(), MessageId = message.Id, SeenAt = DateTime.UtcNow, UserId = userId };
         ///Todo: begin transaction
         await _messageRepository.AddAsync(message);

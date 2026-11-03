@@ -42,9 +42,7 @@ public class ChatThreadMemberRepository : BaseRepository<ChatThreadMember>, ICha
 
     public async Task<bool> IsMember(Guid threadId, Guid userId)
     {
-        var threadMember = await _context.ChatThreadMembers
-            .Where(x => x.ChatThreadId == threadId && x.UserId == userId)
-            .ToListAsync();
-        return threadMember != null;
+        return await _context.ChatThreadMembers
+            .AnyAsync(x => x.ChatThreadId == threadId && x.UserId == userId);
     }
 }
