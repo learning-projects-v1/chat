@@ -22,7 +22,7 @@ Azure resource group rg-chatapp               ▼
 | Resource group | `rg-chatapp` | region `centralindia` (`LOCATION=` to change) |
 | Log Analytics workspace | `log-chatapp` | 30-day retention, **0.1 GB/day ingestion cap** |
 | Container Apps environment | `cae-chatapp` | consumption plan |
-| Service Bus namespace + queue | `sb-chatapp-<suffix>` / `message-sent` | Basic tier; queue matches the emulator config (max delivery 5, lock 30 s, TTL 1 h) |
+| Service Bus namespace + queue | `sb-chatapp-<suffix>` / `message-sent` | Basic tier; queue matches the emulator config (max delivery 3, lock 30 s, TTL 1 h) |
 | Queue SAS rule | `chatapp-api` | **Send + Listen on that one queue only** (no Manage, no other queues) |
 | PostgreSQL Flexible Server + database | `psql-chatapp-<suffix>` / `chatapp` | Burstable B1ms, 32 GB, v16, no HA, firewall = "allow Azure services" |
 | Container app | `chatapp-api` | 0.25 vCPU / 0.5 GiB, min 0 / max 1 replica, external ingress on 8080 |
@@ -97,7 +97,7 @@ curl -s -X POST $URL/api/threads/$THREAD/messages -H "Authorization: Bearer $TOK
 az containerapp logs show -g rg-chatapp -n chatapp-api --tail 50 | grep "Processed MessageSent"
 ```
 The portal shows the same in the Service Bus namespace → *Metrics* (Incoming / Completed messages).
-Dead-lettered messages (5 failed attempts) are under the queue → *Service Bus Explorer* → Dead-letter.
+Dead-lettered messages (3 failed attempts) are under the queue → *Service Bus Explorer* → Dead-letter.
 
 ## Tear down
 

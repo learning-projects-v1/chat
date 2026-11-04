@@ -181,7 +181,7 @@ fi
 if ! exists az servicebus queue show -g "$RG" --namespace-name "$SB_NAMESPACE" -n "$SB_QUEUE"; then
   # Same settings as servicebus-emulator/Config.json, so local and Azure behave alike.
   az servicebus queue create -g "$RG" --namespace-name "$SB_NAMESPACE" -n "$SB_QUEUE" \
-    --max-delivery-count 5 --lock-duration PT30S --default-message-time-to-live PT1H -o none
+    --max-delivery-count 3 --lock-duration PT30S --default-message-time-to-live PT1H -o none
 fi
 if ! exists az servicebus queue authorization-rule show -g "$RG" --namespace-name "$SB_NAMESPACE" \
      --queue-name "$SB_QUEUE" -n "$SB_RULE"; then
