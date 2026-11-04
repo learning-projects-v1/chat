@@ -14,3 +14,10 @@
 - One Postgres container is shared by every test in the collection during a run (`ApiFixture`). A new one starts each run. Data persists between tests unless it's cleared, so each test makes unique users (a GUID in the email).
 - The fake `IsMember()` didn't behave like the real one. The real one always returned true (`ToListAsync()` never returns null, only an empty list), so the B01 403 check never worked against a real DB. The integration test caught it → fixed with `AnyAsync`.
 - (Claude explained, 3 Nov) The MSB3277 warning: `Npgsql.EntityFrameworkCore.PostgreSQL` 8.0.11 pulls EF Core Relational 8.0.11, while `Microsoft.EntityFrameworkCore` 8.0.16 wants Relational 8.0.16. The build picks 8.0.11, which can fail at runtime with a missing method. Fix: keep the EF packages on one version (e.g. bump the Npgsql provider to the newest 8.0.x).
+
+## B03 · notifications over Azure Service Bus (4 Nov 2026)
+- A queue handles three things: load (a lot of requests at once go to the queue), service failures (messages stay saved in the queue, so failures can be recovered), and taking work off the API (a worker service handles the notifications).
+- The lock stops the same message being taken by another consumer: it's hidden from all consumers for the lock duration (30 s here). If the consumer doesn't complete it in that time, it comes back.
+- `DeliveryCount` is how many times a message has been delivered. At `MaxDeliveryCount` (3 in the emulator now) it moves to the dead-letter queue, where it can be inspected and resubmitted.
+- If the worker saves the notifications and dies before completing the message, it's redelivered after 30 s with `DeliveryCount` + 1. The guard (`ExistsAsync`, `MessageSentHandler.cs:36`) sees the processed row and skips it, then the worker completes it. The live SignalR push is lost, but the row is there: rows exactly once, push at most once.
+- (Claude explained, 3 Nov) Known gap, no outbox: `SendMessage` commits the message before publishing. If the publish fails, the message is saved but nobody is notified. A transactional outbox would fix that.
