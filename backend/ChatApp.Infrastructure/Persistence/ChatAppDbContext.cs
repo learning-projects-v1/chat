@@ -22,6 +22,8 @@ public class ChatAppDbContext : DbContext
     public DbSet<ChatThread> ChatThreads { get; set; }
     public DbSet<ChatThreadMember> ChatThreadMembers { get; set; }
     public DbSet<MessageSeenStatus> MessageSeenStatuses { get; set; }
+    public DbSet<Notification> Notifications { get; set; }
+    public DbSet<ProcessedMessage> ProcessedMessages { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -141,6 +143,28 @@ public class ChatAppDbContext : DbContext
             .HasForeignKey(m => m.MessageId);
 
             entity.HasIndex(e => new { e.MessageId, e.UserId }).IsUnique();
+        });
+
+        modelBuilder.Entity<Notification>(entity =>
+        {
+            entity.HasKey(n => n.Id);
+
+            /// notification - recipient
+            entity.HasOne<User>().WithMany().HasForeignKey(n => n.UserId).OnDelete(DeleteBehavior.Cascade);
+
+            /// notification - message
+            entity.HasOne<Message>().WithMany().HasForeignKey(n => n.MessageId).OnDelete(DeleteBehavior.Cascade);
+
+            // "my notifications, newest first"
+            entity.HasIndex(n => new { n.UserId, n.CreatedAt });
+        });
+
+        modelBuilder.Entity<ProcessedMessage>(entity =>
+        {
+            // The primary key IS the duplicate guard: a second row with the same
+            // MessageId is rejected by PostgreSQL (unique_violation, 23505).
+            entity.HasKey(p => p.MessageId);
+            entity.Property(p => p.MessageId).HasMaxLength(128);
         });
     }
 }

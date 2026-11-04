@@ -16,10 +16,16 @@ public sealed class ChatApiFactory : WebApplicationFactory<Program>
     public const string JwtAudience = "ChatApp.IntegrationTests.Clients";
 
     private readonly string _connectionString;
+    private readonly string? _serviceBusConnectionString;
 
-    public ChatApiFactory(string connectionString)
+    /// <param name="serviceBusConnectionString">
+    /// null (default): ServiceBus:Enabled = false, so SendMessage notifies in-process.
+    /// Set: the API publishes to the Service Bus emulator and runs NotificationWorker.
+    /// </param>
+    public ChatApiFactory(string connectionString, string? serviceBusConnectionString = null)
     {
         _connectionString = connectionString;
+        _serviceBusConnectionString = serviceBusConnectionString;
     }
 
     protected override void ConfigureWebHost(IWebHostBuilder builder)
@@ -42,5 +48,11 @@ public sealed class ChatApiFactory : WebApplicationFactory<Program>
         builder.UseSetting("JwtSettings:Audience", JwtAudience);
         builder.UseSetting("JwtSettings:AccessTokenExpirationMinutes", "60");
         builder.UseSetting("JwtSettings:RefreshTokenExpirationHours", "24");
+
+        builder.UseSetting("ServiceBus:Enabled", _serviceBusConnectionString is null ? "false" : "true");
+        if (_serviceBusConnectionString is not null)
+        {
+            builder.UseSetting("ConnectionStrings:ServiceBus", _serviceBusConnectionString);
+        }
     }
 }

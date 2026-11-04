@@ -1,5 +1,6 @@
 ﻿using ChatApp.API.Helper;
 using ChatApp.Application.DTOs;
+using ChatApp.Application.Events;
 using ChatApp.Application.Interfaces;
 using ChatApp.Application.Mappings;
 using ChatApp.Domain.Models;
@@ -21,8 +22,9 @@ public class MessagesController: ControllerBase
     IMessageSeenStatusRepository _messageSeenStatusRepository;
     IUnitOfWork _unitOfWork;
     IRealTimeNotifier _realTimeNotifier;
+    IEventPublisher _eventPublisher;
 
-    public MessagesController(IMessageRepository messageRepository, IUnitOfWork unitOfWork, IUserRepository userRepository, IRealTimeNotifier notifier, IChatThreadRepository chatThreadRepository, IChatThreadMemberRepository chatThreadMemberRepository, IMessageSeenStatusRepository messageSeenStatusRepository)
+    public MessagesController(IMessageRepository messageRepository, IUnitOfWork unitOfWork, IUserRepository userRepository, IRealTimeNotifier notifier, IChatThreadRepository chatThreadRepository, IChatThreadMemberRepository chatThreadMemberRepository, IMessageSeenStatusRepository messageSeenStatusRepository, IEventPublisher eventPublisher)
     {
         _messageRepository = messageRepository;
         _unitOfWork = unitOfWork;
@@ -31,6 +33,7 @@ public class MessagesController: ControllerBase
         _chatThreadRepository = chatThreadRepository;
         _chatThreadMemberRepository = chatThreadMemberRepository;
         _messageSeenStatusRepository = messageSeenStatusRepository;
+        _eventPublisher = eventPublisher;
     }
 
     // get all messages in a thread
@@ -101,23 +104,12 @@ public class MessagesController: ControllerBase
         if (thread == null) {
             return BadRequest(new { message = "Thread not found" });
         }
-        
+
         var isMember = await _chatThreadMemberRepository.IsMember(chatDto.ChatThreadId, userId);
         if (!isMember)
         {
             return new ForbidResult();
         }
-
-        var userInfoDto = new UserInfoDto()
-        {
-            Id = friendInfo.Id,
-            Username = friendInfo.UserName,
-        };
-        var payload = new ChatPreviewDto()
-        {
-            Chat = chatDto,
-            SenderInfo = userInfoDto
-        };
 
         var seenStatus = new MessageSeenStatus() { Id = Guid.NewGuid(), MessageId = message.Id, SeenAt = DateTime.UtcNow, UserId = userId };
         ///Todo: begin transaction
@@ -125,14 +117,30 @@ public class MessagesController: ControllerBase
         await _messageSeenStatusRepository.AddAsync(seenStatus);
         await _unitOfWork.SaveChangesAsync();
 
-        //await _realTimeNotifier.NotifyMessage(message.ReceiverId, payload);
         chatDto.Id = message.Id;
-        var seenStatusDto = new MessageSeenStatusDto() { Id = seenStatus.Id, MessageId = message.Id, SeenAt = seenStatus.SeenAt, ThreadId = message.ChatThreadId, UserId = userId };
         var threadMembers = await _chatThreadMemberRepository.GetThreadMembersAsync(chatDto.ChatThreadId);
-        var threadMemberIds = threadMembers.Select(x => x.Id.ToString()).ToList();
-        await _realTimeNotifier.NotifyMessageToAll(threadMemberIds, payload);
-        await _realTimeNotifier.NotifyMessagesSeenStatus(threadMemberIds, new() { seenStatusDto });
-        return Ok(chatDto); 
+
+        // The notification (rows + SignalR push) is no longer done here: we publish an event and
+        // NotificationWorker does it (see MessageSentHandler). The message id doubles as the
+        // Service Bus MessageId, which the worker's duplicate guard keys on.
+        // Known gap: the message is committed above *before* this publish. If the publish fails,
+        // the message is saved but nobody is notified (the transactional outbox pattern fixes that).
+        var messageSent = new MessageSent(
+            MessageId: message.Id,
+            ThreadId: message.ChatThreadId,
+            SenderId: userId,
+            SenderUsername: friendInfo.UserName,
+            Content: message.Content,
+            SentAt: message.SentAt,
+            ReplyToMessageId: message.ReplyToMessageId,
+            SenderSeenStatusId: seenStatus.Id,
+            SenderSeenAt: seenStatus.SeenAt,
+            ThreadMemberIds: threadMembers.Select(x => x.Id).ToList());
+        // No RequestAborted token: the message is already saved, so a client hanging up
+        // must not cancel its notification.
+        await _eventPublisher.PublishAsync(messageSent, message.Id.ToString());
+
+        return Ok(chatDto);
     }
 
 

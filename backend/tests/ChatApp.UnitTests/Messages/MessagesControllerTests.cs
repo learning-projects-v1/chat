@@ -1,6 +1,7 @@
 using System.Security.Claims;
 using ChatApp.API.Controllers;
 using ChatApp.Application.DTOs;
+using ChatApp.Application.Events;
 using ChatApp.Application.Interfaces;
 using ChatApp.Domain.Models;
 using Microsoft.AspNetCore.Http;
@@ -18,12 +19,13 @@ public class MessagesControllerTests
     private readonly IChatThreadRepository _chatThreadRepository = Substitute.For<IChatThreadRepository>();
     private readonly IChatThreadMemberRepository _chatThreadMemberRepository = Substitute.For<IChatThreadMemberRepository>();
     private readonly IMessageSeenStatusRepository _messageSeenStatusRepository = Substitute.For<IMessageSeenStatusRepository>();
+    private readonly IEventPublisher _eventPublisher = Substitute.For<IEventPublisher>();
     private readonly MessagesController _sut;
 
     public MessagesControllerTests()
     {
         _sut = new MessagesController(_messageRepository, _unitOfWork, _userRepository, _notifier,
-            _chatThreadRepository, _chatThreadMemberRepository, _messageSeenStatusRepository);
+            _chatThreadRepository, _chatThreadMemberRepository, _messageSeenStatusRepository, _eventPublisher);
     }
 
     [Fact]
@@ -41,10 +43,12 @@ public class MessagesControllerTests
         await _messageRepository.DidNotReceive().AddAsync(Arg.Any<Message>(), Arg.Any<CancellationToken>());
         await _messageSeenStatusRepository.DidNotReceive()
             .AddAsync(Arg.Any<MessageSeenStatus>(), Arg.Any<CancellationToken>());
+        await _eventPublisher.DidNotReceive()
+            .PublishAsync(Arg.Any<MessageSent>(), Arg.Any<string>(), Arg.Any<CancellationToken>());
     }
 
     [Fact]
-    public async Task SendMessage_Valid_SavesAndNotifiesAllThreadMembers()
+    public async Task SendMessage_Valid_SavesAndPublishesMessageSentForAllThreadMembers()
     {
         // Arrange: sign in, sender + thread exist, GetThreadMembersAsync returns 2 users
         var me = Guid.NewGuid();
@@ -57,14 +61,21 @@ public class MessagesControllerTests
         // Act
         var result = await _sut.SendMessage(NewChat(threadId, me));
 
-        // Assert: OkObjectResult · SaveChangesAsync once · NotifyMessageToAll got both member ids
-        Assert.IsType<OkObjectResult>(result);
+        // Assert: OkObjectResult · SaveChangesAsync once · one MessageSent with both member ids,
+        // published with the chat message id as its MessageId · no inline SignalR push any more
+        var ok = Assert.IsType<OkObjectResult>(result);
+        var sent = Assert.IsType<ChatDto>(ok.Value);
         await _unitOfWork.Received(1).SaveChangesAsync();
-        await _notifier.Received(1).NotifyMessageToAll(
-            Arg.Is<List<string>>(ids => ids.Count == 2
-                                        && ids.Contains(me.ToString())
-                                        && ids.Contains(friend.ToString())),
-            Arg.Any<ChatPreviewDto>());
+        await _eventPublisher.Received(1).PublishAsync(
+            Arg.Is<MessageSent>(e => e.MessageId == sent.Id
+                                     && e.SenderId == me
+                                     && e.ThreadId == threadId
+                                     && e.ThreadMemberIds.Count == 2
+                                     && e.ThreadMemberIds.Contains(me)
+                                     && e.ThreadMemberIds.Contains(friend)),
+            sent.Id.ToString(),
+            Arg.Any<CancellationToken>());
+        await _notifier.DidNotReceive().NotifyMessageToAll(Arg.Any<List<string>>(), Arg.Any<ChatPreviewDto>());
     }
 
     [Fact]
