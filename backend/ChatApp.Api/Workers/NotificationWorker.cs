@@ -64,7 +64,13 @@ public sealed class NotificationWorker : BackgroundService
         // again (DeliveryCount + 1). After MaxDeliveryCount attempts (5, see Config.json for the
         // emulator) Service Bus moves it to the queue's dead-letter queue for a human to look at.
         var handled = await handler.HandleAsync(evt, args.Message.MessageId, args.CancellationToken);
-        if (!handled)
+        if (handled)
+        {
+            // The line to look for in the Container Apps logs when checking the Azure flow end to end.
+            _logger.LogInformation("Processed MessageSent {MessageId} from the {Queue} queue (attempt {DeliveryCount}).",
+                args.Message.MessageId, QueueNames.MessageSent, args.Message.DeliveryCount);
+        }
+        else
         {
             _logger.LogInformation("Duplicate delivery of message {MessageId} (attempt {DeliveryCount}); skipped.",
                 args.Message.MessageId, args.Message.DeliveryCount);

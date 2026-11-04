@@ -41,6 +41,9 @@ builder.Services
     .AddMessaging(builder.Configuration)
     .AddSignalR();
 
+// Liveness endpoint for Azure Container Apps (and a quick "is it up?" check after a deploy).
+builder.Services.AddHealthChecks();
+
 var app = builder.Build();
 app.MapHub<NotificationHub>("/hubs/notifications");
 app.UseCors("AllowFrontend");
@@ -56,6 +59,7 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
+app.MapHealthChecks("/health");
 
 using (var scope = app.Services.CreateScope())
 {
