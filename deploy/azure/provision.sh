@@ -39,8 +39,9 @@ set -euo pipefail
 
 # ---- Settings: override any of these with an env var -----------------------------------------
 PREFIX="${PREFIX:-chatapp}"
-LOCATION="${LOCATION:-centralindia}"      # close to Dhaka; try southeastasia / eastus2 if your
-                                          # subscription says the region is restricted for Postgres
+LOCATION="${LOCATION:-koreacentral}"      # Azure for Students allows only 5 regions (policy "Allowed
+                                          # resource deployment regions"); also uaenorth, malaysiawest,
+                                          # indonesiacentral, austriaeast
 RG="${RG:-rg-${PREFIX}}"
 LOG_WORKSPACE="${LOG_WORKSPACE:-log-${PREFIX}}"
 ACA_ENV="${ACA_ENV:-cae-${PREFIX}}"
@@ -201,14 +202,14 @@ if ! exists az postgres flexible-server show -g "$RG" -n "$PG_SERVER"; then
   az postgres flexible-server create -g "$RG" -n "$PG_SERVER" -l "$LOCATION" \
     --tier Burstable --sku-name Standard_B1ms --storage-size 32 --version 16 \
     --admin-user "$PG_ADMIN" --admin-password "$PG_ADMIN_PASSWORD" \
-    --public-access 0.0.0.0 --high-availability Disabled --backup-retention 7 \
+    --public-access 0.0.0.0 --backup-retention 7 \
     --yes -o none
 else
   # Re-run: make the server password match the one we are about to store as a secret.
   az postgres flexible-server update -g "$RG" -n "$PG_SERVER" --admin-password "$PG_ADMIN_PASSWORD" -o none
 fi
-if ! exists az postgres flexible-server db show -g "$RG" -s "$PG_SERVER" -d "$PG_DB"; then
-  az postgres flexible-server db create -g "$RG" -s "$PG_SERVER" -d "$PG_DB" -o none
+if ! exists az postgres flexible-server db show -g "$RG" -s "$PG_SERVER" -n "$PG_DB"; then
+  az postgres flexible-server db create -g "$RG" -s "$PG_SERVER" -n "$PG_DB" -o none
 fi
 # ADO.NET format, as DbContextMiddleware expects. Azure requires TLS.
 DB_CONNECTION="Host=${PG_SERVER}.postgres.database.azure.com;Port=5432;Database=${PG_DB};Username=${PG_ADMIN};Password=${PG_ADMIN_PASSWORD};SSL Mode=Require"

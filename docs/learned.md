@@ -21,3 +21,10 @@
 - `DeliveryCount` is how many times a message has been delivered. At `MaxDeliveryCount` (3 in the emulator now) it moves to the dead-letter queue, where it can be inspected and resubmitted.
 - If the worker saves the notifications and dies before completing the message, it's redelivered after 30 s with `DeliveryCount` + 1. The guard (`ExistsAsync`, `MessageSentHandler.cs:36`) sees the processed row and skips it, then the worker completes it. The live SignalR push is lost, but the row is there: rows exactly once, push at most once.
 - (Claude explained, 3 Nov) Known gap, no outbox: `SendMessage` commits the message before publishing. If the publish fails, the message is saved but nobody is notified. A transactional outbox would fix that.
+
+## B04 · ChatApp on Azure Container Apps (5 Nov 2026)
+- Container Apps lets us run our image and services. It also provides the necessary components: HTTPS, a URL, secret management, and scaling to zero when idle.
+- Secrets live in the container app and reach the process as env vars through `secretref:`. The app can read them, and so can anyone with enough Azure rights on the subscription, like me as Owner.
+- The script had never touched real Azure, so the first runs found what the emulator couldn't: my subscription allows only 5 regions (`koreacentral` works, `centralindia` is blocked), two `az` flags had changed, and the image was private, so Azure couldn't have pulled it. Org settings had to allow public packages first.
+- The network can look fine and still break `az`: IPv6 to `management.azure.com` kept resetting, so the script died at random until I turned IPv6 off for the run.
+- Cost so far: $0 on my student credit, but Azure's cost data lags, so this isn't proven yet. List price is about $15–20 a month, almost all Postgres. The credit expires around 26 Dec.
