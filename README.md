@@ -6,10 +6,7 @@ A one-to-one chat app: an ASP.NET Core 8 Web API (clean architecture, EF Core + 
 Users register and log in, send and accept friend requests, and chat in real time with replies, reactions and seen status.
 When a message is sent, the API publishes a `MessageSent` event to an Azure Service Bus queue; a background worker turns it into notification rows and a SignalR push.
 
-<!-- record: docs/demo.gif, ~15 s. Two browser windows side by side (e.g. Chrome + a private window), logged in as u1@gmail.com and u2@gmail.com, same thread open.
-     u1 sends a message, it appears live in u2's thread and chat list; u2 replies or reacts. Run with Service Bus on (servicebus compose profile + ServiceBus__Enabled=true),
-     and show the "Processed MessageSent ..." log line from NotificationWorker in a terminal next to the browsers. Then uncomment the line below. -->
-<!-- ![Demo: two browsers chatting, the second one gets the message through Service Bus](docs/demo.gif) -->
+![Demo: two browsers chatting, the second one gets the message through Service Bus](docs/demo.gif)
 
 ## Contents
 - [Architecture](#architecture)
@@ -48,7 +45,7 @@ flowchart LR
     W -->|"(6) push"| H
     H -->|"MessageAllNotification"| A
     H -->|"MessageAllNotification"| B
-    Q -.->|"after 5 failed deliveries"| DLQ
+    Q -.->|"after 3 failed deliveries"| DLQ
 ```
 
 The same flow runs in two places:
@@ -75,23 +72,23 @@ The Angular client is in `frontend/chatApp`.
 
 ## Why Service Bus
 
-<!-- rewrite in your words -->
-**Queue instead of inline.** Before, `SendMessage` pushed the new message to the thread members over SignalR inside the request. Now the request saves the message, publishes one `MessageSent` event and returns. The notification work (notification rows + the SignalR push) happens in `NotificationWorker`, so a failure there (database hiccup, a bug in the handler) is retried by Service Bus instead of failing the user's send.
+**Queue instead of inline.**
+Before, when a new message was sent, the API saved it and then sent the notifications through SignalR inline, in the same request. Now the API saves the message, publishes one `MessageSent` event to the message broker and returns. A worker sends the notifications to the recipients. We get the broker's benefits: notifications are delivered asynchronously, failed ones are retried, and a failure in the notification code no longer fails the user's send.
 
-<!-- rewrite in your words -->
-**At-least-once delivery.** The worker receives in peek-lock mode with `AutoCompleteMessages = false` and completes a message only after the handler has succeeded. If the handler throws, the processor abandons the message; if the process dies before the complete call, the lock (30 s) expires. Either way Service Bus delivers the message again. So the same message can arrive more than once, and the handler has to cope with that.
+**At-least-once delivery.**
+The worker receives a message in peek-lock mode: the message is locked for 30 s so other consumers can't pick it up, and then it is passed to the handler. The worker completes the message only after the handler succeeds (`AutoCompleteMessages = false`). If the handler throws, the message is abandoned; if the worker crashes, the lock expires. Either way, Service Bus delivers the message again. So a message is never lost, but it can arrive more than once, and the handler has to handle duplicates (next paragraph). At-least-once delivery plus an idempotent handler means the notification rows are saved exactly once. The live SignalR push runs after the save, so it happens at most once: if the worker crashes after the save but before the push, the push is lost. The notification row is still in the database, but no endpoint reads it yet (see [Known limitations](#known-limitations)).
 
-<!-- rewrite in your words -->
-**The duplicate guard.** The chat message id is used as the Service Bus `MessageId`. `MessageSentHandler` checks the `ProcessedMessages` table for that id and skips the message if it is there. Otherwise it writes the notification rows and the `ProcessedMessages` row in one `SaveChanges` (one transaction). If two deliveries race past the check, the primary key on `ProcessedMessages.MessageId` lets only one commit; the other gets `DuplicateKeyException` and is treated as a duplicate. Duplicates are completed, not retried. The SignalR push runs after the commit, so the rows are written once and the live push happens at most once.
+**The duplicate guard.**
+The chat message id is used as the Service Bus `MessageId`. Before processing an event, the handler checks the `ProcessedMessages` table for that id and skips the event if it was processed before. Otherwise it saves the `Notifications` rows and the `ProcessedMessages` row in a single transaction. If two deliveries pass the check at the same time, the primary key on `ProcessedMessages.MessageId` lets only one of them commit; the other gets a `DuplicateKeyException` and is treated as a duplicate. A duplicate is completed, not abandoned, because we don't want it redelivered.
 
-<!-- rewrite in your words -->
-**When the worker is down.** The worker runs in the API process. While it is not consuming, messages wait in the queue; the queue's time-to-live is 1 hour and expired messages are dropped (dead-lettering on expiry is off). Users can still send messages, they just don't get the live push until the worker is back.
+**When the worker is down.**
+If the worker is down, nothing is delivered and the messages wait in the queue. Their delivery count doesn't go up, because nobody tried them. When the worker comes back, it works through the backlog. Messages older than the time-to-live (1 hour) expire and are dropped, because dead-lettering on expiry is off. The worker only sends notifications, so it doesn't block message sending. But it runs in the API process, so if the whole process is down, sending is down too.
 
-<!-- rewrite in your words -->
-**Dead-letter queue.** After 5 failed deliveries (`MaxDeliveryCount`, same in the emulator config and the Azure script) Service Bus moves the message to the queue's dead-letter queue. Nothing in the app reads it; you look at it in Service Bus Explorer in the Azure portal.
+**Dead-letter queue.**
+After `MaxDeliveryCount` failed deliveries (3 here, in both the emulator config and the Azure script), the message is moved to the queue's dead-letter queue. Nothing in the app reads it. It can be inspected and resubmitted in Service Bus Explorer in the Azure portal.
 
-<!-- rewrite in your words -->
-**Known gap: no outbox.** The message is committed to Postgres before the event is published. If the publish fails, the message is saved but nobody is notified, and the request returns an error even though the message exists. The transactional outbox pattern (write the event to an outbox table in the same transaction, publish it from there) would close this gap; it is not built.
+**Known gap: no outbox.**
+The message is saved to Postgres before the event is published. If the API crashes, or the publish fails, after the save, the message exists but no notification is ever sent (and on a failed publish the request returns an error even though the message was saved). The transactional outbox pattern would solve this: write the event to an outbox table in the same transaction as the message, and publish it from there. It is not built.
 
 ## Run locally
 
@@ -179,11 +176,8 @@ The Azure deploy is scripted, not automatic: `deploy/azure/provision.sh` uses th
 
 Steps, cost, how to check the flow end to end and the deploy's own limits: [`deploy/azure/README.md`](deploy/azure/README.md).
 
-Public URL: <!-- public URL after B04 runs --> not deployed yet.
+Public URL: https://chatapp-api.salmonflower-9397f601.koreacentral.azurecontainerapps.io. `/health` returns 200, with a 7.5 s cold start.
 
-<!-- Older deployments, from before Service Bus: AWS EC2 (http://32.192.194.160, not reachable on 30 Oct 2026) and Render
-     (https://chatapp-frontend-5cl3.onrender.com/, frontend page loads; backend not checked). Notes in deploy/aws/ and backend/render.yaml.
-     Keep, fix or delete. -->
 
 ## Known limitations
 
